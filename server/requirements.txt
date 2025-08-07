@@ -1,0 +1,7 @@
+# filepath: c:\Luma\NUXT\my-app\my-app\Map-app\my-project\server\requirements.txt
+nltk>=3.8
+numpy>=1.20.0
+scikit-learn>=1.0.0
+gensim>=4.0.0
+pymupdf>=1.20.0
+pillow>=9.0.0
