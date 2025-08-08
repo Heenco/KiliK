@@ -13,13 +13,27 @@ interface LotDetails {
 }
 
 export function usePropertyApis() {
+  const config = useRuntimeConfig()
+  
   /**
    * Fetches lot details from coordinates
    */
   const fetchLotDetails = async (longitude: number, latitude: number): Promise<LotDetails | null> => {
     try {
       const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_lot_details?lat=${latitude}&lon=${longitude}`
+        'https://mfratgltpabsyduhboap.supabase.co/rest/v1/rpc/get_lot_details',
+        {
+          method: 'POST',
+          headers: {
+            'apikey': config.public.SUPABASE_KEY,
+            'Authorization': `Bearer ${config.public.SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            lat: latitude,
+            lon: longitude
+          })
+        }
       );
       
       if (!response.ok) {
