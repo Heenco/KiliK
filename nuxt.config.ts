@@ -72,7 +72,7 @@ export default defineNuxtConfig({
       SUPABASE_URL: process.env.SUPABASE_URL || (process.env.VERCEL_URL ? 'https://mfratgltpabsyduhboap.supabase.co' : 'https://mfratgltpabsyduhboap.supabase.co'),
       SUPABASE_KEY: process.env.SUPABASE_KEY || (process.env.VERCEL_URL ? 'PRODUCTION_SUPABASE_KEY' : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mcmF0Z2x0cGFic3lkdWhib2FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNjgzNzQsImV4cCI6MjA2Mjk0NDM3NH0.Br5-xThqEFqbyopiv0lrrCwDJ3MwJpaVoWkcY_286eo'),
       OPENAI_API_KEY: process.env.NUXT_PUBLIC_OPENAI_API_KEY || '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',
-      GOOGLE_MAPS_API_KEY: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyAYwhWTpIsih_qv7vBoYSU82UmZb35Ccn4'
+      GOOGLE_MAPS_API_KEY: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY 
     }
   },
   supabase: {
