@@ -1,14 +1,17 @@
 // This composable handles all property-related API calls
 
-interface LotDetails {
-  lot: string;
-  plan: string;
+interface PropertyDetails {
   lotplan: string;
-  tenure: string;
+  suburb: string;
   lot_area: number;
-  locality: string;
+  parcel_typ: string;
   shire_name: string;
-  smis_map: string;
+  lga_name: string;
+  flood_risk: string | null;
+  noise_desc: string | null;
+  bushfire_desc: string | null;
+  acid_sulph: string | null;
+  erosion_desc: string | null;
   [key: string]: any; // Allow for additional properties
 }
 
@@ -16,12 +19,12 @@ export function usePropertyApis() {
   const config = useRuntimeConfig()
   
   /**
-   * Fetches lot details from coordinates
+   * Fetches all property details from coordinates using the merged endpoint
    */
-  const fetchLotDetails = async (longitude: number, latitude: number): Promise<LotDetails | null> => {
+  const fetchPropertyDetails = async (longitude: number, latitude: number): Promise<PropertyDetails | null> => {
     try {
       const response = await fetch(
-        'https://mfratgltpabsyduhboap.supabase.co/rest/v1/rpc/get_lot_details',
+        'https://mfratgltpabsyduhboap.supabase.co/rest/v1/rpc/get_merged_lotsuburb_details',
         {
           method: 'POST',
           headers: {
@@ -37,7 +40,7 @@ export function usePropertyApis() {
       );
       
       if (!response.ok) {
-        console.error('Error fetching lot details:', response.statusText);
+        console.error('Error fetching property details:', response.statusText);
         return null;
       }
       
@@ -50,157 +53,12 @@ export function usePropertyApis() {
       
       return null;
     } catch (error) {
-      console.error('Error fetching lot details:', error);
-      return null;
-    }
-  };
-
-  /**
-   * Fetches flood risk data using lotdp_input
-   */
-  const fetchFloodRisk = async (lotdpInput: string): Promise<Array<{ flood_risk: string; flood_type: string }> | null> => {
-    try {
-      const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_flood_mapping_by_lot?lotplan_input=${lotdpInput}`
-      );
-      
-      if (!response.ok) {
-        console.error('Error fetching flood risk:', response.statusText);
-        return null;
-      }
-      
-      const data = await response.json();
-      
-      // Validate response
-      if (Array.isArray(data)) {
-        return data;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error fetching flood risk:', error);
-      return null;
-    }
-  };
-
-  /**
-   * Fetches bushfire risk data using lotdp_input
-   */
-  const fetchBushfireRisk = async (lotdpInput: string): Promise<Array<{ description: string }> | null> => {
-    try {
-      const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_bushfire_by_lot?lotplan_input=${lotdpInput}`
-      );
-
-      if (!response.ok) {
-        console.error('Error fetching bushfire risk:', response.statusText);
-        return null;
-      }
-
-      const data = await response.json();
-
-      // Validate response
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching bushfire risk:', error);
-      return null;
-    }
-  };
-
-  /**
-   * Fetches noise risk data using lotdp_input
-   */
-  const fetchNoiseRisk = async (lotdpInput: string): Promise<Array<{ description: string }> | null> => {
-    try {
-      const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_noise_by_lot?lotplan_input=${lotdpInput}`
-      );
-
-      if (!response.ok) {
-        console.error('Error fetching noise risk:', response.statusText);
-        return null;
-      }
-
-      const data = await response.json();
-
-      // Validate response
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching noise risk:', error);
-      return null;
-    }
-  };
-
-  /**
-   * Fetches coastal erosion risk data using lotdp_input
-   */
-  const fetchCoastalErosionRisk = async (lotdpInput: string): Promise<Array<{ ovl2_desc: string }> | null> => {
-    try {
-      const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_erosion_by_lot?lotplan_input=${lotdpInput}`
-      );
-
-      if (!response.ok) {
-        console.error('Error fetching coastal erosion risk:', response.statusText);
-        return null;
-      }
-
-      const data = await response.json();
-
-      // Validate response
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching coastal erosion risk:', error);
-      return null;
-    }
-  };
-
-  /**
-   * Fetches acid sulfate risk data using lotdp_input
-   */
-  const fetchAcidSulfateRisk = async (lotdpInput: string): Promise<Array<{ acid_sulph: string }> | null> => {
-    try {
-      const response = await fetch(
-        `http://supabase.heenco.com:54321/rest/v1/rpc/get_acid_sulfate_by_lot?lotplan_input=${lotdpInput}`
-      );
-
-      if (!response.ok) {
-        console.error('Error fetching acid sulfate risk:', response.statusText);
-        return null;
-      }
-
-      const data = await response.json();
-
-      // Validate response
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching acid sulfate risk:', error);
+      console.error('Error fetching property details:', error);
       return null;
     }
   };
 
   return {
-    fetchLotDetails,
-    fetchFloodRisk,
-    fetchBushfireRisk,
-    fetchNoiseRisk,
-    fetchCoastalErosionRisk,
-    fetchAcidSulfateRisk
+    fetchPropertyDetails
   };
 }

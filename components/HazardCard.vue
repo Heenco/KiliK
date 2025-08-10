@@ -110,8 +110,8 @@
               {{ property.highestCoastalErosionRisk.ovl2_desc }}
             </span>
           </div>
-          <span v-else class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">
-            No coastal erosion risk detected
+          <span v-else class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs ml-auto">
+            No risk detected
           </span>
         </div>
       </div>

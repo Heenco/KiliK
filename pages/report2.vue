@@ -15,7 +15,7 @@
               <p class="text-base text-white text-opacity-80 mt-1">{{ address.split(',').slice(1, -1).join(',') }}</p>
               <div v-if="property.lotDetails" class="inline-flex items-center mt-2">
                 <span class="px-2 py-1 text-xs rounded bg-blue-400/20 text-blue-400 font-medium">
-                  Lot {{ property.lotDetails.lot }} {{ property.lotDetails.plan }}
+                  {{ property.lotDetails.lotplan }}
                 </span>
               </div>
               <div v-else-if="isLoadingLotDetails" class="mt-2">
@@ -170,7 +170,8 @@ const propertyData = ref({
 
 onMounted(() => {
   const { lat, lng } = route.query;
-  const googleApiKey = 'AIzaSyDtcpZMaC13xHQEux1qzwv1g3GGGxkrKyc'; // Replace with your actual API key
+  const config = useRuntimeConfig();
+  const googleApiKey = config.public.GOOGLE_MAPS_API_KEY;
 
   if (lat && lng && googleApiKey) {
     propertyImageUrl.value = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${lat},${lng}&key=${googleApiKey}`;
@@ -181,7 +182,7 @@ onMounted(() => {
   // Load Google Maps JS API for Street View 360 if needed
   if (typeof window !== 'undefined' && (!window.google || !window.google.maps)) {
     const gmapScript = document.createElement('script');
-    gmapScript.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}`;
+    gmapScript.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&loading=async`;
     gmapScript.async = true;
     gmapScript.defer = true;
     document.head.appendChild(gmapScript);

@@ -22,7 +22,10 @@
             <h3 class="text-xs font-semibold text-gray-800">{{ selectedAddress.title }}</h3>
 
             <!-- Second line with suburb and postcode -->
-            <p class="text-xs text-gray-500"> {{ selectedAddress.lot }} / {{ selectedAddress.plan }}</p>
+            <p class="text-xs text-gray-500">
+              <span v-if="selectedAddress.lotplan">Lot/Plan: {{ selectedAddress.lotplan }}</span>
+              <span v-else-if="selectedAddress.lot && selectedAddress.plan">Lot/Plan: {{ selectedAddress.lot }}/{{ selectedAddress.plan }}</span>
+            </p>
           </div>
           <div class="flex items-center space-x-2">
             <a 
