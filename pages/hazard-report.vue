@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 overflow-hidden">
+  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900">
     <Header />
 
     <main class="container mx-auto px-4 py-6 flex-1">

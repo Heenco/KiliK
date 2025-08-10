@@ -1,49 +1,49 @@
-<template>  <header    class="fixed top-0 left-0 w-full z-20 flex items-center px-6 py-2 border-b glassmorphism transition-all duration-300"
-    :class="{ 'translate-y-0 opacity-100': isVisible, '-translate-y-full opacity-0': !isVisible }">    <div class="container mx-auto flex items-center justify-between">      <div class="logo-container ml-0 md:ml-4">        <div class="font-outfit text-2xl md:text-3xl font-black tracking-tight text-white flex items-center relative">
+<template>  <header    class="fixed top-0 left-0 w-full z-20 flex items-center px-1 py-2 border-b glassmorphism transition-all duration-300"
+    :class="{ 'translate-y-0 opacity-100': isVisible, '-translate-y-full opacity-0': !isVisible }">    <div class="w-full flex items-center justify-between px-4">      <div class="logo-container">        <NuxtLink to="/" class="font-outfit text-2xl md:text-3xl font-black tracking-tight text-white flex items-center relative cursor-pointer">
           <span class="text-shadow logo-text">Kili<span class="text-green-400 font-black">K</span></span>
           <span class="text-xxs absolute -top-2 -right-5 text-gray-400 tracking-wider font-medium bg-gray-800/60 px-0.5 py-0.5 rounded-sm beta-tag">BETA</span>
-        </div>
+        </NuxtLink>
       </div>        <div class="relative">
         <!-- Always show the dropdown menu, but content changes based on auth status -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button class="p-3 rounded-full hover:bg-gray-800/60 focus:outline-none text-white border border-gray-800/40 shadow-sm transition-all duration-300">
+            <button class="p-2 rounded-full hover:bg-gray-800/60 focus:outline-none text-white border border-gray-800/40 shadow-sm transition-all duration-300">
               <div class="hamburger-menu">
                 <div class="hamburger-line"></div>
                 <div class="hamburger-line"></div>
                 <div class="hamburger-line"></div>
               </div>
             </button>
-          </DropdownMenuTrigger>          <DropdownMenuContent align="end" class="w-96 max-h-60 overflow-y-auto bg-gradient-to-b from-gray-900 to-black border border-gray-800 shadow-xl backdrop-blur dropdown-menu-content">
+          </DropdownMenuTrigger>          <DropdownMenuContent align="end" class="w-80 mt-2 mr-4 max-h-60 overflow-y-auto bg-gradient-to-b from-gray-900 to-black border border-gray-800 shadow-xl backdrop-blur dropdown-menu-content">
             <!-- Show user info and sign out button when signed in -->
             <template v-if="user">
-              <div class="flex flex-col gap-1 p-6 pb-8 border-b border-gray-800">
-                <div class="font-semibold text-base mb-2 text-white">{{ user?.user_metadata?.full_name || user?.email }}</div>
+              <div class="flex flex-col gap-1 p-4 pb-4 border-b border-gray-800">
+                <div class="font-medium text-sm mb-1 text-white">{{ user?.user_metadata?.full_name || user?.email }}</div>
                 <div class="text-xs text-gray-400 break-all">{{ user?.email }}</div>
               </div>
                 <!-- Navigation Links -->
-              <div class="py-3 px-4 border-b border-gray-800">
-                <div class="text-sm text-gray-400 mb-2">Navigation</div>
+              <div class="py-2 px-3 border-b border-gray-800">
+                <div class="text-xs text-gray-400 mb-2">Navigation</div>
                 <div class="grid grid-cols-2 gap-2">
-                  <NuxtLink to="/map" class="p-2 rounded hover:bg-gray-800 text-white text-sm">Map</NuxtLink>
-                  <NuxtLink to="/analysis" class="p-2 rounded hover:bg-gray-800 text-white text-sm">Analysis</NuxtLink>
+                  <NuxtLink to="/map" class="p-2 rounded hover:bg-gray-800 text-white text-xs">Map</NuxtLink>
+                  <NuxtLink to="/analysis" class="p-2 rounded hover:bg-gray-800 text-white text-xs">Analysis</NuxtLink>
                 </div>
               </div>
               
-              <div class="py-3"></div> <!-- Extra space above sign out button -->
-              <DropdownMenuItem as-child class="p-4">
-                <Button @click="signOut" class="w-full text-left mt-2 bg-gray-900 hover:bg-gray-800 text-white border border-gray-800 transition-all duration-300 hover:border-green-400/50 hover:shadow-green">Sign Out</Button>
+              <div class="py-2"></div> <!-- Extra space above sign out button -->
+              <DropdownMenuItem as-child class="p-3">
+                <Button @click="signOut" class="w-full text-left text-xs bg-gray-900 hover:bg-gray-800 text-white border border-gray-800 transition-all duration-300 hover:border-green-400/50 hover:shadow-green">Sign Out</Button>
               </DropdownMenuItem>
             </template>
             <!-- Show sign in button when not signed in -->
             <template v-else>
-              <div class="flex flex-col gap-1 p-6 pb-8 border-b border-gray-800">
-                <div class="font-semibold text-base mb-2 text-white">Welcome to CliQ</div>
+              <div class="flex flex-col gap-1 p-4 pb-4 border-b border-gray-800">
+                <div class="font-medium text-sm mb-1 text-white">Welcome to CliQ</div>
                 <div class="text-xs text-gray-400">Sign in to access your account</div>
               </div>
-              <div class="py-3"></div> <!-- Extra space above sign in button -->
-              <DropdownMenuItem as-child class="p-4">
-                <Button @click="signIn" class="w-full text-left mt-2 bg-gray-900 hover:bg-gray-800 text-white border border-gray-800 transition-all duration-300 hover:border-green-400/50 hover:shadow-green">Sign In</Button>
+              <div class="py-2"></div> <!-- Extra space above sign in button -->
+              <DropdownMenuItem as-child class="p-3">
+                <Button @click="signIn" class="w-full text-left text-xs bg-gray-900 hover:bg-gray-800 text-white border border-gray-800 transition-all duration-300 hover:border-green-400/50 hover:shadow-green">Sign In</Button>
               </DropdownMenuItem>
             </template>
           </DropdownMenuContent>
@@ -81,14 +81,14 @@ const handleScroll = () => {
   lastScrollPosition = currentScrollPosition
 }
 
-// Setup scroll event listeners
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
+// Setup scroll event listeners - TEMPORARILY DISABLED FOR TESTING
+// onMounted(() => {
+//   window.addEventListener('scroll', handleScroll)
+// })
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
+// onUnmounted(() => {
+//   window.removeEventListener('scroll', handleScroll)
+// })
 
 async function signOut() {
   await auth.signOut()

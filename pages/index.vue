@@ -1,11 +1,11 @@
-<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 overflow-hidden property-background">
+<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 property-background">
     <div class="property-grid"></div>
     <div class="container mx-auto px-4 flex-1 flex flex-col">
       <!-- Main Content -->
       <main class="flex flex-col justify-center items-center min-h-[60vh] py-6 flex-1"><div class="text-center mb-3">          <span class="text-xs bg-gray-100 px-3 py-1 rounded-full">
             Now available in Brisbane, Australia
           </span>        </div>        <h2 class="text-center text-4xl font-bold mb-2">
-          One Cli<span class="text-green-400">Q</span> property profile
+          One Kili<span class="text-green-400">K</span> property profile
         </h2><p class="text-center text-gray-600 mb-3 max-w-xl mx-auto text-sm">
           Search for properties in your ideal neighborhood, assess safety, and evaluate proximity to amenities.
         </p>

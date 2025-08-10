@@ -12,5 +12,5 @@ import Header from '~/components/ui/Header.vue'
 </script>
 
 <style>
-/* Global styles can go here */
+/* Global styles */
 </style>

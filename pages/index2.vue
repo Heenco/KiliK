@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 overflow-hidden property-background">
+  <div class="bg-gradient-to-b from-black to-gray-900 property-background">
     <div class="property-grid"></div>
-    <div class="container mx-auto px-4 flex-1 flex flex-col">
-      <!-- Main Content -->      <main class="flex flex-col items-center py-6 flex-1">        <!-- Hero Section -->
-        <section class="flex flex-col justify-center items-center min-h-[100vh] w-full">
+    <div class="container mx-auto px-4">
+      <!-- Main Content -->      <main class="flex flex-col items-center py-6">        <!-- Hero Section -->
+        <section class="flex flex-col justify-center items-center py-20 w-full">
           <div class="text-center mb-3">
             <span class="text-xs bg-gray-100 px-3 py-1 rounded-full">
               Announcing our partnership with Foursquare <Button variant="link" class="text-xs text-gray-300 hover:text-white">Read on</Button>
@@ -24,7 +24,7 @@
  
         </section>
           <!-- Data Enrichment Section -->
-        <section class="py-16 min-h-[100vh] flex items-center w-full max-w-7xl">
+        <section class="py-16 flex items-center w-full max-w-7xl">
           <div class="flex flex-col md:flex-row gap-12 items-center">
             <div class="w-full md:w-1/2">              <div class="inline-block mb-3 px-4 py-2 bg-green-600 text-sm font-medium rounded-full text-white">
                 AI agent for location Intelligence
@@ -132,7 +132,7 @@
               </div>
             </div>
           </div>        </section>        <!-- Comparative Market Analysis Section -->
-        <section class="py-16 min-h-[100vh] flex items-center w-full max-w-7xl">
+        <section class="py-16 flex items-center w-full max-w-7xl">
           <div class="flex flex-col md:flex-row gap-12 items-center">
             <div class="w-full md:w-1/2">
               <div class="inline-block mb-3 px-4 py-2 bg-green-600 text-sm font-medium rounded-full text-white">
@@ -379,7 +379,7 @@
             </div>
           </div>
         </section>        <!-- Custom Attributes Section -->
-        <section class="py-16 min-h-[100vh] flex items-center w-full max-w-7xl">
+        <section class="py-16 flex items-center w-full max-w-7xl">
           <div class="flex flex-col-reverse md:flex-row gap-12 items-center">
             <div class="w-full md:w-1/2">              <div class="relative overflow-hidden rounded-lg bg-gray-800/80 shadow-xl">
                 <!-- Image Slideshow -->
@@ -596,7 +596,7 @@
             </div>
           </div>
         </section>        <!-- AI Agent Review Section -->
-        <section class="py-16 min-h-[100vh] flex items-center w-full max-w-7xl">
+        <section class="py-16 flex items-center w-full max-w-7xl">
           <div class="flex flex-col md:flex-row gap-12 items-center">            <div class="w-full md:w-1/2">
               <div class="inline-flex items-center gap-2 mb-3 px-4 py-2 bg-green-600 text-sm font-medium rounded-full text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
