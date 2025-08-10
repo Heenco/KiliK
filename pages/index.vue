@@ -65,7 +65,7 @@
         </nav>
       </div>
       <footer class="w-full py-4 mt-0 border-t border-gray-800 text-center text-gray-500 text-xs">
-        &copy; {{ new Date().getFullYear() }} CliQ All rights reserved.
+        &copy; {{ new Date().getFullYear() }} Heenco All rights reserved.
       </footer>
     </div>
   </div>
