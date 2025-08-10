@@ -17,14 +17,17 @@
       <!-- Address Display -->
       <div v-if="selectedAddress" class="mb-3">
         <div class="flex items-center justify-between">
-          <div>
-            <!-- Slightly smaller address text -->
-            <h3 class="text-xs font-semibold text-gray-800">{{ selectedAddress.title }}</h3>
+          <div class="flex-1 min-w-0">
+            <!-- Main address title -->
+            <h3 class="text-xs font-semibold text-gray-800 truncate">{{ selectedAddress.title }}</h3>
 
             <!-- Second line with suburb and postcode -->
-            <p class="text-xs text-gray-500">
-              <span v-if="selectedAddress.lotplan">Lot/Plan: {{ selectedAddress.lotplan }}</span>
-              <span v-else-if="selectedAddress.lot && selectedAddress.plan">Lot/Plan: {{ selectedAddress.lot }}/{{ selectedAddress.plan }}</span>
+            <p class="text-xs text-gray-500 mt-0.5">
+              <span v-if="selectedAddress.suburb || selectedAddress.postcode">
+                {{ [selectedAddress.suburb, selectedAddress.postcode].filter(Boolean).join(', ') }}
+              </span>
+              <span v-if="selectedAddress.lotplan" class="block mt-0.5">Lot/Plan: {{ selectedAddress.lotplan }}</span>
+              <span v-else-if="selectedAddress.lot && selectedAddress.plan" class="block mt-0.5">Lot/Plan: {{ selectedAddress.lot }}/{{ selectedAddress.plan }}</span>
             </p>
           </div>
           <div class="flex items-center space-x-2">
@@ -62,43 +65,42 @@
         </TabsList>
         
         <AccessTab
-          :showAddressLayer="layers.address"
-          :showLotLayer="layers.lot"
-          :showHealthLayer="layers.health"
-          :showFoodLayer="layers.food"
-          :showOsmPointLayer="layers.osm"
           :showIsochroneLayer="layers.isochrone"
-          :showRetailShopsLayer="layers.retailShops"
           :showPlacesLayer="layers.places"
-          :showRailwayStationsLayer="layers.railwayStations"
-          :showRailwayLinesLayer="layers.railwayLines"
-          :showBusStationsLayer="layers.busStations"
-          :showDiningCafeLayer="layers.diningCafe"
-          :showEducationLayer="layers.education"
-          :showHospitalsLayer="layers.hospitals" 
-          :hospitalsWithinIsochrone="props.hospitalsWithinIsochrone"
+          :showHealthcareLayer="layers.healthcare"
+          :showGroceriesLayer="layers.groceries"
+          :showBankingLayer="layers.banking"
+          :showRetailLayer="layers.retail"
+          :showPetcareLayer="layers.petcare"
+          :showDiningLayer="layers.dining"
+          :showEntertainmentLayer="layers.entertainment"
+          :showRecreationLayer="layers.recreation"
+          :showTrailsLayer="layers.trails"
+          :showTransportationLayer="layers.transportation"
+          :showVehiclesLayer="layers.vehicles"
+          :showSchoolsLayer="layers.schools"
+          :showCommunityLayer="layers.community"
           :travelMode="travelMode"
           :travelTime="travelTime"
           :walkabilityData="props.walkabilityData"
           :isLoadingWalkability="props.isLoadingWalkability"
           :walkabilityError="props.walkabilityError"
           :hasPropertySelected="props.hasPropertySelected"
-          @update:showAddressLayer="layers.address = $event"
-          @update:showLotLayer="layers.lot = $event"
-          @update:showHealthLayer="layers.health = $event"
-          @update:showOsmPointLayer="layers.osm = $event"
           @update:showIsochroneLayer="layers.isochrone = $event"
-          @update:showRetailShopsLayer="layers.retailShops = $event"
           @update:showPlacesLayer="layers.places = $event"
-          @update:showRailwayStationsLayer="layers.railwayStations = $event"
-          @update:showRailwayLinesLayer="layers.railwayLines = $event"
-          @update:showBusStationsLayer="layers.busStations = $event"
-          @update:showDiningCafeLayer="layers.diningCafe = $event"
-          @update:showEducationLayer="layers.education = $event"
-          @update:showHospitalsLayer="layers.hospitals = $event"
-          @update:healthFilter="filters.health = $event"
-          @update:showFoodLayer="layers.food = $event"
-          @update:foodFilter="filters.food = $event"
+          @update:showHealthcareLayer="layers.healthcare = $event"
+          @update:showGroceriesLayer="layers.groceries = $event"
+          @update:showBankingLayer="layers.banking = $event"
+          @update:showRetailLayer="layers.retail = $event"
+          @update:showPetcareLayer="layers.petcare = $event"
+          @update:showDiningLayer="layers.dining = $event"
+          @update:showEntertainmentLayer="layers.entertainment = $event"
+          @update:showRecreationLayer="layers.recreation = $event"
+          @update:showTrailsLayer="layers.trails = $event"
+          @update:showTransportationLayer="layers.transportation = $event"
+          @update:showVehiclesLayer="layers.vehicles = $event"
+          @update:showSchoolsLayer="layers.schools = $event"
+          @update:showCommunityLayer="layers.community = $event"
           @update:travelMode="$emit('update:travelMode', $event)"
           @update:travelTime="$emit('update:travelTime', $event)"
           @retry-walkability="$emit('retry-walkability')"
@@ -196,10 +198,6 @@ const props = defineProps({
   travelMode: String,
   travelTime: Number,
   showIsochroneLayer: Boolean,
-  hospitalsWithinIsochrone: {
-    type: Number,
-    default: 0
-  },
   walkabilityData: {
     type: Object,
     default: () => ({
@@ -243,11 +241,6 @@ const resetAutoCollapseTimer = () => {
     isExpanded.value = false
   }, INACTIVE_TIMEOUT)
 }
-
-// Watch for changes to the hospitalsWithinIsochrone prop for debugging
-watch(() => props.hospitalsWithinIsochrone, (newCount) => {
-  console.log("Hospital count updated in MapControls:", newCount);
-})
 
 // Watch for tab changes to handle isochrone layer visibility
 watch(selectedTab, (newTab) => {

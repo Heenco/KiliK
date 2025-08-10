@@ -139,12 +139,8 @@ defineEmits(['retry', 'reset', 'show-details'])
 
 const showCharts = ref(false)
 
-// Automatically show charts when data is loaded
-watch([() => props.score, () => props.radarData.length], ([newScore, newRadarDataLength]) => {
-  if (newScore > 0 && newRadarDataLength > 0) {
-    showCharts.value = true
-  }
-})
+// Keep charts closed by default until user clicks to show them
+// (Removed automatic opening when data loads)
 
 // Format data for charts
 const formattedRadarData = computed(() => {

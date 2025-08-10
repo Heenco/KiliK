@@ -1,7 +1,7 @@
 <template>
   <TabsContent value="access">
     <div class="space-y-1">
-      <!-- Walkability Score Component - New addition -->
+      <!-- Walkability Score Component -->
       <WalkabilityScore
         v-if="isLoadingWalkability || (showIsochroneLayer && hasPropertySelected)"
         :score="walkabilityData.score"
@@ -18,7 +18,7 @@
         @show-details="$emit('show-walkability-details')"
       />
 
-      <!-- Travel Mode and Time - Moved to top -->
+      <!-- Travel Mode and Time -->
       <div class="flex gap-3 py-0.5 mb-1">
         <div class="flex-1">
           <Label for="travel-mode" class="layer-label block mb-1">Travel mode</Label>
@@ -48,151 +48,232 @@
         </div>
       </div>
 
-      <!-- Isochrone Layer section - Moved up near travel controls -->
+      <!-- Travel Area Layer -->
       <div class="flex items-center space-x-2 py-0.5">
         <Switch 
           id="isochrone-layer"
           :model-value="showIsochroneLayer"
           @update:modelValue="$emit('update:showIsochroneLayer', $event)"
         />
-        <Label for="isochrone-layer" class="layer-label">Isochrone Polygon</Label>
+        <Label for="isochrone-layer" class="layer-label">Travel Area</Label>
       </div>
-      
-      <!-- Hospitals & Healthcare Layer section - Moved from SafetyTab -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="hospitals-layer"
-          :model-value="showHospitalsLayer"
-          @update:modelValue="$emit('update:showHospitalsLayer', $event)"
-        />
-        <div class="flex items-center">
-          <Label for="hospitals-layer" class="layer-label">Hospitals & Healthcare</Label>
-          <!-- Updated to use the pill-badge style -->
-          <span v-if="showIsochroneLayer && hospitalsWithinIsochrone > 0" 
-                class="pill-badge badge-green ml-2">
-            {{ hospitalsWithinIsochrone }} locations nearby
-          </span>
+
+      <!-- Overture Places Layers organized by category -->
+      <Accordion type="multiple" class="w-full mt-2" :default-value="['essential', 'shopping']">
+        
+        <!-- All Places -->
+        <div class="flex items-center space-x-2 py-0.5 mb-2">
+          <Switch 
+            id="places-layer"
+            :model-value="showPlacesLayer"
+            @update:modelValue="$emit('update:showPlacesLayer', $event)"
+          />
+          <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #808080;"></div>
+          <Label for="places-layer" class="layer-label">All Places</Label>
         </div>
-      </div>
-      
-      <!-- Address and Lot boundary layers removed - now always visible -->
-      
-      <!-- OSM Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="osm-layer"
-          :model-value="showOsmPointLayer"
-          @update:modelValue="$emit('update:showOsmPointLayer', $event)"
-        />
-        <Label for="osm-layer" class="layer-label">OSM Layer</Label>
-      </div>
 
-      <!-- Retail Shops Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="retail-shops-layer"
-          :model-value="showRetailShopsLayer"
-          @update:modelValue="$emit('update:showRetailShopsLayer', $event)"
-        />
-        <Label for="retail-shops-layer" class="layer-label">Retail Shops</Label>
-      </div>
-
-      <!-- Places (OVERTURE) Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="places-layer"
-          :model-value="showPlacesLayer"
-          @update:modelValue="$emit('update:showPlacesLayer', $event)"
-        />
-        <Label for="places-layer" class="layer-label">Places (OVERTURE)</Label>
-      </div>
-
-      <!-- Dining & Cafe Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="dining-cafe-layer"
-          :model-value="showDiningCafeLayer"
-          @update:modelValue="$emit('update:showDiningCafeLayer', $event)"
-        />
-        <Label for="dining-cafe-layer" class="layer-label">Dining & Cafe</Label>
-      </div>
-
-      <!-- Schools and Education Centres Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="education-layer"
-          :model-value="showEducationLayer"
-          @update:modelValue="$emit('update:showEducationLayer', $event)"
-        />
-        <Label for="education-layer" class="layer-label">Schools & Education Centres</Label>
-      </div>
-
-      <!-- Railway Stations Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="railway-layer"
-          :model-value="showRailwayStationsLayer && showRailwayLinesLayer"
-          @update:modelValue="toggleRailwayLayers"
-        />
-        <Label for="railway-layer" class="layer-label">Railway Lines & Stations</Label>
-      </div>
-
-      <!-- Bus Stations Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="bus-stations-layer"
-          :model-value="showBusStationsLayer"
-          @update:modelValue="$emit('update:showBusStationsLayer', $event)"
-        />
-        <Label for="bus-stations-layer" class="layer-label">Bus Stations</Label>
-      </div>
-
-      <!-- Essential Daily Needs Accordion -->
-      <Accordion type="single" collapsible class="w-full mt-1">
-        <AccordionItem value="daily-needs">
+        <!-- Essential Daily Needs -->
+        <AccordionItem value="essential">
           <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
             <span class="layer-label">Essential Daily Needs</span>
           </AccordionTrigger>
           <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
             <div class="space-y-1 pt-1">
-              <!-- Health & Personal Care section -->
-              <div>
-                <div class="flex items-center space-x-2">
-                  <Switch 
-                    id="health-layer"
-                    :model-value="showHealthLayer"
-                    @update:modelValue="toggleHealthLayer"
-                  />
-                  <Label for="health-layer" class="layer-label">Health & Personal Care</Label>
-                </div>
-                <HealthTypes 
-                  v-if="showHealthLayer"
-                  :model-value="selectedHealthTypes"
-                  @update:modelValue="updateHealthFilter"
-                  class="mt-2"
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="healthcare-layer"
+                  :model-value="showHealthcareLayer"
+                  @update:modelValue="$emit('update:showHealthcareLayer', $event)"
                 />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF4444;"></div>
+                <Label for="healthcare-layer" class="layer-label">Health & Personal Care</Label>
               </div>
 
-              <!-- Food & Groceries section -->
-              <div>
-                <div class="flex items-center space-x-2">
-                  <Switch 
-                    id="food-layer"
-                    :model-value="showFoodLayer"
-                    @update:modelValue="toggleFoodLayer"
-                  />
-                  <Label for="food-layer" class="layer-label">Food & Groceries</Label>
-                </div>
-                <FoodTypes 
-                  v-if="showFoodLayer"
-                  :model-value="selectedFoodTypes"
-                  @update:modelValue="updateFoodFilter"
-                  class="mt-2"
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="groceries-layer"
+                  :model-value="showGroceriesLayer"
+                  @update:modelValue="$emit('update:showGroceriesLayer', $event)"
                 />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #4CAF50;"></div>
+                <Label for="groceries-layer" class="layer-label">Food & Groceries</Label>
               </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="banking-layer"
+                  :model-value="showBankingLayer"
+                  @update:modelValue="$emit('update:showBankingLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #2196F3;"></div>
+                <Label for="banking-layer" class="layer-label">Banking & Financial</Label>
+              </div>
+
             </div>
           </AccordionContent>
         </AccordionItem>
+
+        <!-- Shopping -->
+        <AccordionItem value="shopping">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Shopping</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="retail-layer"
+                  :model-value="showRetailLayer"
+                  @update:modelValue="$emit('update:showRetailLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #9C27B0;"></div>
+                <Label for="retail-layer" class="layer-label">Retail Shops</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="petcare-layer"
+                  :model-value="showPetcareLayer"
+                  @update:modelValue="$emit('update:showPetcareLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF9800;"></div>
+                <Label for="petcare-layer" class="layer-label">Pet Care & Services</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <!-- Lifestyle -->
+        <AccordionItem value="lifestyle">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Lifestyle</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="dining-layer"
+                  :model-value="showDiningLayer"
+                  @update:modelValue="$emit('update:showDiningLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #E91E63;"></div>
+                <Label for="dining-layer" class="layer-label">Dining & Cafes</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="entertainment-layer"
+                  :model-value="showEntertainmentLayer"
+                  @update:modelValue="$emit('update:showEntertainmentLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #673AB7;"></div>
+                <Label for="entertainment-layer" class="layer-label">Entertainment Venues</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <!-- Recreation & Outdoors -->
+        <AccordionItem value="recreation">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Recreation & Outdoors</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="recreation-layer"
+                  :model-value="showRecreationLayer"
+                  @update:modelValue="$emit('update:showRecreationLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #4CAF50;"></div>
+                <Label for="recreation-layer" class="layer-label">Recreation & Sports</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="trails-layer"
+                  :model-value="showTrailsLayer"
+                  @update:modelValue="$emit('update:showTrailsLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #8BC34A;"></div>
+                <Label for="trails-layer" class="layer-label">Walking & Cycling Trails</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <!-- Mobility -->
+        <AccordionItem value="mobility">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Mobility</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="transportation-layer"
+                  :model-value="showTransportationLayer"
+                  @update:modelValue="$emit('update:showTransportationLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #607D8B;"></div>
+                <Label for="transportation-layer" class="layer-label">Public Transportation</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="vehicles-layer"
+                  :model-value="showVehiclesLayer"
+                  @update:modelValue="$emit('update:showVehiclesLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #424242;"></div>
+                <Label for="vehicles-layer" class="layer-label">Vehicle Services</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <!-- Community & Learning -->
+        <AccordionItem value="community">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Community & Learning</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="schools-layer"
+                  :model-value="showSchoolsLayer"
+                  @update:modelValue="$emit('update:showSchoolsLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF9800;"></div>
+                <Label for="schools-layer" class="layer-label">Schools & Education</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="community-layer"
+                  :model-value="showCommunityLayer"
+                  @update:modelValue="$emit('update:showCommunityLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #795548;"></div>
+                <Label for="community-layer" class="layer-label">Community Resources</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
       </Accordion>
     </div>
   </TabsContent>
@@ -217,28 +298,26 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
-import HealthTypes from './HealthTypes.vue'
-import FoodTypes from './FoodTypes.vue'
 import WalkabilityScore from '../WalkabilityScore.vue'
 
 const props = defineProps({
-  showAddressLayer: Boolean,
-  showLotLayer: Boolean,
-  showHealthLayer: Boolean,
-  showFoodLayer: Boolean,
-  showOsmPointLayer: Boolean,
   showIsochroneLayer: Boolean,
-  showRetailShopsLayer: Boolean,
   showPlacesLayer: Boolean,
-  showDiningCafeLayer: Boolean,
-  showRailwayStationsLayer: Boolean,
-  showRailwayLinesLayer: Boolean,
-  showBusStationsLayer: Boolean,
-  showEducationLayer: Boolean,
-  showHospitalsLayer: Boolean,
+  showHealthcareLayer: Boolean,
+  showGroceriesLayer: Boolean,
+  showBankingLayer: Boolean,
+  showRetailLayer: Boolean,
+  showPetcareLayer: Boolean,
+  showDiningLayer: Boolean,
+  showEntertainmentLayer: Boolean,
+  showRecreationLayer: Boolean,
+  showTrailsLayer: Boolean,
+  showTransportationLayer: Boolean,
+  showVehiclesLayer: Boolean,
+  showSchoolsLayer: Boolean,
+  showCommunityLayer: Boolean,
   travelMode: String,
   travelTime: Number,
-  hospitalsWithinIsochrone: Number,
   walkabilityData: {
     type: Object,
     default: () => ({
@@ -254,22 +333,21 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'update:showAddressLayer',
-  'update:showLotLayer',
-  'update:showHealthLayer',
-  'update:showFoodLayer',
-  'update:healthFilter',
-  'update:foodFilter',
-  'update:showOsmPointLayer',
   'update:showIsochroneLayer',
-  'update:showRetailShopsLayer',
   'update:showPlacesLayer',
-  'update:showDiningCafeLayer',
-  'update:showRailwayStationsLayer',
-  'update:showRailwayLinesLayer',
-  'update:showBusStationsLayer',
-  'update:showEducationLayer',
-  'update:showHospitalsLayer',
+  'update:showHealthcareLayer',
+  'update:showGroceriesLayer',
+  'update:showBankingLayer',
+  'update:showRetailLayer',
+  'update:showPetcareLayer',
+  'update:showDiningLayer',
+  'update:showEntertainmentLayer',
+  'update:showRecreationLayer',
+  'update:showTrailsLayer',
+  'update:showTransportationLayer',
+  'update:showVehiclesLayer',
+  'update:showSchoolsLayer',
+  'update:showCommunityLayer',
   'update:travelMode',
   'update:travelTime',
   'retry-walkability',
@@ -282,40 +360,6 @@ const displayTravelMode = computed(() => {
   if (!props.travelMode) return '';
   return props.travelMode.charAt(0).toUpperCase() + props.travelMode.slice(1);
 })
-
-const selectedHealthTypes = ref(['hospital', 'pharmacy', 'clinic', 'doctors', 'dentist'])
-const selectedFoodTypes = ref(['supermarket', 'convenience', 'bakery', 'butcher', 'greengrocer'])
-
-const updateHealthFilter = (types) => {
-  selectedHealthTypes.value = types
-  emit('update:healthFilter', types)
-}
-
-const updateFoodFilter = (types) => {
-  selectedFoodTypes.value = types
-  emit('update:foodFilter', types)
-}
-
-const toggleHealthLayer = (value) => {
-  emit('update:showHealthLayer', value)
-  if (value) {
-    selectedHealthTypes.value = ['hospital', 'pharmacy', 'clinic', 'doctors', 'dentist']
-    emit('update:healthFilter', selectedHealthTypes.value)
-  }
-}
-
-const toggleFoodLayer = (value) => {
-  emit('update:showFoodLayer', value)
-  if (value) {
-    selectedFoodTypes.value = ['supermarket', 'convenience', 'bakery', 'butcher', 'greengrocer']
-    emit('update:foodFilter', selectedFoodTypes.value)
-  }
-}
-
-const toggleRailwayLayers = (value) => {
-  emit('update:showRailwayStationsLayer', value)
-  emit('update:showRailwayLinesLayer', value)
-}
 </script>
 
 <style scoped>

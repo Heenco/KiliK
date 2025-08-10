@@ -5,39 +5,26 @@
     <!-- Add a container for the search box below the header -->
     <div id="geocoder-container" class="absolute top-20 left-4 z-10 w-80"></div>
     
-    <MapContainer 
-      :showAddressLayer="layers.address"
-      :showLotLayer="layers.lot"
-      :showHealthLayer="layers.health"
-      :showFoodLayer="layers.food"
-      :showOsmPointLayer="layers.osm"
-      :showFloodLayer="layers.flood"
-      :showLandslideLayer="layers.landslide"
-      :showNoiseLayer="layers.noise"
+    <MapContainerOverture 
       :showIsochroneLayer="layers.isochrone"
-      :showStreetLightsLayer="layers.streetLights"
-      :showPoliceLayer="layers.police"
-      :showSpeedCameraLayer="layers.speedCamera"
-      :showTrafficSignalsLayer="layers.trafficSignals"
-      :showFireStationsLayer="layers.fireStations"
-      :showHospitalsLayer="layers.hospitals"
-      :showRetailShopsLayer="layers.retailShops"
-      :showEducationLayer="layers.education"
       :showPlacesLayer="layers.places"
-      :showRailwayStationsLayer="layers.railwayStations"
-      :showRailwayLinesLayer="layers.railwayLines"
-      :showBusStationsLayer="layers.busStations"
-      :showElectricityTransmissionLayer="layers.electricityTransmission"
-      :showDiningCafeLayer="layers.diningCafe"
-      :showSeifaLayer="layers.seifa"
-      :healthFilter="filters.health"
-      :foodFilter="filters.food"
+      :showHealthcareLayer="layers.healthcare"
+      :showGroceriesLayer="layers.groceries"
+      :showBankingLayer="layers.banking"
+      :showRetailLayer="layers.retail"
+      :showPetcareLayer="layers.petcare"
+      :showDiningLayer="layers.dining"
+      :showEntertainmentLayer="layers.entertainment"
+      :showRecreationLayer="layers.recreation"
+      :showTrailsLayer="layers.trails"
+      :showTransportationLayer="layers.transportation"
+      :showVehiclesLayer="layers.vehicles"
+      :showSchoolsLayer="layers.schools"
+      :showCommunityLayer="layers.community"
       :travelMode="travelMode"
       :travelTime="travelTime"
       :selectedAddress="selectedAddress"
       @addressSelected="handleAddressSelected"
-      @floodRiskData="handleFloodRiskData"
-      @hospitalsWithinIsochroneChange="handleHospitalsWithinIsochrone"
       @walkabilityDataChange="handleWalkabilityDataChange"
       @walkabilityLoading="isLoadingWalkability = $event"
     />
@@ -46,7 +33,6 @@
       :travelMode="travelMode" 
       :travelTime="travelTime"
       :showIsochroneLayer="layers.isochrone"
-      :hospitalsWithinIsochrone="hospitalCount"
       :walkabilityData="walkabilityData"
       :isLoadingWalkability="isLoadingWalkability"
       :walkabilityError="walkabilityError"
@@ -54,7 +40,6 @@
       @update:travelMode="travelMode = $event"
       @update:travelTime="travelTime = $event"
       @update:activeTab="handleTabChange"
-      @hospitalsWithinIsochroneChange="handleHospitalsWithinIsochrone"
       @retry-walkability="handleRetryWalkability"
       @reset-walkability="handleResetWalkability"
       @show-walkability-details="handleShowWalkabilityDetails"
@@ -162,7 +147,7 @@ const handleShowWalkabilityDetails = () => {
 </script>
 
 <style>
-@import 'mapbox-gl/dist/mapbox-gl.css';
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
 /* Custom container for geocoder below header */
 #geocoder-container {
@@ -170,7 +155,7 @@ const handleShowWalkabilityDetails = () => {
   transition: all 0.3s ease;
 }
 
-#geocoder-container .mapboxgl-ctrl-geocoder {
+#geocoder-container .maplibregl-ctrl-geocoder {
   min-width: 100% !important;
   max-width: 100% !important;
   width: 100%;
@@ -183,38 +168,38 @@ const handleShowWalkabilityDetails = () => {
 }
 
 /* Geocoder custom styles */
-.mapboxgl-ctrl-geocoder {
+.maplibregl-ctrl-geocoder {
   min-width: 300px !important;
   font-family: inherit;
   background-color: rgba(255, 255, 255, 0.9);
 }
 
-.mapboxgl-ctrl-geocoder--input {
+.maplibregl-ctrl-geocoder--input {
   height: 40px !important;
   font-size: 0.875rem !important; /* 14px */
 }
 
-.mapboxgl-ctrl-geocoder--input:focus {
+.maplibregl-ctrl-geocoder--input:focus {
   outline: none;
   border-color: rgba(74, 222, 128, 0.5); /* text-green-400 equivalent */
   box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1); /* text-green-400 with lower opacity */
 }
 
-.mapboxgl-ctrl-geocoder--input::placeholder {
+.maplibregl-ctrl-geocoder--input::placeholder {
   font-size: 0.875rem; /* 14px */
   opacity: 0.75;
 }
 
-.mapboxgl-ctrl-geocoder--suggestion {
+.maplibregl-ctrl-geocoder--suggestion {
   color: #333;
 }
 
-.mapboxgl-ctrl-bottom-right {
+.maplibregl-ctrl-bottom-right {
   display: none;
 }
 
 /* Update the margin-top for map controls */
-.mapboxgl-ctrl-top-right {
+.maplibregl-ctrl-top-right {
   margin-top: calc(60vh + 1rem); /* Adjust based on card height */
 }
 
