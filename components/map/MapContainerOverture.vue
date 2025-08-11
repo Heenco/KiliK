@@ -99,7 +99,7 @@ onMounted(() => {
 
   map = new maplibregl.Map({
     container: 'map',
-    style: 'https://tiles.openfreemap.org/styles/positron',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
     center: [153.0281, -27.4678],
     zoom: 12,
   });
