@@ -2,9 +2,38 @@
   <div class="walkability-container">
     <!-- Loading state -->
     <div v-if="isLoading" class="flex items-center justify-center py-4">
-      <div class="matrix-spinner" aria-label="Loading">
-        <span v-for="n in 20" :key="n" :class="['dot', 'dot-' + n]"></span>
+      <!-- Option 1: Ripple Circles (Default) -->
+      <div class="ripple-loader" aria-label="Loading walkability data">
+        <div class="ripple-circle"></div>
+        <div class="ripple-circle"></div>
+        <div class="ripple-circle"></div>
       </div>
+      
+      <!-- Option 2: Pulse Dots (Uncomment to use) -->
+      <!-- <div class="pulse-dots" aria-label="Loading">
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div> -->
+      
+      <!-- Option 3: Orbiting Circles (Uncomment to use) -->
+      <!-- <div class="orbit-loader" aria-label="Loading">
+        <div class="orbit-center"></div>
+        <div class="orbit-ring">
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+          <div class="orbit-dot"></div>
+        </div>
+      </div> -->
+      
+      <!-- Option 4: Wave Animation (Uncomment to use) -->
+      <!-- <div class="wave-loader" aria-label="Loading">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div> -->
     </div>
 
     <!-- Error state -->
@@ -360,4 +389,161 @@ const scoreTextClass = computed(() => {
 .matrix-spinner .dot-8  { animation: matrix-dot-move 1s linear infinite 0.7s; }
 .matrix-spinner .dot-9  { animation: matrix-dot-move 1s linear infinite 0.8s; }
 .matrix-spinner .dot-10 { animation: matrix-dot-move 1s linear infinite 0.9s; }
+
+/* ========================================== */
+/* NEW LOADING ANIMATIONS */
+/* ========================================== */
+
+/* Option 1: Ripple Circles (Recommended) */
+.ripple-loader {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.ripple-circle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #a855f7;
+  border-radius: 50%;
+  opacity: 0;
+  animation: ripple-animation 2s linear infinite;
+}
+
+.ripple-circle:nth-child(1) { animation-delay: 0s; }
+.ripple-circle:nth-child(2) { animation-delay: 0.7s; }
+.ripple-circle:nth-child(3) { animation-delay: 1.4s; }
+
+@keyframes ripple-animation {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Option 2: Pulse Dots */
+.pulse-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a855f7;
+  animation: pulse-animation 1.4s ease-in-out infinite;
+}
+
+.pulse-dot:nth-child(1) { animation-delay: 0s; }
+.pulse-dot:nth-child(2) { animation-delay: 0.2s; }
+.pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse-animation {
+  0%, 80%, 100% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Option 3: Orbiting Circles */
+.orbit-loader {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.orbit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #a855f7;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbit-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: orbit-rotation 2s linear infinite;
+}
+
+.orbit-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #a855f7;
+  border-radius: 50%;
+}
+
+.orbit-dot:nth-child(1) {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orbit-dot:nth-child(2) {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.orbit-dot:nth-child(3) {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes orbit-rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Option 4: Wave Animation */
+.wave-loader {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 20px;
+}
+
+.wave-bar {
+  width: 3px;
+  height: 100%;
+  background: #a855f7;
+  border-radius: 2px;
+  animation: wave-animation 1.2s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave-animation {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+}
 </style>

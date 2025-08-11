@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="absolute top-20 right-6 z-20 transition-all duration-500 ease-in-out"
+    class="absolute top-16 right-6 z-20 transition-all duration-500 ease-in-out"
     :class="{ 'w-80': isExpanded, 'w-12': !isExpanded }"
     @mouseenter="handleInteraction"
     @mousemove="handleInteraction"
