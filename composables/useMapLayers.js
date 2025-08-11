@@ -243,15 +243,14 @@ export function useMapLayers() {
     fireStations: {
       'id': 'fire-stations-layer',
       'type': 'circle',
-      'source': 'overture-places', //  Updated to use the local-places vector tile source
-      'source-layer': 'place',
+      'source': 'osm-planetiler', // Updated to use OSM planetiler source
+      'source-layer': 'poi',
       minzoom:13, 
       maxzoom:22,
       'filter': ['any',
-        // Match against the categories fields for police and law enforcement
-        ['in', 'fire', ['get', 'categories']],
-        ['in', 'rescue', ['get', 'categories']],
-        ['in', 'hydrant', ['get', 'categories']]
+        // Match against OSM subclass values for fire and rescue services
+        ['==', ['get', 'subclass'], 'fire_station'],
+        ['==', ['get', 'subclass'], 'ambulance_station']
       ],
       'paint': {
         'circle-radius': 6,
@@ -300,17 +299,16 @@ export function useMapLayers() {
     hospitals: {
       'id': 'hospitals-layer',
       'type': 'circle',
-      'source': 'overture-places', // Updated to use the local-places vector tile source
-      'source-layer': 'place',
+      'source': 'osm-planetiler', // Updated to use OSM planetiler source
+      'source-layer': 'poi',
       minzoom:13, 
       maxzoom:22,
       'filter': ['any',
-        // Match against the categories fields for hospitals and healthcare
-        ['in', 'hospital', ['get', 'categories']],
-        ['in', 'medical', ['get', 'categories']],
-        ['in', 'health', ['get', 'categories']],
-        ['in', 'clinic', ['get', 'categories']],
-        ['in', 'doctor', ['get', 'categories']]
+        // Match against OSM subclass values for hospitals and healthcare
+        ['==', ['get', 'subclass'], 'hospital'],
+        ['==', ['get', 'subclass'], 'clinic'],
+        ['==', ['get', 'subclass'], 'doctors'],
+        ['==', ['get', 'subclass'], 'dentist']
       ],
       'paint': {
         'circle-radius': 4,
@@ -351,16 +349,15 @@ export function useMapLayers() {
     police: {
       'id': 'police-layer',
       'type': 'circle',
-      'source': 'overture-places',  // Using the local-places vector tile source
-      'source-layer': 'place',
+      'source': 'osm-planetiler',  // Updated to use OSM planetiler source
+      'source-layer': 'poi',
       minzoom:13, 
       maxzoom:22,
       'filter': ['any',
-        // Match against the categories fields for police and law enforcement
-        ['in', 'police', ['get', 'categories']],
-        ['in', 'law', ['get', 'categories']],
-        ['in', 'enforcement', ['get', 'categories']],
-        ['in', 'security', ['get', 'categories']]
+        // Match against OSM subclass values for police and law enforcement
+        ['==', ['get', 'subclass'], 'police'],
+        ['==', ['get', 'subclass'], 'courthouse'],
+        ['==', ['get', 'subclass'], 'prison']
       ],
       'paint': {
         'circle-radius': 7,

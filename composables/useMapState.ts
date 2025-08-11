@@ -27,6 +27,15 @@ export const useMapState = () => {
     noise: false,           // Noise corridors
     erosion: false,         // Erosion zones
     acidSulfate: false,     // Acid sulfate soils
+    
+    // Safety layers (OSM-based)
+    streetLights: false,    // Street lights
+    police: false,          // Police stations
+    speedCamera: false,     // Speed cameras
+    trafficSignals: false,  // Traffic signals & crossings
+    fireStations: false,    // Fire stations & rescue
+    hospitals: false,       // Hospitals & healthcare
+    electricityTransmission: false, // Electricity transmission lines
   }))
 
   const filters = useState('mapFilters', () => ({

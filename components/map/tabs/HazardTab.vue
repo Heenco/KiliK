@@ -3,64 +3,70 @@
     <!-- Info message when no address is selected -->
     <div v-if="!hasSpecificAddress" class="mb-3 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-500">
       <div class="flex items-center">
-        <span class="mr-1">🔍</span>
         Search for an address to see specific property risks.
       </div>
     </div>
     
     <div class="space-y-1">
       <!-- Flood Layer section -->
-      <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center">
-          <Switch 
-            id="flood-layer"
-            :model-value="showFloodLayer"
-            @update:modelValue="$emit('update:showFloodLayer', $event)"
-          />
-          <div class="w-3 h-3 bg-blue-500 rounded border ml-2"></div>
-          <Label for="flood-layer" class="layer-label ml-2">Flood</Label>
-        </div>
-        
-        <!-- Flood Risk Badge -->
-        <div class="ml-2">
-          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
-            --
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="flood-layer"
+              :model-value="showFloodLayer"
+              @update:modelValue="$emit('update:showFloodLayer', $event)"
+            />
+            <Label for="flood-layer" class="layer-label ml-2">Flood</Label>
           </div>
-          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
-            Loading...
-          </div>
-          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
-            Error
-          </div>
-          <div v-else-if="hazardData?.flood_risk">
-            <span 
-              :class="{
-                'px-3 py-1 rounded-full text-xs': true,
-                'bg-green-400/20 text-green-400': hazardData.flood_risk.toLowerCase() === 'low',
-                'bg-yellow-400/20 text-yellow-400': hazardData.flood_risk.toLowerCase() === 'medium',
-                'bg-red-400/20 text-red-400': hazardData.flood_risk.toLowerCase() === 'high'
-              }"
-            >
-              {{ hazardData.flood_risk }}
+          
+          <!-- Flood Risk Badge -->
+          <div class="ml-2">
+            <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+              --
+            </div>
+            <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+              Loading...
+            </div>
+            <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+              Error
+            </div>
+            <div v-else-if="hazardData?.flood_risk">
+              <span 
+                :class="{
+                  'px-3 py-1 rounded-full text-xs': true,
+                  'bg-green-400/20 text-green-400': hazardData.flood_risk.toLowerCase() === 'low',
+                  'bg-yellow-400/20 text-yellow-400': hazardData.flood_risk.toLowerCase() === 'medium',
+                  'bg-red-400/20 text-red-400': hazardData.flood_risk.toLowerCase() === 'high'
+                }"
+              >
+                {{ hazardData.flood_risk }}
+              </span>
+            </div>
+            <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+              No risk
             </span>
           </div>
-          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
-            No risk
-          </span>
+        </div>
+        
+        <!-- Flood Legend -->
+        <div v-if="showFloodLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-3 bg-blue-500 rounded border mr-2"></div>
+          <span>Flood zones</span>
         </div>
       </div>
 
       <!-- Bushfire Layer section -->
-      <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center">
-          <Switch 
-            id="bushfire-layer"
-            :model-value="showBushfireLayer"
-            @update:modelValue="$emit('update:showBushfireLayer', $event)"
-          />
-          <div class="w-3 h-3 bg-red-500 rounded border ml-2"></div>
-          <Label for="bushfire-layer" class="layer-label ml-2">Bushfire</Label>
-        </div>
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="bushfire-layer"
+              :model-value="showBushfireLayer"
+              @update:modelValue="$emit('update:showBushfireLayer', $event)"
+            />
+            <Label for="bushfire-layer" class="layer-label ml-2">Bushfire</Label>
+          </div>
         
         <!-- Bushfire Risk Badge -->
         <div class="ml-2">
@@ -89,19 +95,26 @@
             No risk
           </span>
         </div>
+        </div>
+        
+        <!-- Bushfire Legend -->
+        <div v-if="showBushfireLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-3 bg-red-500 rounded border mr-2"></div>
+          <span>Bushfire risk zones</span>
+        </div>
       </div>
 
       <!-- Noise Layer section -->
-      <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center">
-          <Switch 
-            id="noise-layer"
-            :model-value="showNoiseLayer"
-            @update:modelValue="$emit('update:showNoiseLayer', $event)"
-          />
-          <div class="w-3 h-3 bg-purple-500 rounded border ml-2"></div>
-          <Label for="noise-layer" class="layer-label ml-2">Noise Corridors</Label>
-        </div>
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="noise-layer"
+              :model-value="showNoiseLayer"
+              @update:modelValue="$emit('update:showNoiseLayer', $event)"
+            />
+            <Label for="noise-layer" class="layer-label ml-2">Noise Corridors</Label>
+          </div>
         
         <!-- Noise Risk Badge -->
         <div class="ml-2">
@@ -132,19 +145,26 @@
             No risk
           </span>
         </div>
+        </div>
+        
+        <!-- Noise Legend -->
+        <div v-if="showNoiseLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-3 bg-purple-500 rounded border mr-2"></div>
+          <span>Noise corridors</span>
+        </div>
       </div>
 
       <!-- Erosion Layer section -->
-      <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center">
-          <Switch 
-            id="erosion-layer"
-            :model-value="showErosionLayer"
-            @update:modelValue="$emit('update:showErosionLayer', $event)"
-          />
-          <div class="w-3 h-3 bg-orange-500 rounded border ml-2"></div>
-          <Label for="erosion-layer" class="layer-label ml-2">Erosion</Label>
-        </div>
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="erosion-layer"
+              :model-value="showErosionLayer"
+              @update:modelValue="$emit('update:showErosionLayer', $event)"
+            />
+            <Label for="erosion-layer" class="layer-label ml-2">Erosion</Label>
+          </div>
         
         <!-- Erosion Risk Badge -->
         <div class="ml-2">
@@ -173,19 +193,26 @@
             No risk
           </span>
         </div>
+        </div>
+        
+        <!-- Erosion Legend -->
+        <div v-if="showErosionLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-3 bg-orange-500 rounded border mr-2"></div>
+          <span>Erosion zones</span>
+        </div>
       </div>
 
       <!-- Acid Sulfate Soils Layer section -->
-      <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center">
-          <Switch 
-            id="acid-sulfate-layer"
-            :model-value="showAcidSulfateLayer"
-            @update:modelValue="$emit('update:showAcidSulfateLayer', $event)"
-          />
-          <div class="w-3 h-3 bg-yellow-500 rounded border ml-2"></div>
-          <Label for="acid-sulfate-layer" class="layer-label ml-2">Acid Sulfate Soils</Label>
-        </div>
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="acid-sulfate-layer"
+              :model-value="showAcidSulfateLayer"
+              @update:modelValue="$emit('update:showAcidSulfateLayer', $event)"
+            />
+            <Label for="acid-sulfate-layer" class="layer-label ml-2">Acid Sulfate Soils</Label>
+          </div>
         
         <!-- Acid Sulfate Risk Badge -->
         <div class="ml-2">
@@ -215,7 +242,19 @@
             No risk
           </span>
         </div>
+        </div>
+        
+        <!-- Acid Sulfate Legend -->
+        <div v-if="showAcidSulfateLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-3 bg-yellow-500 rounded border mr-2"></div>
+          <span>Acid sulfate soil areas</span>
+        </div>
       </div>
+    </div>
+    
+    <!-- Description text -->
+    <div class="mt-4 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+      View flood zones, bushfire risks, noise corridors, erosion areas, and acid sulfate soils to assess potential environmental hazards and make informed property decisions.
     </div>
   </TabsContent>
 </template>
@@ -247,11 +286,14 @@ const emit = defineEmits([
 </script>
 
 <style scoped>
-/* Smaller layer labels */
+/* Appealing layer labels */
 .layer-label {
-  font-size: 0.715rem; /* 11px */
+  font-size: 0.8rem; /* 13px */
   font-weight: 500;
-  color: #555555;
+  color: #374151;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 /* Pill-shaped badge component */

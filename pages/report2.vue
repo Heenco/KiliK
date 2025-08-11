@@ -17,6 +17,18 @@
                 <span class="px-2 py-1 text-xs rounded bg-blue-400/20 text-blue-400 font-medium">
                   {{ property.lotDetails.lotplan }}
                 </span>
+                <!-- Interactive Map Link - Next to Lotplan -->
+                <a 
+                  @click="goToMap"
+                  href="javascript:void(0)"
+                  class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition duration-150 cursor-pointer ml-4"
+                >
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 616 0z"></path>
+                  </svg>
+                  View on Map
+                </a>
               </div>
               <div v-else-if="isLoadingLotDetails" class="mt-2">
                 <span class="text-xs text-gray-400">Loading property details...</span>
@@ -73,6 +85,19 @@
                 Official Property Map
               </a>
             </div>
+            <!-- Interactive Map Button -->
+            <div class="mt-2">
+              <button 
+                @click="goToMap"
+                class="text-xs flex items-center justify-center py-1 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition duration-150 w-full"
+              >
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                View Interactive Map
+              </button>
+            </div>
           </div>
         </div>
       </div>      <!-- Three Cards Section -->
@@ -124,7 +149,7 @@
 
 <script setup>
 import Header from '@/components/ui/Header.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { usePropertyData } from '~/composables/usePropertyData';
 import InspectionChecklist from './inspection-checklist.vue';
@@ -137,6 +162,7 @@ import BuildingSpecificationsCard from '@/components/BuildingSpecificationsCard.
 import PropertySearch from '@/components/PropertySearch.vue';
 
 const route = useRoute();
+const router = useRouter();
 const address = ref(route.query.address || '');
 const propertyImageUrl = ref('');
 const imageError = ref(false);
@@ -219,6 +245,26 @@ function handleEscKey(event) {
   if (event.key === 'Escape') {
     closeStreetView360();
   }
+}
+
+function goToMap() {
+  console.log('goToMap function called'); // Debug log
+  console.log('Current address:', address.value); // Debug log
+  
+  // Navigate to map2 page with current address and coordinates
+  const { lat, lng } = route.query;
+  
+  console.log('Navigation data:', { address: address.value, lat, lng }); // Debug log
+  
+  router.push({
+    path: '/map2',
+    query: {
+      address: address.value,
+      lat: lat,
+      lng: lng,
+      search: address.value // Pass address as search parameter for the search box
+    }
+  });
 }
 
 function loadFloodRiskManually() {

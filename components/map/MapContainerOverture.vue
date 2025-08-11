@@ -34,6 +34,14 @@ const props = defineProps({
   showNoiseLayer: Boolean,
   showErosionLayer: Boolean,
   showAcidSulfateLayer: Boolean,
+  // Safety layer props
+  showStreetLightsLayer: Boolean,
+  showPoliceLayer: Boolean,
+  showSpeedCameraLayer: Boolean,
+  showTrafficSignalsLayer: Boolean,
+  showFireStationsLayer: Boolean,
+  showHospitalsLayer: Boolean,
+  showElectricityTransmissionLayer: Boolean,
   travelMode: String,
   travelTime: Number,
   selectedAddress: Object
@@ -113,16 +121,30 @@ watch(() => props.showNoiseLayer, (visible) => toggleHazardLayer('noise-layer', 
 watch(() => props.showErosionLayer, (visible) => toggleHazardLayer('erosion-layer', visible));
 watch(() => props.showAcidSulfateLayer, (visible) => toggleHazardLayer('acid-sulfate-layer', visible));
 
+// Watch safety layer visibility
+watch(() => props.showPoliceLayer, (visible) => toggleHazardLayer('police-layer', visible));
+watch(() => props.showFireStationsLayer, (visible) => toggleHazardLayer('fire-stations-layer', visible));
+watch(() => props.showHospitalsLayer, (visible) => toggleHazardLayer('hospitals-layer', visible));
+watch(() => props.showStreetLightsLayer, (visible) => toggleHazardLayer('street-lights-layer', visible));
+watch(() => props.showSpeedCameraLayer, (visible) => toggleHazardLayer('speed-camera-layer', visible));
+watch(() => props.showTrafficSignalsLayer, (visible) => toggleHazardLayer('traffic-signals-layer', visible));
+
 onMounted(() => {
   // Add PMTiles protocol
   let protocol = new Protocol();
   maplibregl.addProtocol('pmtiles', protocol.tile);
 
+  // Check for URL parameters for initial map positioning
+  const urlParams = new URLSearchParams(window.location.search);
+  const lat = parseFloat(urlParams.get('lat'));
+  const lng = parseFloat(urlParams.get('lng'));
+  const searchQuery = urlParams.get('search') || urlParams.get('address');
+
   map = new maplibregl.Map({
     container: 'map',
     style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [153.0281, -27.4678],
-    zoom: 12,
+    center: lat && lng ? [lng, lat] : [153.0281, -27.4678],
+    zoom: lat && lng ? 16 : 12, // Zoom in if we have specific coordinates
   });
 
   // Add geocoder
@@ -140,6 +162,61 @@ onMounted(() => {
     geocoderContainer.appendChild(geocoder.onAdd(map));
   } else {
     map.addControl(geocoder, 'top-left');
+  }
+
+  // Handle initial search from URL parameters - store for later use in load handler
+  let initialAddressData = null;
+  if (searchQuery && lat && lng) {
+    // Set the input value in the geocoder
+    geocoder.setInput(searchQuery);
+    
+    // Parse the address from URL search query (same format as geocoder)
+    const addressParts = searchQuery.split(', ');
+    
+    let title = '';
+    let suburb = '';
+    let statePostcode = '';
+    let country = '';
+    
+    if (addressParts.length >= 1) {
+      title = addressParts[0]; // "1 Bearke Place"
+    }
+    
+    if (addressParts.length >= 2) {
+      // "Bracken Ridge Queensland 4017" - need to separate suburb from state/postcode
+      const secondPart = addressParts[1];
+      // Try to extract postcode (4-digit number) and everything before it
+      const postcodeMatch = secondPart.match(/^(.+?)\s+([A-Z][a-z]+)\s+(\d{4})$/);
+      if (postcodeMatch) {
+        suburb = postcodeMatch[1]; // "Bracken Ridge"
+        const state = postcodeMatch[2]; // "Queensland"
+        const postcode = postcodeMatch[3]; // "4017"
+        statePostcode = `${state} ${postcode}`;
+      } else {
+        // Fallback if pattern doesn't match
+        suburb = secondPart;
+      }
+    }
+    
+    if (addressParts.length >= 3) {
+      country = addressParts[2]; // "Australia"
+    }
+    
+    // Prepare address data for use after map loads
+    initialAddressData = {
+      title: title,
+      subtitle: searchQuery, // Full address
+      suburb: suburb,
+      postcode: statePostcode, // "Queensland 4017"
+      state: statePostcode.split(' ')[0] || '', // "Queensland"
+      country: country,
+      lot: '',
+      plan: '',
+      coordinates: [lng, lat]
+    };
+  } else if (searchQuery) {
+    // Just populate the search box if no coordinates
+    geocoder.setInput(searchQuery);
   }
 
   // Handle geocoder results
@@ -237,10 +314,34 @@ onMounted(() => {
       }
     });
 
+    // Handle initial address from URL parameters (after sources are created)
+    if (initialAddressData) {
+      // Add clicked point to show selection
+      map.getSource('clicked-point').setData({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: initialAddressData.coordinates
+        },
+        properties: {}
+      });
+      
+      // Emit address selected event to populate the UI
+      emit('addressSelected', initialAddressData);
+    }
+
     // Add PMTiles sources and layers
     map.addSource('overture-places', {
       type: 'vector',
       url: 'pmtiles://https://overturemaps-tiles-us-west-2-beta.s3.amazonaws.com/2025-04-23/places.pmtiles',
+    });
+
+    // Add OSM planetiler source for safety layers
+    map.addSource('osm-planetiler', {
+      type: 'vector',
+      tiles: ['https://dwuxtsziek7cf.cloudfront.net/planet/{z}/{x}/{y}.mvt'],
+      minzoom: 0,
+      maxzoom: 14
     });
 
     // Add PMTiles hazard data sources
@@ -623,6 +724,130 @@ onMounted(() => {
       }
     }
 
+    // Add safety layers using OSM planetiler source
+    // Police layer
+    map.addLayer({
+      id: 'police-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'subclass'], 'police'],
+        ['==', ['get', 'subclass'], 'courthouse'],
+        ['==', ['get', 'subclass'], 'prison']
+      ],
+      paint: {
+        'circle-radius': 7,
+        'circle-color': '#1E3A8A',
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FFFFFF'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
+    // Fire stations layer
+    map.addLayer({
+      id: 'fire-stations-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'subclass'], 'fire_station'],
+        ['==', ['get', 'subclass'], 'ambulance_station']
+      ],
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#DC2626',
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FCA5A5'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
+    // Hospitals layer
+    map.addLayer({
+      id: 'hospitals-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'subclass'], 'hospital'],
+        ['==', ['get', 'subclass'], 'clinic'],
+        ['==', ['get', 'subclass'], 'doctors'],
+        ['==', ['get', 'subclass'], 'dentist']
+      ],
+      paint: {
+        'circle-radius': 4,
+        'circle-color': '#059669',
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FFFFFF'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
+    // Street lights layer (using OSM planetiler source, need to check available subclasses)
+    map.addLayer({
+      id: 'street-lights-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'amenity'], 'street_lamp'],
+        ['==', ['get', 'highway'], 'street_lamp']
+      ],
+      paint: {
+        'circle-radius': 8,
+        'circle-color': '#FFEB3B',
+        'circle-opacity': 0.8,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FFFFFF'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
+    // Speed cameras layer
+    map.addLayer({
+      id: 'speed-camera-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'amenity'], 'speed_camera'],
+        ['==', ['get', 'highway'], 'speed_camera']
+      ],
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#DC2626',
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FECACA'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
+    // Traffic signals layer
+    map.addLayer({
+      id: 'traffic-signals-layer',
+      type: 'circle',
+      source: 'osm-planetiler',
+      'source-layer': 'poi',
+      filter: ['any',
+        ['==', ['get', 'highway'], 'traffic_signals'],
+        ['==', ['get', 'amenity'], 'traffic_signals']
+      ],
+      paint: {
+        'circle-radius': 5,
+        'circle-color': '#10B981',
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#FFFFFF'
+      },
+      layout: { 'visibility': 'none' }
+    });
+
     // Add hover events for hazard layers
     const hazardLayers = [
       { id: 'flood-layer', name: 'Flood Zone', color: '#2196F3' },
@@ -630,6 +855,16 @@ onMounted(() => {
       { id: 'noise-layer', name: 'Noise Corridor', color: '#9C27B0' },
       { id: 'erosion-layer', name: 'Erosion Zone', color: '#FF9800' },
       { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' }
+    ];
+
+    // Add hover events for safety layers
+    const safetyLayers = [
+      { id: 'police-layer', name: 'Police Station', color: '#1E3A8A' },
+      { id: 'fire-stations-layer', name: 'Fire Station', color: '#DC2626' },
+      { id: 'hospitals-layer', name: 'Hospital/Clinic', color: '#059669' },
+      { id: 'street-lights-layer', name: 'Street Light', color: '#FFEB3B' },
+      { id: 'speed-camera-layer', name: 'Speed Camera', color: '#DC2626' },
+      { id: 'traffic-signals-layer', name: 'Traffic Signal', color: '#10B981' }
     ];
 
     // Create hazard popup
@@ -665,6 +900,46 @@ onMounted(() => {
       map.on('mouseleave', layer.id, () => {
         map.getCanvas().style.cursor = '';
         hazardPopup.remove();
+      });
+    });
+
+    // Create safety popup
+    const safetyPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    safetyLayers.forEach(layer => {
+      // Mouse enter event
+      map.on('mouseenter', layer.id, (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        
+        const feature = e.features[0];
+        const props = feature.properties;
+        
+        let content = `<div class="p-2 max-w-xs">
+          <h4 class="font-bold text-sm mb-1" style="color: ${layer.color}">${layer.name}</h4>`;
+        
+        // Add name if available
+        const name = props.name || props.names || 'Unnamed';
+        if (name && name !== 'Unnamed') {
+          content += `<div class="text-xs mb-1"><strong>Name:</strong> ${name}</div>`;
+        }
+        
+        // Add subclass info
+        if (props.subclass) {
+          content += `<div class="text-xs mb-1"><strong>Type:</strong> ${props.subclass}</div>`;
+        }
+        
+        content += '</div>';
+        
+        safetyPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+      });
+
+      // Mouse leave event
+      map.on('mouseleave', layer.id, () => {
+        map.getCanvas().style.cursor = '';
+        safetyPopup.remove();
       });
     });
 

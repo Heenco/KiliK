@@ -66,6 +66,14 @@ export const useMapSources = (map) => {
       tiles: ['http://localhost:8080/place/{z}/{x}/{y}']
     })
 
+    // OSM planetiler source for POI data
+    map.addSource('osm-planetiler', {
+      type: 'vector',
+      tiles: ['https://dwuxtsziek7cf.cloudfront.net/planet/{z}/{x}/{y}.mvt'],
+      minzoom: 0,
+      maxzoom: 14
+    })
+
     // Clicked point source
     map.addSource('clicked-point', {
       type: 'geojson',

@@ -363,11 +363,14 @@ const displayTravelMode = computed(() => {
 </script>
 
 <style scoped>
-/* Smaller layer labels */
+/* Layer labels with Inter font to match HazardTab */
 .layer-label {
-  font-size: 0.715rem; /* 11px */
+  font-size: 0.8rem; /* 13px */
   font-weight: 500;
-  color: #555555;
+  color: #374151;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 /* Reduced padding in accordion */
