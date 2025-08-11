@@ -370,6 +370,12 @@ onMounted(() => {
       url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/acid_sulfate_soils.pmtiles'
     });
 
+    // Add lot boundaries PMTiles source
+    map.addSource('lot-boundaries', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/Lot.pmtiles'
+    });
+
     // Define layer configurations
     const layerConfigs = {
       places: {
@@ -720,6 +726,83 @@ onMounted(() => {
           break;
         } catch (err) {
           console.log(`Failed acid sulfate soils layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    // Add lot boundaries layer (automatically visible at high zoom levels)
+    try {
+      map.addLayer({
+        id: 'lot-boundaries-layer',
+        type: 'line',
+        source: 'lot-boundaries',
+        'source-layer': 'Lot', // This might need adjustment based on the PMTiles structure
+        minzoom: 16, // Only show when zoomed in enough to see individual lots
+        maxzoom: 22,
+        paint: {
+          'line-color': '#FF6B35', // Orange color for better visibility
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            16, 1,    // Thicker lines at zoom 16
+            18, 2,    // Medium-thick lines at zoom 18
+            20, 3     // Very thick lines at zoom 20+
+          ],
+          'line-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            16, 0.7,  // More visible at zoom 16
+            18, 0.85, // Very visible at zoom 18
+            20, 1.0   // Fully opaque at zoom 20+
+          ]
+        },
+        layout: { 
+          'visibility': 'visible' // Always visible (when zoom level is appropriate)
+        }
+      });
+      console.log('Lot boundaries layer added successfully');
+    } catch (error) {
+      console.warn('Error adding lot boundaries layer with source-layer "Lot", trying alternatives:', error);
+      // Try with alternative source layer names
+      const lotAlternatives = ['lot', 'lots', 'boundaries', 'parcels', 'default'];
+      for (const layerName of lotAlternatives) {
+        try {
+          map.addLayer({
+            id: 'lot-boundaries-layer',
+            type: 'line',
+            source: 'lot-boundaries',
+            'source-layer': layerName,
+            minzoom: 16,
+            maxzoom: 22,
+            paint: {
+              'line-color': '#FF6B35', // Orange color for better visibility
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                16, 1,    // Thicker lines at zoom 16
+                18, 2,    // Medium-thick lines at zoom 18
+                20, 3     // Very thick lines at zoom 20+
+              ],
+              'line-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                16, 0.7,  // More visible at zoom 16
+                18, 0.85, // Very visible at zoom 18
+                20, 1.0   // Fully opaque at zoom 20+
+              ]
+            },
+            layout: { 
+              'visibility': 'visible'
+            }
+          });
+          console.log(`Lot boundaries layer added with source-layer: ${layerName}`);
+          break;
+        } catch (err) {
+          console.log(`Failed lot boundaries layer with source-layer: ${layerName}`);
         }
       }
     }
