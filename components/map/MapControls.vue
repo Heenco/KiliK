@@ -15,8 +15,8 @@
       style="max-height: 80vh;"
     >
       <!-- Address Display -->
-      <div v-if="selectedAddress" class="mb-3">
-        <div class="flex items-center justify-between">
+      <div class="mb-3">
+        <div v-if="selectedAddress" class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <!-- Main address title -->
             <h3 class="text-xs font-semibold text-gray-800 truncate">{{ selectedAddress.title }}</h3>
@@ -31,6 +31,18 @@
             </p>
           </div>
           <div class="flex items-center space-x-2">
+            <!-- Sticky/Pin toggle button -->
+            <button 
+              @click="toggleSticky"
+              class="p-1 rounded hover:bg-gray-100"
+              :class="{ 'bg-blue-100': isSticky }"
+              :title="isSticky ? 'Unpin panel (auto-collapse enabled)' : 'Pin panel (disable auto-collapse)'"
+            >
+              <Pin 
+                class="h-4 w-4" 
+                :class="isSticky ? 'text-blue-600' : 'text-gray-500'"
+              />
+            </button>
             <a 
               :href="getStreetViewUrl()"
               target="_blank"
@@ -49,6 +61,26 @@
               aria-label="Close"
             >
               <XIcon class="h-3 w-3 text-gray-500" />
+            </button>
+          </div>
+        </div>
+        <div v-else class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <h3 class="text-xs font-medium text-gray-400">No address selected</h3>
+            <p class="text-xs text-gray-300 mt-0.5">Search for a property to view details</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <!-- Sticky/Pin toggle button -->
+            <button 
+              @click="toggleSticky"
+              class="p-1 rounded hover:bg-gray-100"
+              :class="{ 'bg-blue-100': isSticky }"
+              :title="isSticky ? 'Unpin panel (auto-collapse enabled)' : 'Pin panel (disable auto-collapse)'"
+            >
+              <Pin 
+                class="h-4 w-4" 
+                :class="isSticky ? 'text-blue-600' : 'text-gray-500'"
+              />
             </button>
           </div>
         </div>
@@ -191,7 +223,7 @@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   XIcon, CameraIcon, MapPinIcon, ChevronLeftIcon, 
-  ChevronRightIcon, AlertTriangleIcon, ShieldIcon, UsersIcon 
+  ChevronRightIcon, AlertTriangleIcon, ShieldIcon, UsersIcon, Pin 
 } from 'lucide-vue-next'
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import AccessTab from './tabs/AccessTab.vue'
@@ -239,6 +271,7 @@ const selectedAddress = ref(null)
 const floodRisk = ref(null)
 const isExpanded = ref(true) // New state for panel expansion
 const selectedTab = ref('access') // Track selected tab
+const isSticky = ref(false) // New state for sticky/pin functionality
 let autoCollapseTimer = null // Timer for auto-collapse
 const INACTIVE_TIMEOUT = 10000 // 10 seconds of inactivity before collapsing
 
@@ -248,9 +281,28 @@ const resetAutoCollapseTimer = () => {
     clearTimeout(autoCollapseTimer)
   }
   
-  autoCollapseTimer = setTimeout(() => {
-    isExpanded.value = false
-  }, INACTIVE_TIMEOUT)
+  // Only set timer if panel is not pinned/sticky
+  if (!isSticky.value) {
+    autoCollapseTimer = setTimeout(() => {
+      isExpanded.value = false
+    }, INACTIVE_TIMEOUT)
+  }
+}
+
+// Toggle sticky/pin state
+const toggleSticky = () => {
+  isSticky.value = !isSticky.value
+  
+  if (isSticky.value) {
+    // Clear any existing timer when pinning
+    if (autoCollapseTimer) {
+      clearTimeout(autoCollapseTimer)
+      autoCollapseTimer = null
+    }
+  } else {
+    // Restart auto-collapse when unpinning
+    resetAutoCollapseTimer()
+  }
 }
 
 // Watch for tab changes to handle isochrone layer visibility
