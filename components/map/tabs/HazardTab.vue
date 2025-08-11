@@ -1,47 +1,220 @@
 <template>
   <TabsContent value="hazard">
+    <!-- Info message when no address is selected -->
+    <div v-if="!hasSpecificAddress" class="mb-3 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-500">
+      <div class="flex items-center">
+        <span class="mr-1">🔍</span>
+        Search for an address to see specific property risks.
+      </div>
+    </div>
+    
     <div class="space-y-1">
       <!-- Flood Layer section -->
       <div class="flex items-center justify-between py-0.5">
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center">
           <Switch 
             id="flood-layer"
             :model-value="showFloodLayer"
             @update:modelValue="$emit('update:showFloodLayer', $event)"
           />
-          <Label for="flood-layer" class="layer-label">Flood</Label>
+          <div class="w-3 h-3 bg-blue-500 rounded border ml-2"></div>
+          <Label for="flood-layer" class="layer-label ml-2">Flood</Label>
         </div>
         
-        <!-- Display flood risk with pill-shaped badge -->
-        <div v-if="floodRisk" class="flex items-center">
-          <span class="text-xs text-gray-500 mr-1">Risk:</span>
-          <span 
-            class="pill-badge"
-            :class="getRiskClass(floodRisk)"
-          >
-            {{ floodRisk === 'None' ? 'Non-detected' : floodRisk }}
+        <!-- Flood Risk Badge -->
+        <div class="ml-2">
+          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            --
+          </div>
+          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            Loading...
+          </div>
+          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            Error
+          </div>
+          <div v-else-if="hazardData?.flood_risk">
+            <span 
+              :class="{
+                'px-3 py-1 rounded-full text-xs': true,
+                'bg-green-400/20 text-green-400': hazardData.flood_risk.toLowerCase() === 'low',
+                'bg-yellow-400/20 text-yellow-400': hazardData.flood_risk.toLowerCase() === 'medium',
+                'bg-red-400/20 text-red-400': hazardData.flood_risk.toLowerCase() === 'high'
+              }"
+            >
+              {{ hazardData.flood_risk }}
+            </span>
+          </div>
+          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+            No risk
           </span>
         </div>
       </div>
 
-      <!-- Landslide Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="landslide-layer"
-          :model-value="showLandslideLayer"
-          @update:modelValue="$emit('update:showLandslideLayer', $event)"
-        />
-        <Label for="landslide-layer" class="layer-label">Landslide</Label>
+      <!-- Bushfire Layer section -->
+      <div class="flex items-center justify-between py-0.5">
+        <div class="flex items-center">
+          <Switch 
+            id="bushfire-layer"
+            :model-value="showBushfireLayer"
+            @update:modelValue="$emit('update:showBushfireLayer', $event)"
+          />
+          <div class="w-3 h-3 bg-red-500 rounded border ml-2"></div>
+          <Label for="bushfire-layer" class="layer-label ml-2">Bushfire</Label>
+        </div>
+        
+        <!-- Bushfire Risk Badge -->
+        <div class="ml-2">
+          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            --
+          </div>
+          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            Loading...
+          </div>
+          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            Error
+          </div>
+          <div v-else-if="hazardData?.bushfire_desc">
+            <span 
+              :class="{
+                'px-3 py-1 rounded-full text-xs': true,
+                'bg-green-400/20 text-green-400': hazardData.bushfire_desc.toLowerCase().includes('low'),
+                'bg-yellow-400/20 text-yellow-400': hazardData.bushfire_desc.toLowerCase().includes('medium'),
+                'bg-red-400/20 text-red-400': hazardData.bushfire_desc.toLowerCase().includes('high')
+              }"
+            >
+              {{ hazardData.bushfire_desc }}
+            </span>
+          </div>
+          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+            No risk
+          </span>
+        </div>
       </div>
 
       <!-- Noise Layer section -->
-      <div class="flex items-center space-x-2 py-0.5">
-        <Switch 
-          id="noise-layer"
-          :model-value="showNoiseLayer"
-          @update:modelValue="$emit('update:showNoiseLayer', $event)"
-        />
-        <Label for="noise-layer" class="layer-label">Noise</Label>
+      <div class="flex items-center justify-between py-0.5">
+        <div class="flex items-center">
+          <Switch 
+            id="noise-layer"
+            :model-value="showNoiseLayer"
+            @update:modelValue="$emit('update:showNoiseLayer', $event)"
+          />
+          <div class="w-3 h-3 bg-purple-500 rounded border ml-2"></div>
+          <Label for="noise-layer" class="layer-label ml-2">Noise Corridors</Label>
+        </div>
+        
+        <!-- Noise Risk Badge -->
+        <div class="ml-2">
+          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            --
+          </div>
+          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            Loading...
+          </div>
+          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            Error
+          </div>
+          <div v-else-if="hazardData?.noise_desc">
+            <span 
+              :class="{
+                'px-3 py-1 rounded-full text-xs': true,
+                'bg-orange-400/20 text-orange-400': hazardData.noise_desc.toLowerCase().includes('category 0'),
+                'bg-yellow-400/20 text-yellow-400': hazardData.noise_desc.toLowerCase().includes('category 1'),
+                'bg-orange-500/20 text-orange-500': hazardData.noise_desc.toLowerCase().includes('category 2'),
+                'bg-red-400/20 text-red-400': hazardData.noise_desc.toLowerCase().includes('category 3'),
+                'bg-red-500/20 text-red-500': hazardData.noise_desc.toLowerCase().includes('category 4')
+              }"
+            >
+              {{ hazardData.noise_desc }}
+            </span>
+          </div>
+          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+            No risk
+          </span>
+        </div>
+      </div>
+
+      <!-- Erosion Layer section -->
+      <div class="flex items-center justify-between py-0.5">
+        <div class="flex items-center">
+          <Switch 
+            id="erosion-layer"
+            :model-value="showErosionLayer"
+            @update:modelValue="$emit('update:showErosionLayer', $event)"
+          />
+          <div class="w-3 h-3 bg-orange-500 rounded border ml-2"></div>
+          <Label for="erosion-layer" class="layer-label ml-2">Erosion</Label>
+        </div>
+        
+        <!-- Erosion Risk Badge -->
+        <div class="ml-2">
+          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            --
+          </div>
+          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            Loading...
+          </div>
+          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            Error
+          </div>
+          <div v-else-if="hazardData?.erosion_desc">
+            <span 
+              :class="{
+                'px-3 py-1 rounded-full text-xs': true,
+                'bg-green-400/20 text-green-400': hazardData.erosion_desc.toLowerCase().includes('low'),
+                'bg-yellow-400/20 text-yellow-400': hazardData.erosion_desc.toLowerCase().includes('medium'),
+                'bg-red-400/20 text-red-400': hazardData.erosion_desc.toLowerCase().includes('high')
+              }"
+            >
+              {{ hazardData.erosion_desc }}
+            </span>
+          </div>
+          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+            No risk
+          </span>
+        </div>
+      </div>
+
+      <!-- Acid Sulfate Soils Layer section -->
+      <div class="flex items-center justify-between py-0.5">
+        <div class="flex items-center">
+          <Switch 
+            id="acid-sulfate-layer"
+            :model-value="showAcidSulfateLayer"
+            @update:modelValue="$emit('update:showAcidSulfateLayer', $event)"
+          />
+          <div class="w-3 h-3 bg-yellow-500 rounded border ml-2"></div>
+          <Label for="acid-sulfate-layer" class="layer-label ml-2">Acid Sulfate Soils</Label>
+        </div>
+        
+        <!-- Acid Sulfate Risk Badge -->
+        <div class="ml-2">
+          <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            --
+          </div>
+          <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            Loading...
+          </div>
+          <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            Error
+          </div>
+          <div v-else-if="hazardData?.acid_sulph">
+            <span 
+              :class="{
+                'px-3 py-1 rounded-full text-xs': true,
+                'bg-orange-400/20 text-orange-400': hazardData.acid_sulph.toLowerCase().includes('as1'),
+                'bg-yellow-400/20 text-yellow-400': hazardData.acid_sulph.toLowerCase().includes('as2'),
+                'bg-red-400/20 text-red-400': hazardData.acid_sulph.toLowerCase().includes('as3'),
+                'bg-red-500/20 text-red-500': hazardData.acid_sulph.toLowerCase().includes('as4')
+              }"
+            >
+              {{ hazardData.acid_sulph }}
+            </span>
+          </div>
+          <span v-else class="px-3 py-1 bg-green-400/20 text-green-400 rounded-full text-xs">
+            No risk
+          </span>
+        </div>
       </div>
     </div>
   </TabsContent>
@@ -54,36 +227,23 @@ import { TabsContent } from '@/components/ui/tabs'
 
 const props = defineProps({
   showFloodLayer: Boolean,
-  showLandslideLayer: Boolean,
+  showBushfireLayer: Boolean,
   showNoiseLayer: Boolean,
-  floodRisk: String
+  showErosionLayer: Boolean,
+  showAcidSulfateLayer: Boolean,
+  hazardData: Object,
+  isLoadingHazards: Boolean,
+  hazardError: String,
+  hasSpecificAddress: Boolean
 })
 
 const emit = defineEmits([
   'update:showFloodLayer',
-  'update:showLandslideLayer',
-  'update:showNoiseLayer'
+  'update:showBushfireLayer', 
+  'update:showNoiseLayer',
+  'update:showErosionLayer',
+  'update:showAcidSulfateLayer'
 ])
-
-// Function to determine risk indicator styling based on risk level
-const getRiskClass = (risk) => {
-  switch(risk) {
-    case 'High':
-      return 'badge-red';
-    case 'Medium':
-      return 'badge-yellow';
-    case 'Low':
-      return 'badge-lime';
-    case 'None':
-      return 'badge-green';
-    case 'Loading...':
-      return 'badge-gray';
-    case 'Error':
-      return 'badge-error';
-    default:
-      return 'badge-gray';
-  }
-}
 </script>
 
 <style scoped>

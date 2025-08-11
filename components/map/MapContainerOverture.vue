@@ -29,6 +29,11 @@ const props = defineProps({
   showVehiclesLayer: Boolean,
   showSchoolsLayer: Boolean,
   showCommunityLayer: Boolean,
+  showFloodLayer: Boolean,
+  showBushfireLayer: Boolean,
+  showNoiseLayer: Boolean,
+  showErosionLayer: Boolean,
+  showAcidSulfateLayer: Boolean,
   travelMode: String,
   travelTime: Number,
   selectedAddress: Object
@@ -76,6 +81,15 @@ const toggleLayer = (layerId, visible) => {
   }
 };
 
+const toggleHazardLayer = (layerId, visible) => {
+  if (map) {
+    const visibility = visible ? 'visible' : 'none';
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', visibility);
+    }
+  }
+};
+
 // Watch for layer visibility changes
 watch(() => props.showPlacesLayer, (visible) => toggleLayer('places', visible));
 watch(() => props.showHealthcareLayer, (visible) => toggleLayer('healthcare', visible));
@@ -91,6 +105,13 @@ watch(() => props.showTransportationLayer, (visible) => toggleLayer('transportat
 watch(() => props.showVehiclesLayer, (visible) => toggleLayer('vehicles', visible));
 watch(() => props.showSchoolsLayer, (visible) => toggleLayer('schools', visible));
 watch(() => props.showCommunityLayer, (visible) => toggleLayer('community', visible));
+
+// Watch hazard layer visibility
+watch(() => props.showFloodLayer, (visible) => toggleHazardLayer('flood-layer', visible));
+watch(() => props.showBushfireLayer, (visible) => toggleHazardLayer('bushfire-layer', visible));
+watch(() => props.showNoiseLayer, (visible) => toggleHazardLayer('noise-layer', visible));
+watch(() => props.showErosionLayer, (visible) => toggleHazardLayer('erosion-layer', visible));
+watch(() => props.showAcidSulfateLayer, (visible) => toggleHazardLayer('acid-sulfate-layer', visible));
 
 onMounted(() => {
   // Add PMTiles protocol
@@ -220,6 +241,32 @@ onMounted(() => {
     map.addSource('overture-places', {
       type: 'vector',
       url: 'pmtiles://https://overturemaps-tiles-us-west-2-beta.s3.amazonaws.com/2025-04-23/places.pmtiles',
+    });
+
+    // Add PMTiles hazard data sources
+    map.addSource('flood-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/flood.pmtiles'
+    });
+
+    map.addSource('bushfire-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/bushfire.pmtiles'
+    });
+
+    map.addSource('noise-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/noise.pmtiles'
+    });
+
+    map.addSource('erosion-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/erosion.pmtiles'
+    });
+
+    map.addSource('acid-sulfate-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/acid_sulfate_soils.pmtiles'
     });
 
     // Define layer configurations
@@ -382,6 +429,243 @@ onMounted(() => {
       }
 
       map.addLayer(layerDefinition);
+    });
+
+    // Add hazard layers with error handling
+    try {
+      // Add flood layer
+      map.addLayer({
+        id: 'flood-layer',
+        type: 'fill',
+        source: 'flood-data',
+        'source-layer': 'flood',
+        paint: {
+          'fill-color': '#2196F3',
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#1976D2'
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding flood layer with source-layer "flood", trying alternatives:', error);
+      // Try with alternative source layer names
+      const floodAlternatives = ['flooding', 'flood-zones', 'default'];
+      for (const layerName of floodAlternatives) {
+        try {
+          map.addLayer({
+            id: 'flood-layer',
+            type: 'fill',
+            source: 'flood-data',
+            'source-layer': layerName,
+            paint: {
+              'fill-color': '#2196F3',
+              'fill-opacity': 0.5,
+              'fill-outline-color': '#1976D2'
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed flood layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    try {
+      // Add bushfire layer
+      map.addLayer({
+        id: 'bushfire-layer',
+        type: 'fill',
+        source: 'bushfire-data',
+        'source-layer': 'bushfire',
+        paint: {
+          'fill-color': '#FF5722',
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#D32F2F'
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding bushfire layer, trying alternatives:', error);
+      const bushfireAlternatives = ['bushfires', 'fire', 'default'];
+      for (const layerName of bushfireAlternatives) {
+        try {
+          map.addLayer({
+            id: 'bushfire-layer',
+            type: 'fill',
+            source: 'bushfire-data',
+            'source-layer': layerName,
+            paint: {
+              'fill-color': '#FF5722',
+              'fill-opacity': 0.5,
+              'fill-outline-color': '#D32F2F'
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed bushfire layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    try {
+      // Add noise layer
+      map.addLayer({
+        id: 'noise-layer',
+        type: 'fill',
+        source: 'noise-data',
+        'source-layer': 'noise_corridors',
+        paint: {
+          'fill-color': '#9C27B0',
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#7B1FA2'
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding noise layer, trying alternatives:', error);
+      const noiseAlternatives = ['noise', 'corridors', 'default'];
+      for (const layerName of noiseAlternatives) {
+        try {
+          map.addLayer({
+            id: 'noise-layer',
+            type: 'fill',
+            source: 'noise-data',
+            'source-layer': layerName,
+            paint: {
+              'fill-color': '#9C27B0',
+              'fill-opacity': 0.5,
+              'fill-outline-color': '#7B1FA2'
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed noise layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    try {
+      // Add erosion layer
+      map.addLayer({
+        id: 'erosion-layer',
+        type: 'fill',
+        source: 'erosion-data',
+        'source-layer': 'erosion',
+        paint: {
+          'fill-color': '#FF9800',
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#F57C00'
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding erosion layer, trying alternatives:', error);
+      const erosionAlternatives = ['erosions', 'erosion-zones', 'default'];
+      for (const layerName of erosionAlternatives) {
+        try {
+          map.addLayer({
+            id: 'erosion-layer',
+            type: 'fill',
+            source: 'erosion-data',
+            'source-layer': layerName,
+            paint: {
+              'fill-color': '#FF9800',
+              'fill-opacity': 0.5,
+              'fill-outline-color': '#F57C00'
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed erosion layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    try {
+      // Add acid sulfate soils layer
+      map.addLayer({
+        id: 'acid-sulfate-layer',
+        type: 'fill',
+        source: 'acid-sulfate-data',
+        'source-layer': 'acid_sulfate_soils',
+        paint: {
+          'fill-color': '#FFC107',
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#FF8F00'
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding acid sulfate soils layer, trying alternatives:', error);
+      const acidSulfateAlternatives = ['acid_sulfate', 'soils', 'default'];
+      for (const layerName of acidSulfateAlternatives) {
+        try {
+          map.addLayer({
+            id: 'acid-sulfate-layer',
+            type: 'fill',
+            source: 'acid-sulfate-data',
+            'source-layer': layerName,
+            paint: {
+              'fill-color': '#FFC107',
+              'fill-opacity': 0.5,
+              'fill-outline-color': '#FF8F00'
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed acid sulfate soils layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    // Add hover events for hazard layers
+    const hazardLayers = [
+      { id: 'flood-layer', name: 'Flood Zone', color: '#2196F3' },
+      { id: 'bushfire-layer', name: 'Bushfire Zone', color: '#FF5722' },
+      { id: 'noise-layer', name: 'Noise Corridor', color: '#9C27B0' },
+      { id: 'erosion-layer', name: 'Erosion Zone', color: '#FF9800' },
+      { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' }
+    ];
+
+    // Create hazard popup
+    const hazardPopup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    hazardLayers.forEach(layer => {
+      // Mouse enter event
+      map.on('mouseenter', layer.id, (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        
+        const feature = e.features[0];
+        const props = feature.properties;
+        
+        let content = `<div class="p-2 max-w-xs">
+          <h4 class="font-bold text-sm mb-1" style="color: ${layer.color}">${layer.name}</h4>`;
+        
+        // Add properties if available
+        Object.keys(props).forEach(key => {
+          if (props[key] && key !== 'geometry') {
+            content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`;
+          }
+        });
+        
+        content += '</div>';
+        
+        hazardPopup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+      });
+
+      // Mouse leave event
+      map.on('mouseleave', layer.id, () => {
+        map.getCanvas().style.cursor = '';
+        hazardPopup.remove();
+      });
     });
 
     // Create popup for hover details

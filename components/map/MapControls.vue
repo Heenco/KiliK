@@ -1,7 +1,7 @@
 <template>
   <div 
     class="absolute top-16 right-6 z-20 transition-all duration-500 ease-in-out"
-    :class="{ 'w-80': isExpanded, 'w-12': !isExpanded }"
+    :class="{ 'w-96': isExpanded, 'w-12': !isExpanded }"
     @mouseenter="handleInteraction"
     @mousemove="handleInteraction"
     @click="handleInteraction"
@@ -109,12 +109,19 @@
         />
         <HazardTab 
           :showFloodLayer="layers.flood"
-          :showLandslideLayer="layers.landslide"
+          :showBushfireLayer="layers.bushfire"
           :showNoiseLayer="layers.noise"
-          :floodRisk="floodRisk"
+          :showErosionLayer="layers.erosion"
+          :showAcidSulfateLayer="layers.acidSulfate"
+          :hazardData="props.hazardData"
+          :isLoadingHazards="props.isLoadingHazards"
+          :hazardError="props.hazardError"
+          :hasSpecificAddress="props.hasSpecificAddress"
           @update:showFloodLayer="layers.flood = $event"
-          @update:showLandslideLayer="layers.landslide = $event"
+          @update:showBushfireLayer="layers.bushfire = $event"
           @update:showNoiseLayer="layers.noise = $event"
+          @update:showErosionLayer="layers.erosion = $event"
+          @update:showAcidSulfateLayer="layers.acidSulfate = $event"
         />
         <SafetyTab 
           :showStreetLightsLayer="layers.streetLights"
@@ -209,7 +216,11 @@ const props = defineProps({
   },
   isLoadingWalkability: Boolean,
   walkabilityError: String,
-  hasPropertySelected: Boolean
+  hasPropertySelected: Boolean,
+  hasSpecificAddress: Boolean,
+  hazardData: Object,
+  isLoadingHazards: Boolean,
+  hazardError: String
 });
 
 const emit = defineEmits([

@@ -21,6 +21,11 @@
       :showVehiclesLayer="layers.vehicles"
       :showSchoolsLayer="layers.schools"
       :showCommunityLayer="layers.community"
+      :showFloodLayer="layers.flood"
+      :showBushfireLayer="layers.bushfire"
+      :showNoiseLayer="layers.noise"
+      :showErosionLayer="layers.erosion"
+      :showAcidSulfateLayer="layers.acidSulfate"
       :travelMode="travelMode"
       :travelTime="travelTime"
       :selectedAddress="selectedAddress"
@@ -37,6 +42,10 @@
       :isLoadingWalkability="isLoadingWalkability"
       :walkabilityError="walkabilityError"
       :hasPropertySelected="!!selectedAddress"
+      :hasSpecificAddress="!!selectedAddress"
+      :hazardData="hazardData"
+      :isLoadingHazards="isLoadingHazards"
+      :hazardError="hazardError"
       @update:travelMode="travelMode = $event"
       @update:travelTime="travelTime = $event"
       @update:activeTab="handleTabChange"
@@ -49,10 +58,46 @@
 
 <script setup>
 import { useMapState } from '@/composables/useMapState'
-import { ref } from 'vue'
+import { usePropertyApis } from '@/composables/usePropertyApis'
+import { ref, watch, onMounted } from 'vue'
 import Header from '@/components/ui/Header.vue'
 
 const { layers, filters, travelMode, travelTime } = useMapState()
+
+// Initialize property APIs composable
+const { fetchPropertyDetails } = usePropertyApis()
+
+// Hazard data state
+const hazardData = ref(null)
+const isLoadingHazards = ref(false)
+const hazardError = ref(null)
+
+// Function to fetch hazard assessment
+const fetchHazardAssessment = async (latitude, longitude) => {
+  try {
+    isLoadingHazards.value = true
+    hazardError.value = null
+    
+    const details = await fetchPropertyDetails(longitude, latitude)
+    
+    if (details) {
+      hazardData.value = {
+        flood_risk: details.flood_risk,
+        bushfire_desc: details.bushfire_desc,
+        noise_desc: details.noise_desc,
+        erosion_desc: details.erosion_desc,
+        acid_sulph: details.acid_sulph
+      }
+    } else {
+      hazardData.value = null
+    }
+  } catch (error) {
+    console.error('Error fetching hazard assessment:', error)
+    hazardError.value = 'Failed to load hazard data'
+  } finally {
+    isLoadingHazards.value = false
+  }
+}
 
 // Reference to MapControls component
 const mapControlsRef = ref(null)
@@ -68,6 +113,31 @@ const walkabilityData = ref({
 })
 const isLoadingWalkability = ref(false)
 const walkabilityError = ref(null)
+
+// Load initial hazard data on component mount
+// Removed - no longer loading default data
+// onMounted(async () => {
+//   try {
+//     // Load default hazard data for Brisbane CBD area
+//     // Coordinates: Brisbane CBD (lat: -27.4705, lng: 153.0260)
+//     await fetchHazardAssessment(-27.4705, 153.0260)
+//   } catch (error) {
+//     console.error('Error fetching initial hazard data:', error)
+//   }
+// })
+
+// Watch for selectedAddress changes to fetch hazard data
+watch(selectedAddress, async (newAddress) => {
+  if (newAddress && newAddress.coordinates) {
+    try {
+      // Extract lat/lng from coordinates [lng, lat] format
+      const [lng, lat] = newAddress.coordinates
+      await fetchHazardAssessment(lat, lng)
+    } catch (error) {
+      console.error('Error fetching hazard data:', error)
+    }
+  }
+})
 
 // Handler for address selection
 const handleAddressSelected = (addressData) => {

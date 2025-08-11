@@ -20,6 +20,13 @@ export const useMapState = () => {
     vehicles: false,        // Vehicle Services
     schools: false,         // Schools & Education
     community: false,       // Community Resources
+    
+    // PMTiles-based Hazard layers
+    flood: false,           // Flood zones
+    bushfire: false,        // Bushfire zones
+    noise: false,           // Noise corridors
+    erosion: false,         // Erosion zones
+    acidSulfate: false,     // Acid sulfate soils
   }))
 
   const filters = useState('mapFilters', () => ({
