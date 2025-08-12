@@ -59,8 +59,8 @@
       </div>
 
       <!-- Overture Places Layers organized by category -->
-      <Accordion type="multiple" class="w-full mt-2" :default-value="['essential', 'shopping']">
-        
+      <Accordion type="multiple" class="w-full mt-2" :default-value="['mobility', 'essential', 'shopping']">
+
         <!-- All Places -->
         <div class="flex items-center space-x-2 py-0.5 mb-2">
           <Switch 
@@ -71,6 +71,38 @@
           <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #808080;"></div>
           <Label for="places-layer" class="layer-label">All Places</Label>
         </div>
+
+        <!-- Mobility -->
+        <AccordionItem value="mobility">
+          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
+            <span class="layer-label">Mobility</span>
+          </AccordionTrigger>
+          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div class="space-y-1 pt-1">
+              
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="transportation-layer"
+                  :model-value="showTransportationLayer"
+                  @update:modelValue="$emit('update:showTransportationLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #607D8B;"></div>
+                <Label for="transportation-layer" class="layer-label">Public Transportation</Label>
+              </div>
+
+              <div class="flex items-center space-x-2 py-0.5">
+                <Switch 
+                  id="vehicles-layer"
+                  :model-value="showVehiclesLayer"
+                  @update:modelValue="$emit('update:showVehiclesLayer', $event)"
+                />
+                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #424242;"></div>
+                <Label for="vehicles-layer" class="layer-label">Vehicle Services</Label>
+              </div>
+
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
         <!-- Essential Daily Needs -->
         <AccordionItem value="essential">
@@ -204,38 +236,6 @@
                 />
                 <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #8BC34A;"></div>
                 <Label for="trails-layer" class="layer-label">Walking & Cycling Trails</Label>
-              </div>
-
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <!-- Mobility -->
-        <AccordionItem value="mobility">
-          <AccordionTrigger class="flex w-full items-center justify-between py-2 font-medium transition-all hover:underline">
-            <span class="layer-label">Mobility</span>
-          </AccordionTrigger>
-          <AccordionContent class="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-            <div class="space-y-1 pt-1">
-              
-              <div class="flex items-center space-x-2 py-0.5">
-                <Switch 
-                  id="transportation-layer"
-                  :model-value="showTransportationLayer"
-                  @update:modelValue="$emit('update:showTransportationLayer', $event)"
-                />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #607D8B;"></div>
-                <Label for="transportation-layer" class="layer-label">Public Transportation</Label>
-              </div>
-
-              <div class="flex items-center space-x-2 py-0.5">
-                <Switch 
-                  id="vehicles-layer"
-                  :model-value="showVehiclesLayer"
-                  @update:modelValue="$emit('update:showVehiclesLayer', $event)"
-                />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #424242;"></div>
-                <Label for="vehicles-layer" class="layer-label">Vehicle Services</Label>
               </div>
 
             </div>
