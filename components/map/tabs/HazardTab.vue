@@ -250,11 +250,65 @@
           <span>Acid sulfate soil areas</span>
         </div>
       </div>
+
+      <!-- Oil Pipelines Layer section -->
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="oil-pipelines-layer"
+              :model-value="showOilPipelinesLayer"
+              @update:modelValue="$emit('update:showOilPipelinesLayer', $event)"
+            />
+            <Label for="oil-pipelines-layer" class="layer-label ml-2">Oil Pipelines</Label>
+          </div>
+        
+        <!-- Oil Pipelines Info Badge -->
+        <div class="ml-2">
+          <span class="px-3 py-1 bg-yellow-500/20 text-yellow-600 rounded-full text-xs">
+            Infrastructure
+          </span>
+        </div>
+        </div>
+        
+        <!-- Oil Pipelines Legend -->
+        <div v-if="showOilPipelinesLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-1 bg-yellow-500 rounded border mr-2"></div>
+          <span>Oil pipeline infrastructure</span>
+        </div>
+      </div>
+
+      <!-- Gas Pipelines Layer section -->
+      <div class="py-0.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <Switch 
+              id="gas-pipelines-layer"
+              :model-value="showGasPipelinesLayer"
+              @update:modelValue="$emit('update:showGasPipelinesLayer', $event)"
+            />
+            <Label for="gas-pipelines-layer" class="layer-label ml-2">Gas Pipelines</Label>
+          </div>
+        
+        <!-- Gas Pipelines Info Badge -->
+        <div class="ml-2">
+          <span class="px-3 py-1 bg-yellow-500/20 text-yellow-600 rounded-full text-xs">
+            Infrastructure
+          </span>
+        </div>
+        </div>
+        
+        <!-- Gas Pipelines Legend -->
+        <div v-if="showGasPipelinesLayer" class="ml-0 mt-3 flex items-center text-xs text-gray-600">
+          <div class="w-3 h-1 bg-yellow-500 rounded border mr-2"></div>
+          <span>Gas pipeline infrastructure</span>
+        </div>
+      </div>
     </div>
     
     <!-- Description text -->
     <div class="mt-4 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
-      View flood zones, bushfire risks, noise corridors, erosion areas, and acid sulfate soils to assess potential environmental hazards and make informed property decisions.
+      View flood zones, bushfire risks, noise corridors, erosion areas, acid sulfate soils, and infrastructure pipelines to assess potential environmental hazards and utility considerations for informed property decisions.
     </div>
   </TabsContent>
 </template>
@@ -270,6 +324,8 @@ const props = defineProps({
   showNoiseLayer: Boolean,
   showErosionLayer: Boolean,
   showAcidSulfateLayer: Boolean,
+  showOilPipelinesLayer: Boolean,
+  showGasPipelinesLayer: Boolean,
   hazardData: Object,
   isLoadingHazards: Boolean,
   hazardError: String,
@@ -281,7 +337,9 @@ const emit = defineEmits([
   'update:showBushfireLayer', 
   'update:showNoiseLayer',
   'update:showErosionLayer',
-  'update:showAcidSulfateLayer'
+  'update:showAcidSulfateLayer',
+  'update:showOilPipelinesLayer',
+  'update:showGasPipelinesLayer'
 ])
 </script>
 

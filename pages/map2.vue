@@ -26,6 +26,8 @@
       :showNoiseLayer="layers.noise"
       :showErosionLayer="layers.erosion"
       :showAcidSulfateLayer="layers.acidSulfate"
+      :showOilPipelinesLayer="layers.oilPipelines"
+      :showGasPipelinesLayer="layers.gasPipelines"
       :showStreetLightsLayer="layers.streetLights"
       :showPoliceLayer="layers.police"
       :showSpeedCameraLayer="layers.speedCamera"

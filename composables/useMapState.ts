@@ -28,6 +28,10 @@ export const useMapState = () => {
     erosion: false,         // Erosion zones
     acidSulfate: false,     // Acid sulfate soils
     
+    // Infrastructure layers (PMTiles-based)
+    oilPipelines: false,    // Oil pipelines
+    gasPipelines: false,    // Gas pipelines
+    
     // Safety layers (OSM-based)
     streetLights: false,    // Street lights
     police: false,          // Police stations

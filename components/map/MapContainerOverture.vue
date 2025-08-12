@@ -34,6 +34,8 @@ const props = defineProps({
   showNoiseLayer: Boolean,
   showErosionLayer: Boolean,
   showAcidSulfateLayer: Boolean,
+  showOilPipelinesLayer: Boolean,
+  showGasPipelinesLayer: Boolean,
   // Safety layer props
   showStreetLightsLayer: Boolean,
   showPoliceLayer: Boolean,
@@ -120,6 +122,8 @@ watch(() => props.showBushfireLayer, (visible) => toggleHazardLayer('bushfire-la
 watch(() => props.showNoiseLayer, (visible) => toggleHazardLayer('noise-layer', visible));
 watch(() => props.showErosionLayer, (visible) => toggleHazardLayer('erosion-layer', visible));
 watch(() => props.showAcidSulfateLayer, (visible) => toggleHazardLayer('acid-sulfate-layer', visible));
+watch(() => props.showOilPipelinesLayer, (visible) => toggleHazardLayer('oil-pipelines-layer', visible));
+watch(() => props.showGasPipelinesLayer, (visible) => toggleHazardLayer('gas-pipelines-layer', visible));
 
 // Watch safety layer visibility
 watch(() => props.showPoliceLayer, (visible) => toggleHazardLayer('police-layer', visible));
@@ -368,6 +372,12 @@ onMounted(() => {
     map.addSource('acid-sulfate-data', {
       type: 'vector',
       url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/acid_sulfate_soils.pmtiles'
+    });
+
+    // Add infrastructure PMTiles source
+    map.addSource('infrastructure-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/infrastructure.pmtiles'
     });
 
     // Add lot boundaries PMTiles source
@@ -730,6 +740,82 @@ onMounted(() => {
       }
     }
 
+    // Add Oil Pipelines layer
+    try {
+      map.addLayer({
+        id: 'oil-pipelines-layer',
+        type: 'line',
+        source: 'infrastructure-data',
+        'source-layer': 'Oil_Pipelines',
+        paint: {
+          'line-color': '#8B5C2A',
+          'line-width': 3,
+          'line-opacity': 0.8
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding oil pipelines layer, trying alternatives:', error);
+      const oilPipelineAlternatives = ['oil-pipelines', 'oil_pipelines', 'pipelines', 'default'];
+      for (const layerName of oilPipelineAlternatives) {
+        try {
+          map.addLayer({
+            id: 'oil-pipelines-layer',
+            type: 'line',
+            source: 'infrastructure-data',
+            'source-layer': layerName,
+            paint: {
+              'line-color': '#8B5C2A',
+              'line-width': 3,
+              'line-opacity': 0.8
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed oil pipelines layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
+    // Add Gas Pipelines layer
+    try {
+      map.addLayer({
+        id: 'gas-pipelines-layer',
+        type: 'line',
+        source: 'infrastructure-data',
+        'source-layer': 'Gas_Pipelines',
+        paint: {
+          'line-color': '#EAB308',
+          'line-width': 3,
+          'line-opacity': 0.8
+        },
+        layout: { 'visibility': 'none' }
+      });
+    } catch (error) {
+      console.warn('Error adding gas pipelines layer, trying alternatives:', error);
+      const gasPipelineAlternatives = ['gas-pipelines', 'gas_pipelines', 'pipelines', 'default'];
+      for (const layerName of gasPipelineAlternatives) {
+        try {
+          map.addLayer({
+            id: 'gas-pipelines-layer',
+            type: 'line',
+            source: 'infrastructure-data',
+            'source-layer': layerName,
+            paint: {
+              'line-color': '#EAB308',
+              'line-width': 3,
+              'line-opacity': 0.8
+            },
+            layout: { 'visibility': 'none' }
+          });
+          break;
+        } catch (err) {
+          console.log(`Failed gas pipelines layer with source-layer: ${layerName}`);
+        }
+      }
+    }
+
     // Add lot boundaries layer (automatically visible at high zoom levels)
     try {
       map.addLayer({
@@ -937,7 +1023,9 @@ onMounted(() => {
       { id: 'bushfire-layer', name: 'Bushfire Zone', color: '#FF5722' },
       { id: 'noise-layer', name: 'Noise Corridor', color: '#9C27B0' },
       { id: 'erosion-layer', name: 'Erosion Zone', color: '#FF9800' },
-      { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' }
+      { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' },
+      { id: 'oil-pipelines-layer', name: 'Oil Pipeline', color: '#8B5C2A' },
+      { id: 'gas-pipelines-layer', name: 'Gas Pipeline', color: '#EAB308' }
     ];
 
     // Add hover events for safety layers

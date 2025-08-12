@@ -145,6 +145,8 @@
           :showNoiseLayer="layers.noise"
           :showErosionLayer="layers.erosion"
           :showAcidSulfateLayer="layers.acidSulfate"
+          :showOilPipelinesLayer="layers.oilPipelines"
+          :showGasPipelinesLayer="layers.gasPipelines"
           :hazardData="props.hazardData"
           :isLoadingHazards="props.isLoadingHazards"
           :hazardError="props.hazardError"
@@ -154,6 +156,8 @@
           @update:showNoiseLayer="layers.noise = $event"
           @update:showErosionLayer="layers.erosion = $event"
           @update:showAcidSulfateLayer="layers.acidSulfate = $event"
+          @update:showOilPipelinesLayer="layers.oilPipelines = $event"
+          @update:showGasPipelinesLayer="layers.gasPipelines = $event"
         />
         <SafetyTab 
           :showStreetLightsLayer="layers.streetLights"
