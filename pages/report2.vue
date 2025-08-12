@@ -128,7 +128,24 @@
       <div class="mt-6">
         <InspectionChecklist />
       </div>
-    </main>    <!-- Footer -->
+    </main>
+
+    <!-- PDF Generation Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+      <button 
+        @click="generatePDF" 
+        :disabled="isGeneratingPDF"
+        class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-all transform hover:scale-105"
+      >
+        <svg v-if="!isGeneratingPDF" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>{{ isGeneratingPDF ? 'Generating...' : 'Generate PDF' }}</span>
+      </button>
+    </div>
+
+    <!-- Footer -->
     <footer class="py-4 bg-gray-900 text-center text-gray-400 text-sm">
       © 2025 CliQ Property Insights
     </footer>
@@ -167,6 +184,7 @@ const address = ref(route.query.address || '');
 const propertyImageUrl = ref('');
 const imageError = ref(false);
 const showStreetView360 = ref(false);
+const isGeneratingPDF = ref(false);
 
 // Initialize property data including lot details
 const { property, isLoadingLotDetails, lotDetailsError, isLoadingFloodRisk, floodRiskError, loadFloodRisk } = usePropertyData({
@@ -294,6 +312,65 @@ function getFloodRiskTooltip() {
   });
   
   return tooltip;
+}
+
+async function generatePDF() {
+  try {
+    isGeneratingPDF.value = true
+    console.log('Starting PDF generation...')
+    
+    const { lat, lng } = route.query
+    
+    // Build the API URL with query parameters
+    const apiUrl = new URL('/api/generate-pdf', window.location.origin)
+    apiUrl.searchParams.set('address', address.value)
+    if (lat) apiUrl.searchParams.set('lat', String(lat))
+    if (lng) apiUrl.searchParams.set('lng', String(lng))
+    
+    // Use native fetch to get JSON response with base64 PDF
+    const response = await fetch(apiUrl.toString())
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    // Get the JSON response containing base64 PDF
+    const data = await response.json()
+    console.log('PDF data received, size:', data.size, 'bytes')
+    
+    if (!data.success || !data.pdf) {
+      throw new Error('Invalid PDF response from server')
+    }
+    
+    // Convert base64 back to binary
+    const binaryString = atob(data.pdf)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    
+    // Create blob from binary data
+    const blob = new Blob([bytes], { type: 'application/pdf' })
+    console.log('PDF blob created, size:', blob.size, 'bytes')
+    
+    // Create blob URL and trigger download
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `property-report-${address.value.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    console.log('PDF downloaded successfully!')
+    
+  } catch (error) {
+    console.error('PDF generation failed:', error)
+    alert('Failed to generate PDF. Please try again.')
+  } finally {
+    isGeneratingPDF.value = false
+  }
 }
 
 function initStreetView360() {

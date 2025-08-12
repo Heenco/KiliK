@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Header />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -8,7 +7,7 @@
 </template>
 
 <script setup>
-import Header from '~/components/ui/Header.vue'
+// Layouts will handle headers based on page requirements
 </script>
 
 <style>

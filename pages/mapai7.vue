@@ -64,6 +64,54 @@
           <label for="acidSulfateToggle" class="text-sm">Acid Sulfate Soils</label>
           <div class="w-4 h-4 bg-yellow-500 rounded border"></div>
         </div>
+
+        <!-- Oil Pipelines Layer Toggle -->
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="oilPipelinesToggle" 
+            @change="toggleLayer('oil-pipelines-layer')" 
+            :checked="layerVisibility.oilPipelines" 
+          />
+          <label for="oilPipelinesToggle" class="text-sm">Oil Pipelines</label>
+          <div class="w-4 h-4 bg-gray-700 rounded border"></div>
+        </div>
+
+        <!-- Gas Pipelines Layer Toggle -->
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="gasPipelinesToggle" 
+            @change="toggleLayer('gas-pipelines-layer')" 
+            :checked="layerVisibility.gasPipelines" 
+          />
+          <label for="gasPipelinesToggle" class="text-sm">Gas Pipelines</label>
+          <div class="w-4 h-4 bg-green-600 rounded border"></div>
+        </div>
+
+        <!-- Railway Stations Layer Toggle -->
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="railwayStationsToggle" 
+            @change="toggleLayer('railway-stations-layer')" 
+            :checked="layerVisibility.railwayStations" 
+          />
+          <label for="railwayStationsToggle" class="text-sm">Railway Stations</label>
+          <div class="w-4 h-4 bg-indigo-600 rounded border"></div>
+        </div>
+
+        <!-- Railway Lines Layer Toggle -->
+        <div class="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            id="railwayLinesToggle" 
+            @change="toggleLayer('railway-lines-layer')" 
+            :checked="layerVisibility.railwayLines" 
+          />
+          <label for="railwayLinesToggle" class="text-sm">Railway Lines</label>
+          <div class="w-4 h-4 bg-gray-800 rounded border"></div>
+        </div>
       </div>
 
       <!-- Info Panel -->
@@ -88,7 +136,11 @@ const layerVisibility = ref({
   bushfire: true,
   noise: true,
   erosion: true,
-  acidSulfate: true
+  acidSulfate: true,
+  oilPipelines: true,
+  gasPipelines: true,
+  railwayStations: true,
+  railwayLines: true
 })
 
 // Toggle layer visibility function
@@ -117,6 +169,22 @@ function toggleLayer(layerId) {
     case 'acid-sulfate-layer':
       layerVisibility.value.acidSulfate = !layerVisibility.value.acidSulfate
       visibility = layerVisibility.value.acidSulfate ? 'visible' : 'none'
+      break
+    case 'oil-pipelines-layer':
+      layerVisibility.value.oilPipelines = !layerVisibility.value.oilPipelines
+      visibility = layerVisibility.value.oilPipelines ? 'visible' : 'none'
+      break
+    case 'gas-pipelines-layer':
+      layerVisibility.value.gasPipelines = !layerVisibility.value.gasPipelines
+      visibility = layerVisibility.value.gasPipelines ? 'visible' : 'none'
+      break
+    case 'railway-stations-layer':
+      layerVisibility.value.railwayStations = !layerVisibility.value.railwayStations
+      visibility = layerVisibility.value.railwayStations ? 'visible' : 'none'
+      break
+    case 'railway-lines-layer':
+      layerVisibility.value.railwayLines = !layerVisibility.value.railwayLines
+      visibility = layerVisibility.value.railwayLines ? 'visible' : 'none'
       break
   }
   
@@ -172,8 +240,14 @@ onMounted(() => {
       url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/acid_sulfate_soils.pmtiles'
     })
 
+    // Infrastructure data layer using PMTiles (for all infrastructure layers)
+    map.addSource('infrastructure-data', {
+      type: 'vector',
+      url: 'pmtiles://https://pub-eaadd50980ed450cbdd0394c5f3cdbc8.r2.dev/infrastructure.pmtiles'
+    })
+
     // Debug: Log source info
-    console.log('Flood, Bushfire, Noise, Erosion, and Acid Sulfate Soils sources added, waiting for data...')
+    console.log('Flood, Bushfire, Noise, Erosion, Acid Sulfate Soils, and Infrastructure sources added, waiting for data...')
     
     map.on('data', (e) => {
       if (e.sourceId === 'flood-data' && e.isSourceLoaded) {
@@ -240,6 +314,19 @@ onMounted(() => {
           console.log('Acid sulfate soils feature source layer:', features[0].sourceLayer)
         }
       }
+      
+      if (e.sourceId === 'infrastructure-data' && e.isSourceLoaded) {
+        console.log('Infrastructure source loaded successfully!')
+        
+        // Try to query the source to see what's available
+        const features = map.querySourceFeatures('infrastructure-data')
+        console.log('Available infrastructure features:', features.length)
+        if (features.length > 0) {
+          console.log('Sample infrastructure feature:', features[0])
+          console.log('Infrastructure feature properties:', features[0].properties)
+          console.log('Infrastructure feature source layer:', features[0].sourceLayer)
+        }
+      }
     })
 
     map.addLayer({
@@ -302,9 +389,60 @@ onMounted(() => {
       }
     })
 
+    // Add infrastructure layers
+    map.addLayer({
+      id: 'oil-pipelines-layer',
+      type: 'line',
+      source: 'infrastructure-data',
+      'source-layer': 'Oil_Pipelines',
+      paint: {
+        'line-color': '#374151',
+        'line-width': 3,
+        'line-opacity': 0.8
+      }
+    })
+
+    map.addLayer({
+      id: 'gas-pipelines-layer',
+      type: 'line',
+      source: 'infrastructure-data',
+      'source-layer': 'Gas_Pipelines',
+      paint: {
+        'line-color': '#059669',
+        'line-width': 3,
+        'line-opacity': 0.8
+      }
+    })
+
+    map.addLayer({
+      id: 'railway-stations-layer',
+      type: 'circle',
+      source: 'infrastructure-data',
+      'source-layer': 'Railway_Stations',
+      paint: {
+        'circle-color': '#4F46E5',
+        'circle-radius': 6,
+        'circle-opacity': 0.8,
+        'circle-stroke-color': '#312E81',
+        'circle-stroke-width': 2
+      }
+    })
+
+    map.addLayer({
+      id: 'railway-lines-layer',
+      type: 'line',
+      source: 'infrastructure-data',
+      'source-layer': 'Railway_Lines',
+      paint: {
+        'line-color': '#1F2937',
+        'line-width': 4,
+        'line-opacity': 0.8
+      }
+    })
+
     // Try alternative source layer names if the first one fails
     map.on('error', (e) => {
-      if (e.error && e.error.message && (e.error.message.includes('flood-layer') || e.error.message.includes('bushfire-layer') || e.error.message.includes('noise-layer') || e.error.message.includes('erosion-layer') || e.error.message.includes('acid-sulfate-layer'))) {
+      if (e.error && e.error.message && (e.error.message.includes('flood-layer') || e.error.message.includes('bushfire-layer') || e.error.message.includes('noise-layer') || e.error.message.includes('erosion-layer') || e.error.message.includes('acid-sulfate-layer') || e.error.message.includes('oil-pipelines-layer') || e.error.message.includes('gas-pipelines-layer') || e.error.message.includes('railway-stations-layer') || e.error.message.includes('railway-lines-layer'))) {
         console.log('Layer failed, trying alternative source layer names...')
         
         // Handle flood layer alternatives
@@ -441,16 +579,130 @@ onMounted(() => {
             }
           }
         }
+        
+        // Handle Oil Pipelines layer alternatives
+        if (e.error.message.includes('oil-pipelines-layer') && map.getLayer('oil-pipelines-layer')) {
+          map.removeLayer('oil-pipelines-layer')
+          
+          const alternativeNames = ['default', 'oil-pipelines', 'oil_pipelines', 'pipelines', 'geojsonl']
+          
+          for (const layerName of alternativeNames) {
+            try {
+              map.addLayer({
+                id: 'oil-pipelines-layer',
+                type: 'line',
+                source: 'infrastructure-data',
+                'source-layer': layerName,
+                paint: {
+                  'line-color': '#374151',
+                  'line-width': 3,
+                  'line-opacity': 0.8
+                }
+              })
+              console.log(`Successfully added oil pipelines layer with source-layer: ${layerName}`)
+              break
+            } catch (err) {
+              console.log(`Failed oil pipelines layer with source-layer: ${layerName}`)
+            }
+          }
+        }
+        
+        // Handle Gas Pipelines layer alternatives
+        if (e.error.message.includes('gas-pipelines-layer') && map.getLayer('gas-pipelines-layer')) {
+          map.removeLayer('gas-pipelines-layer')
+          
+          const alternativeNames = ['default', 'gas-pipelines', 'gas_pipelines', 'pipelines', 'geojsonl']
+          
+          for (const layerName of alternativeNames) {
+            try {
+              map.addLayer({
+                id: 'gas-pipelines-layer',
+                type: 'line',
+                source: 'infrastructure-data',
+                'source-layer': layerName,
+                paint: {
+                  'line-color': '#059669',
+                  'line-width': 3,
+                  'line-opacity': 0.8
+                }
+              })
+              console.log(`Successfully added gas pipelines layer with source-layer: ${layerName}`)
+              break
+            } catch (err) {
+              console.log(`Failed gas pipelines layer with source-layer: ${layerName}`)
+            }
+          }
+        }
+        
+        // Handle Railway Stations layer alternatives
+        if (e.error.message.includes('railway-stations-layer') && map.getLayer('railway-stations-layer')) {
+          map.removeLayer('railway-stations-layer')
+          
+          const alternativeNames = ['default', 'railway-stations', 'railway_stations', 'stations', 'geojsonl']
+          
+          for (const layerName of alternativeNames) {
+            try {
+              map.addLayer({
+                id: 'railway-stations-layer',
+                type: 'circle',
+                source: 'infrastructure-data',
+                'source-layer': layerName,
+                paint: {
+                  'circle-color': '#4F46E5',
+                  'circle-radius': 6,
+                  'circle-opacity': 0.8,
+                  'circle-stroke-color': '#312E81',
+                  'circle-stroke-width': 2
+                }
+              })
+              console.log(`Successfully added railway stations layer with source-layer: ${layerName}`)
+              break
+            } catch (err) {
+              console.log(`Failed railway stations layer with source-layer: ${layerName}`)
+            }
+          }
+        }
+        
+        // Handle Railway Lines layer alternatives
+        if (e.error.message.includes('railway-lines-layer') && map.getLayer('railway-lines-layer')) {
+          map.removeLayer('railway-lines-layer')
+          
+          const alternativeNames = ['default', 'railway-lines', 'railway_lines', 'lines', 'geojsonl']
+          
+          for (const layerName of alternativeNames) {
+            try {
+              map.addLayer({
+                id: 'railway-lines-layer',
+                type: 'line',
+                source: 'infrastructure-data',
+                'source-layer': layerName,
+                paint: {
+                  'line-color': '#1F2937',
+                  'line-width': 4,
+                  'line-opacity': 0.8
+                }
+              })
+              console.log(`Successfully added railway lines layer with source-layer: ${layerName}`)
+              break
+            } catch (err) {
+              console.log(`Failed railway lines layer with source-layer: ${layerName}`)
+            }
+          }
+        }
       }
     })
 
-    // Add hover events for flood, bushfire, noise, erosion, and acid sulfate soils layers
+    // Add hover events for flood, bushfire, noise, erosion, acid sulfate soils, and infrastructure layers
     const layers = [
       { id: 'flood-layer', name: 'Flood Zone', color: '#2196F3' },
       { id: 'bushfire-layer', name: 'Bushfire Zone', color: '#FF5722' },
       { id: 'noise-layer', name: 'Noise Corridor', color: '#9C27B0' },
       { id: 'erosion-layer', name: 'Erosion Zone', color: '#FF9800' },
-      { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' }
+      { id: 'acid-sulfate-layer', name: 'Acid Sulfate Soils', color: '#FFC107' },
+      { id: 'oil-pipelines-layer', name: 'Oil Pipeline', color: '#374151' },
+      { id: 'gas-pipelines-layer', name: 'Gas Pipeline', color: '#059669' },
+      { id: 'railway-stations-layer', name: 'Railway Station', color: '#4F46E5' },
+      { id: 'railway-lines-layer', name: 'Railway Line', color: '#1F2937' }
     ]
 
     layers.forEach(layer => {
@@ -533,6 +785,58 @@ onMounted(() => {
               content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`
             }
           })
+        } else if (layer.id === 'oil-pipelines-layer') {
+          if (props.pipeline_type) {
+            content += `<div class="text-xs mb-1"><strong>Type:</strong> ${props.pipeline_type}</div>`
+          }
+          if (props.operator) {
+            content += `<div class="text-xs mb-1"><strong>Operator:</strong> ${props.operator}</div>`
+          }
+          // Show all available properties for oil pipelines layer
+          Object.keys(props).forEach(key => {
+            if (props[key] && key !== 'geometry' && key !== 'pipeline_type' && key !== 'operator') {
+              content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`
+            }
+          })
+        } else if (layer.id === 'gas-pipelines-layer') {
+          if (props.pipeline_type) {
+            content += `<div class="text-xs mb-1"><strong>Type:</strong> ${props.pipeline_type}</div>`
+          }
+          if (props.operator) {
+            content += `<div class="text-xs mb-1"><strong>Operator:</strong> ${props.operator}</div>`
+          }
+          // Show all available properties for gas pipelines layer
+          Object.keys(props).forEach(key => {
+            if (props[key] && key !== 'geometry' && key !== 'pipeline_type' && key !== 'operator') {
+              content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`
+            }
+          })
+        } else if (layer.id === 'railway-stations-layer') {
+          if (props.station_name) {
+            content += `<div class="text-xs mb-1"><strong>Station:</strong> ${props.station_name}</div>`
+          }
+          if (props.station_type) {
+            content += `<div class="text-xs mb-1"><strong>Type:</strong> ${props.station_type}</div>`
+          }
+          // Show all available properties for railway stations layer
+          Object.keys(props).forEach(key => {
+            if (props[key] && key !== 'geometry' && key !== 'station_name' && key !== 'station_type') {
+              content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`
+            }
+          })
+        } else if (layer.id === 'railway-lines-layer') {
+          if (props.line_name) {
+            content += `<div class="text-xs mb-1"><strong>Line:</strong> ${props.line_name}</div>`
+          }
+          if (props.line_type) {
+            content += `<div class="text-xs mb-1"><strong>Type:</strong> ${props.line_type}</div>`
+          }
+          // Show all available properties for railway lines layer
+          Object.keys(props).forEach(key => {
+            if (props[key] && key !== 'geometry' && key !== 'line_name' && key !== 'line_type') {
+              content += `<div class="text-xs mb-1"><strong>${key}:</strong> ${props[key]}</div>`
+            }
+          })
         }
         
         content += '</div>'
@@ -585,5 +889,21 @@ input[type="checkbox"] {
 
 .bg-orange-500 {
   background-color: #FF9800;
+}
+
+.bg-gray-700 {
+  background-color: #374151;
+}
+
+.bg-green-600 {
+  background-color: #059669;
+}
+
+.bg-indigo-600 {
+  background-color: #4F46E5;
+}
+
+.bg-gray-800 {
+  background-color: #1F2937;
 }
 </style>

@@ -11,16 +11,17 @@ export default defineNuxtConfig({
   
   // Add server options for cookies to work properly
   nitro: {
-    devProxy: {
-      '/api': {
-        target: 'http://localhost:3000/api',
-        changeOrigin: true,
-        cookieDomainRewrite: {
-          '*': ''
-        }
-      }
-    }
-}
+    // Remove the circular proxy - Nuxt handles /api routes automatically
+    // devProxy: {
+    //   '/api': {
+    //     target: 'http://localhost:3000/api',
+    //     changeOrigin: true,
+    //     cookieDomainRewrite: {
+    //       '*': ''
+    //     }
+    //   }
+    // }
+  }
   ,
 
   vite: {
@@ -79,7 +80,7 @@ export default defineNuxtConfig({
   redirectOptions: {
     login: '/signin',
     callback: '/confirm',
-    exclude: ['/', '/signin', '/confirm'],
+    exclude: ['/', '/signin', '/confirm', '/PDF_report/pdf'],
   },
 },
 });
