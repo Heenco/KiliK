@@ -27,23 +27,42 @@ export default defineEventHandler(async (event) => {
 
     // Detect if request is from Vercel (by host or header)
     const isVercel = host.includes('vercel.app') || process.env.VERCEL === '1'
+    
+    console.log('Environment detection:', { host, isVercel, reportUrl })
 
     if (isVercel) {
       // Use PDFShift
-      const pdfResponse = await axios.post(
-        'https://api.pdfshift.io/v3/convert/pdf',
-        { source: reportUrl },
-        {
-          responseType: 'arraybuffer',
-          auth: { username: 'sk_df68be4d7abaf209766e41987cf8a1b297bdfe78', password: '' }
+      console.log('Using PDFShift for PDF generation')
+      try {
+        const pdfResponse = await axios.post(
+          'https://api.pdfshift.io/v3/convert/pdf',
+          { source: reportUrl },
+          {
+            responseType: 'arraybuffer',
+            auth: { username: 'sk_df68be4d7abaf209766e41987cf8a1b297bdfe78', password: '' }
+          }
+        )
+        
+        // Check if response is actually a PDF
+        if (pdfResponse.headers['content-type']?.includes('application/pdf')) {
+          const pdfBuffer = Buffer.from(pdfResponse.data)
+          console.log('PDFShift success, PDF size:', pdfBuffer.length)
+          setResponseHeader(event, 'Content-Type', 'application/pdf')
+          setResponseHeader(event, 'Content-Disposition', 'attachment; filename=property-report.pdf')
+          return pdfBuffer
+        } else {
+          // PDFShift returned an error (probably JSON)
+          const errorText = Buffer.from(pdfResponse.data).toString()
+          console.error('PDFShift error response:', errorText)
+          throw new Error(`PDFShift error: ${errorText}`)
         }
-      )
-      const pdfBuffer = Buffer.from(pdfResponse.data)
-      setResponseHeader(event, 'Content-Type', 'application/pdf')
-      setResponseHeader(event, 'Content-Disposition', 'attachment; filename=property-report.pdf')
-      return pdfBuffer
+      } catch (axiosError: any) {
+        console.error('PDFShift request failed:', axiosError.response?.data || axiosError.message)
+        throw new Error(`PDFShift failed: ${axiosError.message}`)
+      }
     } else {
       // Proxy to local Puppeteer function
+      console.log('Using local Puppeteer for PDF generation')
       // (Assumes your local function is available at /api/generate-pdf)
       const localResponse = await axios.get(
         `${baseUrl}/api/generate-pdf`,
@@ -56,7 +75,8 @@ export default defineEventHandler(async (event) => {
       setResponseHeader(event, 'Content-Disposition', 'attachment; filename=property-report.pdf')
       return Buffer.from(localResponse.data)
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.error('PDF generation error:', error)
     throw createError({
       statusCode: 500,
       statusMessage: `PDF generation failed: ${error.message}`
