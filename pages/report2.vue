@@ -322,7 +322,7 @@ async function generatePDF() {
     const { lat, lng } = route.query
     
     // Build the API URL with query parameters
-    const apiUrl = new URL('/api/generate-pdf', window.location.origin)
+    const apiUrl = new URL('/api/generate-pdfshift', window.location.origin)
     apiUrl.searchParams.set('address', address.value)
     if (lat) apiUrl.searchParams.set('lat', String(lat))
     if (lng) apiUrl.searchParams.set('lng', String(lng))
