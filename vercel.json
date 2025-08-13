@@ -1,7 +1,0 @@
-{
-  "functions": {
-    ".output/server/**/*.mjs": {
-      "maxDuration": 30
-    }
-  }
-}
