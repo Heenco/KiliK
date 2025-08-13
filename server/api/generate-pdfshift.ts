@@ -91,23 +91,18 @@ export default defineEventHandler(async (event) => {
     } else {
       // Proxy to local Puppeteer function
       console.log('Using local Puppeteer for PDF generation')
-      // (Assumes your local function is available at /api/generate-pdf)
+      // The local function already returns JSON with base64 PDF
       const localResponse = await axios.get(
         `${baseUrl}/api/generate-pdf`,
         {
-          params: { address, lat, lng },
-          responseType: 'arraybuffer'
+          params: { address, lat, lng }
+          // Note: no responseType needed since it returns JSON
         }
       )
       
-      // Convert to base64 and return JSON format (same as PDFShift above)
-      const pdfBuffer = Buffer.from(localResponse.data)
-      const base64Pdf = pdfBuffer.toString('base64')
-      return {
-        success: true,
-        pdf: base64Pdf,
-        size: pdfBuffer.length
-      }
+      // The local API already returns the correct format
+      console.log('Local Puppeteer response received, size:', localResponse.data.size)
+      return localResponse.data
     }
   } catch (error: any) {
     console.error('PDF generation error:', error)
