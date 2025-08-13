@@ -8,9 +8,18 @@ import axios from 'axios'
 import { defineEventHandler, getQuery, getHeader, setResponseHeader, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
+  console.log('PDF generation endpoint called')
+  console.log('Environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL: process.env.VERCEL,
+    host: getHeader(event, 'host')
+  })
+  
   try {
     const query = getQuery(event)
     const { address, lat, lng } = query
+    
+    console.log('Query parameters:', { address, lat, lng })
 
     if (!address) {
       throw createError({
@@ -91,6 +100,7 @@ export default defineEventHandler(async (event) => {
     }
   } catch (error: any) {
     console.error('PDF generation error:', error)
+    console.error('Error stack:', error.stack)
     throw createError({
       statusCode: 500,
       statusMessage: `PDF generation failed: ${error.message}`
