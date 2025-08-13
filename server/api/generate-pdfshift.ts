@@ -58,9 +58,14 @@ export default defineEventHandler(async (event) => {
         if (pdfResponse.headers['content-type']?.includes('application/pdf')) {
           const pdfBuffer = Buffer.from(pdfResponse.data)
           console.log('PDFShift success, PDF size:', pdfBuffer.length)
-          setResponseHeader(event, 'Content-Type', 'application/pdf')
-          setResponseHeader(event, 'Content-Disposition', 'attachment; filename=property-report.pdf')
-          return pdfBuffer
+          
+          // Convert to base64 to match frontend expectations
+          const base64Pdf = pdfBuffer.toString('base64')
+          return {
+            success: true,
+            pdf: base64Pdf,
+            size: pdfBuffer.length
+          }
         } else {
           // PDFShift returned an error (probably JSON)
           const errorText = Buffer.from(pdfResponse.data).toString()
@@ -94,9 +99,15 @@ export default defineEventHandler(async (event) => {
           responseType: 'arraybuffer'
         }
       )
-      setResponseHeader(event, 'Content-Type', 'application/pdf')
-      setResponseHeader(event, 'Content-Disposition', 'attachment; filename=property-report.pdf')
-      return Buffer.from(localResponse.data)
+      
+      // Convert to base64 and return JSON format (same as PDFShift above)
+      const pdfBuffer = Buffer.from(localResponse.data)
+      const base64Pdf = pdfBuffer.toString('base64')
+      return {
+        success: true,
+        pdf: base64Pdf,
+        size: pdfBuffer.length
+      }
     }
   } catch (error: any) {
     console.error('PDF generation error:', error)
