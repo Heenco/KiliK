@@ -39,7 +39,9 @@ export default defineEventHandler(async (event) => {
           { source: reportUrl },
           {
             responseType: 'arraybuffer',
-            auth: { username: 'sk_df68be4d7abaf209766e41987cf8a1b297bdfe78', password: '' }
+            headers: {
+              'X-API-Key': 'sk_df68be4d7abaf209766e41987cf8a1b297bdfe78'
+            }
           }
         )
         
@@ -57,7 +59,19 @@ export default defineEventHandler(async (event) => {
           throw new Error(`PDFShift error: ${errorText}`)
         }
       } catch (axiosError: any) {
-        console.error('PDFShift request failed:', axiosError.response?.data || axiosError.message)
+        console.error('PDFShift request failed:')
+        console.error('Status:', axiosError.response?.status)
+        console.error('Status Text:', axiosError.response?.statusText)
+        console.error('Headers:', axiosError.response?.headers)
+        console.error('Data:', axiosError.response?.data)
+        console.error('Message:', axiosError.message)
+        
+        // Try to get more details from the response
+        if (axiosError.response?.data) {
+          const errorDetails = Buffer.from(axiosError.response.data).toString()
+          console.error('PDFShift error details:', errorDetails)
+        }
+        
         throw new Error(`PDFShift failed: ${axiosError.message}`)
       }
     } else {
