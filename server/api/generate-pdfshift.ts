@@ -32,7 +32,9 @@ export default defineEventHandler(async (event) => {
     const host = getHeader(event, 'host') || 'localhost:3000'
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
     const baseUrl = `${protocol}://${host}`
-    const reportUrl = `${baseUrl}/PDF_report/pdf?address=${encodeURIComponent(String(address))}&lat=${lat || ''}&lng=${lng || ''}`
+    
+    // Use simple PDF page for PDFShift testing
+    const reportUrl = `${baseUrl}/PDF_report/simple?address=${encodeURIComponent(String(address))}&lat=${lat || ''}&lng=${lng || ''}`
 
     // Detect if request is from Vercel (by host or header)
     const isVercel = host.includes('vercel.app') || process.env.VERCEL === '1'
@@ -47,11 +49,7 @@ export default defineEventHandler(async (event) => {
           'https://api.pdfshift.io/v3/convert/pdf',
           { 
             source: reportUrl,
-            landscape: false,
-            format: 'A4',
-            margin: '20mm',
-            delay: 3000,  // Wait 3 seconds for the page to load
-            viewport: '1200x800'
+            format: 'A4'
           },
           {
             responseType: 'arraybuffer',
