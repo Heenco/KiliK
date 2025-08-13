@@ -45,7 +45,23 @@ export default defineEventHandler(async (event) => {
       try {
         const pdfResponse = await axios.post(
           'https://api.pdfshift.io/v3/convert/pdf',
-          { source: reportUrl },
+          { 
+            source: reportUrl,
+            landscape: false,
+            format: 'A4',
+            margin: {
+              top: '20mm',
+              bottom: '20mm',
+              left: '15mm',
+              right: '15mm'
+            },
+            wait_for: 3000,  // Wait 3 seconds for the page to load
+            wait_for_selector: '.pdf-page',  // Wait for this element to be present
+            viewport: {
+              width: 1200,
+              height: 800
+            }
+          },
           {
             responseType: 'arraybuffer',
             headers: {
