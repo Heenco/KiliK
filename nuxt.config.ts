@@ -80,7 +80,7 @@ export default defineNuxtConfig({
   redirectOptions: {
     login: '/signin',
     callback: '/confirm',
-    exclude: ['/', '/signin', '/confirm', '/PDF_report/pdf'],
+    exclude: ['/', '/signin', '/confirm', '/PDF_report/pdf','/PDF_report/simple'],
   },
 },
 });
