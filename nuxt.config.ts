@@ -11,8 +11,6 @@ export default defineNuxtConfig({
   
   // Add server options for cookies to work properly
   nitro: {
-    // Ensure API routes are properly built for Vercel
-    preset: 'vercel',
     // Remove the circular proxy - Nuxt handles /api routes automatically
     // devProxy: {
     //   '/api': {
