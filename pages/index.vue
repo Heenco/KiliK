@@ -1,6 +1,6 @@
-<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 property-background">
+<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 property-background safe-area-container">
     <div class="property-grid"></div>
-    <div class="container mx-auto px-4 flex-1 flex flex-col">
+    <div class="container mx-auto px-4 flex-1 flex flex-col safe-area-content">
       <!-- Main Content -->
       <main class="flex flex-col justify-center items-center min-h-[60vh] py-6 flex-1"><div class="text-center mb-3">          <span class="text-xs bg-gray-100 px-3 py-1 rounded-full">
             Now available in Brisbane, Australia
@@ -346,5 +346,35 @@ const buttonClass = "hover:bg-orange-500/10 text-gray-200"
 .container {
   position: relative;
   z-index: 1;
+}
+
+/* Safe Area Support for iOS devices */
+.safe-area-container {
+  /* Extend background to cover the entire screen including safe areas */
+  min-height: 100vh;
+  min-height: calc(100vh + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-content {
+  /* Ensure content respects safe areas while background extends fully */
+  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+/* Additional mobile optimization */
+@media screen and (max-width: 768px) {
+  .safe-area-container {
+    /* On mobile, make sure we fill the entire viewport */
+    min-height: 100dvh; /* Dynamic viewport height for better mobile support */
+  }
+  
+  /* Adjust container padding for mobile */
+  .container {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
 }
 </style>
