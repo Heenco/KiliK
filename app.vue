@@ -15,7 +15,7 @@
 html, body {
   margin: 0 !important;
   padding: 0 !important;
-  background: #000000 !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
   min-height: 100vh;
   min-height: calc(100vh + env(safe-area-inset-top));
   overflow-x: hidden;
@@ -24,7 +24,7 @@ html, body {
 #__nuxt, .app-root {
   min-height: 100vh;
   min-height: calc(100vh + env(safe-area-inset-top));
-  background: #000000;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   position: relative;
 }
 

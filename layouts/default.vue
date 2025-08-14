@@ -16,7 +16,7 @@ import Header from '~/components/ui/Header.vue'
 html, body {
   margin: 0 !important;
   padding: 0 !important;
-  background: #000 !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
   min-height: 100vh;
   min-height: calc(100vh + env(safe-area-inset-top));
 }
@@ -24,13 +24,13 @@ html, body {
 #__nuxt {
   min-height: 100vh;
   min-height: calc(100vh + env(safe-area-inset-top));
-  background: #000;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 .layout-container {
   min-height: 100vh;
   min-height: calc(100vh + env(safe-area-inset-top));
-  background: #000;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 .layout-main {
