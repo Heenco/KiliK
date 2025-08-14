@@ -9,7 +9,7 @@
         class="px-3 py-2 text-xs font-medium transition-colors"
         :class="[
           activeTab === tab 
-            ? 'text-blue-400 border-b-2 border-blue-400' 
+            ? 'text-green-400 border-b-2 border-green-400' 
             : 'text-gray-400 hover:text-gray-300'
         ]"
       >
@@ -25,7 +25,7 @@
             {{ place.name || `${formatCategoryName(activeTab)} #${index + 1}` }}
           </div>
           <div class="text-gray-300 flex-shrink-0">
-            <span class="text-blue-400">{{ formatDistance(place.distance) }}</span>
+            <span class="text-green-400">{{ formatDistance(place.distance) }}</span>
           </div>
         </div>
       </div>
@@ -88,11 +88,11 @@ const formatCategoryName = (category) => {
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: rgba(96, 165, 250, 0.4);
+  background: rgba(74, 222, 128, 0.4);
   border-radius: 3px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: rgba(96, 165, 250, 0.6);
+  background: rgba(74, 222, 128, 0.6);
 }
 </style>

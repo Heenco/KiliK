@@ -1,10 +1,10 @@
 <template>  <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-blue hover:-translate-y-2 transition-all">
-    <h2 class="text-xl font-bold text-blue-400 mb-2">Accessibility</h2>
+    <h2 class="text-xl font-bold text-green-400 mb-2">Accessibility</h2>
     <p class="text-gray-300 text-sm mb-4">Assess ease of access to amenities and transportation.</p>
     
     <!-- Loading state -->
     <div v-if="isLoading" class="mt-4 flex items-center justify-center py-2">
-      <div class="h-5 w-5 rounded-full border-2 border-t-transparent border-blue-400 animate-spin"></div>
+      <div class="h-5 w-5 rounded-full border-2 border-t-transparent border-green-400 animate-spin"></div>
       <span class="ml-2 text-gray-300 text-sm">Calculating walkability...</span>
     </div>
     
@@ -39,7 +39,7 @@
             <button 
               v-if="showChartButton" 
               @click="toggleChart" 
-              class="text-blue-400 hover:text-blue-300 text-xs"
+              class="text-green-400 hover:text-green-300 text-xs"
             >
               {{ showChart ? 'Hide Details' : 'Show Details' }}
             </button>
@@ -57,11 +57,11 @@
     <div v-else class="mt-4 space-y-2">
       <div class="flex justify-between items-center">
         <span class="text-gray-300">Public Transit</span>
-        <span class="px-2 py-1 bg-blue-400/20 text-blue-400 rounded text-xs">High</span>
+        <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">High</span>
       </div>
       <div class="flex justify-between items-center">
         <span class="text-gray-300">Schools</span>
-        <span class="px-2 py-1 bg-blue-400/20 text-blue-400 rounded text-xs">High</span>
+        <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">High</span>
       </div>
       <div class="flex justify-between items-center">
         <span class="text-gray-300">Shopping</span>

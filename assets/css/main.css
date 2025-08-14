@@ -46,8 +46,8 @@
 }
 
 :root {
-  --background: #0f172a;
-  --foreground: oklch(0.985 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -120,76 +120,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
-  /* Override Tailwind's body background for safe area support */
-  html {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-    min-height: 100vh !important;
-    min-height: calc(100vh + env(safe-area-inset-top)) !important;
-    width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  
   body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-    min-height: 100vh !important;
-    min-height: calc(100vh + env(safe-area-inset-top)) !important;
-    color: white !important;
-    width: 100% !important;
-    overflow-x: hidden !important;
-  }
-  
-  /* Safe area support for iOS devices */
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden;
-  }
-  
-  /* Support for iOS safe areas */
-  @supports (padding: max(0px)) {
-    html {
-      padding-top: env(safe-area-inset-top) !important;
-      padding-bottom: env(safe-area-inset-bottom) !important;
-      padding-left: env(safe-area-inset-left) !important;
-      padding-right: env(safe-area-inset-right) !important;
-    }
-    
-    body {
-      padding: 0 !important;
-    }
-  }
-}
-
-/* Post-Tailwind overrides - ensure our styles take priority */
-html, body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-  min-height: 100vh !important;
-  min-height: calc(100vh + env(safe-area-inset-top)) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-#__nuxt {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-  min-height: 100vh !important;
-  min-height: calc(100vh + env(safe-area-inset-top)) !important;
-}
-
-/* Mobile specific overrides */
-@media screen and (max-width: 768px) {
-  html, body {
-    min-height: 100dvh !important;
-    min-height: calc(100dvh + env(safe-area-inset-top)) !important;
-  }
-  
-  #__nuxt {
-    min-height: 100dvh !important;
-    min-height: calc(100dvh + env(safe-area-inset-top)) !important;
+    @apply bg-background text-foreground;
   }
 }

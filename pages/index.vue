@@ -1,6 +1,6 @@
-<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 property-background safe-area-container">
+<template>  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 property-background">
     <div class="property-grid"></div>
-    <div class="container mx-auto px-4 flex-1 flex flex-col safe-area-content">
+    <div class="container mx-auto px-4 flex-1 flex flex-col">
       <!-- Main Content -->
       <main class="flex flex-col justify-center items-center min-h-[60vh] py-6 flex-1"><div class="text-center mb-3">          <span class="text-xs bg-gray-100 px-3 py-1 rounded-full">
             Now available in Brisbane, Australia
@@ -68,11 +68,6 @@ import { SearchIcon, MapPinIcon, ChevronRightIcon } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-
-// Disable layout for this page to have full control
-definePageMeta({
-  layout: false
-})
 
 const searchQuery = ref('')
 const suggestions = ref([])
@@ -351,67 +346,5 @@ const buttonClass = "hover:bg-orange-500/10 text-gray-200"
 .container {
   position: relative;
   z-index: 1;
-}
-
-/* Safe Area Support for iOS devices */
-.safe-area-container {
-  /* Extend background to cover the entire screen including safe areas */
-  min-height: 100vh;
-  min-height: calc(100vh + env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-.safe-area-content {
-  /* Ensure content respects safe areas while background extends fully */
-  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-}
-
-/* Override global body styles for this page */
-:deep(body) {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-:deep(html) {
-  margin: 0 !important;
-  padding: 0 !important;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-}
-
-/* Ensure the root div takes full height */
-:deep(#__nuxt) {
-  min-height: 100vh;
-  min-height: calc(100vh + env(safe-area-inset-top));
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-/* Additional mobile optimization */
-@media screen and (max-width: 768px) {
-  .safe-area-container {
-    /* On mobile, make sure we fill the entire viewport */
-    min-height: 100dvh; /* Dynamic viewport height for better mobile support */
-    min-height: calc(100dvh + env(safe-area-inset-top));
-  }
-  
-  /* Adjust container padding for mobile */
-  .container {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-  }
-  
-  /* Ensure body covers everything on mobile */
-  :deep(body) {
-    min-height: 100dvh !important;
-    min-height: calc(100dvh + env(safe-area-inset-top)) !important;
-  }
-  
-  :deep(html) {
-    min-height: 100dvh !important;
-    min-height: calc(100dvh + env(safe-area-inset-top)) !important;
-  }
 }
 </style>
