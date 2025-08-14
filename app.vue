@@ -11,30 +11,39 @@
 </script>
 
 <style>
-/* Global styles for safe area support */
-html, body {
+/* Global styles for safe area support - High specificity overrides */
+html, 
+html body, 
+body {
   margin: 0 !important;
   padding: 0 !important;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-  min-height: 100vh;
-  min-height: calc(100vh + env(safe-area-inset-top));
-  overflow-x: hidden;
+  background-attachment: fixed !important;
+  min-height: 100vh !important;
+  min-height: calc(100vh + env(safe-area-inset-top)) !important;
+  overflow-x: hidden !important;
+  width: 100% !important;
 }
 
-#__nuxt, .app-root {
-  min-height: 100vh;
-  min-height: calc(100vh + env(safe-area-inset-top));
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  position: relative;
+/* Target Nuxt root elements specifically */
+#__nuxt, 
+#__nuxt > div,
+.app-root {
+  min-height: 100vh !important;
+  min-height: calc(100vh + env(safe-area-inset-top)) !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  background-attachment: fixed !important;
+  position: relative !important;
+  width: 100% !important;
 }
 
 /* iOS safe area support */
 @supports (padding: max(0px)) {
   html {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: env(safe-area-inset-left) !important;
+    padding-right: env(safe-area-inset-right) !important;
   }
   
   body {
@@ -45,14 +54,18 @@ html, body {
 
 /* Ensure viewport covers full screen on mobile */
 @media screen and (max-width: 768px) {
-  html, body {
+  html, 
+  html body, 
+  body {
     min-height: 100dvh !important;
     min-height: calc(100dvh + env(safe-area-inset-top)) !important;
   }
   
-  #__nuxt, .app-root {
-    min-height: 100dvh;
-    min-height: calc(100dvh + env(safe-area-inset-top));
+  #__nuxt, 
+  #__nuxt > div,
+  .app-root {
+    min-height: 100dvh !important;
+    min-height: calc(100dvh + env(safe-area-inset-top)) !important;
   }
 }
 </style>
