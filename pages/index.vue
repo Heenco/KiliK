@@ -5,10 +5,8 @@
       <main class="flex flex-col justify-center items-center min-h-[60vh] py-6 flex-1"><div class="text-center mb-3">          <span class="text-xs bg-gray-100 px-3 py-1 rounded-full">
             Now available in Brisbane, Australia
           </span>        </div>        <h2 class="text-center text-4xl font-bold mb-2">
-          One Kili<span class="text-green-400">K</span> property profile
-        </h2><p class="text-center text-gray-600 mb-3 max-w-xl mx-auto text-sm">
-          Search for properties in your ideal neighborhood, assess safety, and evaluate proximity to amenities.
-        </p>
+          Find Your Dream Home with <span class="text-green-400">Confidence</span>
+        </h2>
 
         <!-- Search Bar -->
         <div class="max-w-2xl w-full flex justify-center items-center mt-2">
@@ -34,33 +32,25 @@
           </div>
         </div>
         
-        <!-- Example Addresses 
+        <!-- Sample Address -->
         <div class="max-w-2xl mx-auto mt-12">
-          <p class="text-sm text-gray-600 mb-4">
-           Not sure where to start? Try one of these random addresses to see how the search works:
+          <p class="text-sm text-gray-400 mb-3 text-center">
+           Not sure where to start? Try this sample address:
           </p>
           
-          <div class="space-y-4">
-            <div v-for="(address, index) in addresses" :key="index" 
-                 class="flex items-center justify-between p-4 bg-white rounded-lg border hover:shadow-md transition-shadow">
-              <div class="flex items-center gap-3">
-                <MapPinIcon class="h-5 w-5 text-gray-400" />
-                <div>
-                  <h3 class="font-medium">{{ address.street }}</h3>
-                  <p class="text-sm text-gray-500">{{ address.location }}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <Badge v-if="address.isNew" variant="secondary">New</Badge>
-                <ChevronRightIcon class="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
+          <div class="flex justify-center">
+            <button 
+              @click="searchSampleAddress"
+              class="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600 rounded-lg text-gray-200 text-sm transition-colors duration-200 hover:text-white"
+            >
+              6 Land Street, Toowong QLD
+            </button>
           </div>
         </div>
-        -->
       </main>      <div class="w-full flex justify-center items-center mb-2">
         <nav class="flex gap-6">
           <a href="#" class="text-gray-400 hover:text-white transition text-xs">Blog</a>
+          <NuxtLink to="/products" class="text-gray-400 hover:text-white transition text-xs">Pricing</NuxtLink>
           <NuxtLink to="/index2" class="text-gray-400 hover:text-white transition text-xs">Alternative Home</NuxtLink>
         </nav>
       </div>
@@ -129,6 +119,42 @@ const selectAddress = (suggestion) => {
       lng: lng
     }
   });
+}
+
+const searchSampleAddress = async () => {
+  const sampleAddress = '6 Land Street, Toowong QLD, Australia';
+  searchQuery.value = sampleAddress;
+  
+  try {
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(sampleAddress)}.json?` + 
+      new URLSearchParams({
+        access_token: 'pk.eyJ1Ijoia2hlcmFkbWFuZGkiLCJhIjoiY2l4aXF5Ym5lMDAwbzJ6cHA0cWw4OWRkNyJ9.pbe17ldY9KRsNZQRwfkRFA',
+        country: 'au',
+        types: 'address',
+        limit: 1
+      })
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    if (data.features && data.features.length > 0) {
+      const [lng, lat] = data.features[0].center;
+      router.push({
+        path: '/report2',
+        query: {
+          address: data.features[0].place_name,
+          lat: lat,
+          lng: lng
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error)
+  }
 }
 
 const goToReport = () => {

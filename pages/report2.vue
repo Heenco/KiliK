@@ -169,6 +169,7 @@ import Header from '@/components/ui/Header.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { usePropertyData } from '~/composables/usePropertyData';
+import { useWalkabilityState } from '~/composables/useWalkabilityState';
 import InspectionChecklist from './inspection-checklist.vue';
 import HazardCard from '@/components/HazardCard.vue';
 import AccessibilityCard from '@/components/AccessibilityCard.vue';
@@ -321,11 +322,31 @@ async function generatePDF() {
     
     const { lat, lng } = route.query
     
+    // Get walkability data from cache if available
+    const { getWalkabilityData } = useWalkabilityState()
+    const latNum = parseFloat(lat)
+    const lngNum = parseFloat(lng)
+    let walkabilityParams = ''
+    
+    if (!isNaN(latNum) && !isNaN(lngNum)) {
+      const cachedWalkability = getWalkabilityData(latNum, lngNum)
+      if (cachedWalkability) {
+        console.log('📤 Passing walkability data to PDF:', cachedWalkability)
+        walkabilityParams = `&walkabilityScore=${cachedWalkability.score}&walkabilityRadarData=${encodeURIComponent(JSON.stringify(cachedWalkability.radarData))}&walkabilityTotalPOIs=${cachedWalkability.totalPOIs}`
+      }
+    }
+    
     // Build the API URL with query parameters
     const apiUrl = new URL('/api/generate-pdfshift', window.location.origin)
     apiUrl.searchParams.set('address', address.value)
     if (lat) apiUrl.searchParams.set('lat', String(lat))
     if (lng) apiUrl.searchParams.set('lng', String(lng))
+    
+    // Add walkability data to the PDF URL that will be generated
+    if (walkabilityParams) {
+      const pdfUrl = `${window.location.origin}/PDF_report/pdf?address=${encodeURIComponent(address.value)}&lat=${lat}&lng=${lng}${walkabilityParams}`
+      apiUrl.searchParams.set('url', pdfUrl)
+    }
     
     // Use native fetch to get JSON response with base64 PDF
     const response = await fetch(apiUrl.toString())

@@ -75,12 +75,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWalkabilityScore } from '~/composables/useWalkabilityScore';
+import { useWalkabilityState } from '~/composables/useWalkabilityState';
 import * as turf from '@turf/turf';
 import DistanceMatrixTabs from './DistanceMatrixTabs.vue';
 
 // Get the route to access lat/lng
 const route = useRoute();
 const { getWalkabilityScore } = useWalkabilityScore();
+const { hasDataForCoordinates, getWalkabilityData, setWalkabilityData, setLoading, setError } = useWalkabilityState();
 
 // State variables
 const isLoading = ref(false);
@@ -134,15 +136,35 @@ const calculateWalkability = async () => {
     
     coordinates.value = isochroneCoords;
     
+    // Check if we already have cached data for these coordinates
+    const lat = parseFloat(route.query.lat);
+    const lng = parseFloat(route.query.lng);
+    
+    if (hasDataForCoordinates(lat, lng)) {
+      const cachedData = getWalkabilityData(lat, lng);
+      if (cachedData) {
+        walkabilityData.value = cachedData;
+        console.log('✅ AccessibilityCard: Using cached walkability data:', cachedData);
+        showChartButton.value = cachedData.radarData.length >= 3;
+        return;
+      }
+    }
+    
+    console.log('🔄 AccessibilityCard: Calculating new walkability data for:', lat, lng);
+    
     // Get walkability data
     const result = await getWalkabilityScore(isochroneCoords);
     walkabilityData.value = result;
+    
+    // Cache the result for future use
+    setWalkabilityData(lat, lng, result);
     
     // Show chart button if we have enough data points
     showChartButton.value = result.radarData.length >= 3;
   } catch (err) {
     console.error("Error calculating walkability:", err);
     error.value = "Error calculating walkability score";
+    setError("Error calculating walkability score");
   } finally {
     isLoading.value = false;
   }

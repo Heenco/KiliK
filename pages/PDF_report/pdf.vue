@@ -1,785 +1,543 @@
 <template>
-  <div class="pdf-page">
-    <!-- Property Title Section -->
-    <div class="property-header">
-      <div class="title-section">
-        <h1 class="report-title">Property Fact Pack</h1>
-        <div class="property-info">
-          <h2 class="property-address">{{ address.split(',')[0] || 'Property Address' }}</h2>
-          <p class="property-location">{{ address.split(',').slice(1).join(',') || 'Location details' }}</p>
+  <div class="simple-pdf-page">
+    <h1>Simple Property Report</h1>
+    <div class="property-info">
+      <h2>{{ address }}</h2>
+      <p><strong>Date:</strong> {{ new Date().toLocaleDateString() }}</p>
+      <p><strong>Coordinates:</strong> {{ lat }}, {{ lng }}</p>
+    </div>
+    
+    <div class="section">
+      <h3>Property Details</h3>
+      <div v-if="property.lotDetails" class="property-details">
+        <p><strong>Lot Plan:</strong> {{ property.lotDetails.lotplan }}</p>
+        <p><strong>Suburb:</strong> {{ property.lotDetails.suburb }}</p>
+        <p><strong>Local Government Area:</strong> {{ property.lotDetails.shire_name }}</p>
+        <p v-if="property.lotDetails.lot_area"><strong>Land Area:</strong> {{ property.lotDetails.lot_area }} m²</p>
+        <p><strong>Property Type:</strong> {{ property.lotDetails.tenure || 'Residential' }}</p>
+      </div>
+      <div v-else-if="isLoadingLotDetails">
+        <p>Loading property details...</p>
+      </div>
+      <div v-else>
+        <p>Property details not available</p>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h3>Property Overview</h3>
+      <p>This is a simple test report for {{ address }}.</p>
+      <ul>
+        <li>Location verified</li>
+        <li>Basic assessment complete</li>
+        <li>Ready for detailed analysis</li>
+      </ul>
+    </div>
+    
+    <div class="section">
+      <h3>Hazard Assessment</h3>
+      <div class="hazard-grid">
+        <div class="hazard-item">
+          <strong>Flood Risk:</strong> 
+          <span v-if="property.floodRisk && property.floodRisk.length > 0">
+            {{ property.floodRisk[0].flood_risk || 'Unknown' }} 
+            ({{ property.floodRisk[0].flood_type || 'Type unknown' }})
+          </span>
+          <span v-else>No flood risk detected</span>
         </div>
-        <div class="brand-mark">CliQ</div>
+        
+        <div class="hazard-item">
+          <strong>Bushfire Risk:</strong>
+          <span v-if="property.bushfireRisk && property.bushfireRisk.length > 0">
+            {{ property.bushfireRisk[0].description || 'Unknown' }}
+          </span>
+          <span v-else>No bushfire risk detected</span>
+        </div>
+        
+        <div class="hazard-item">
+          <strong>Noise Risk:</strong>
+          <span v-if="property.noiseRisk && property.noiseRisk.length > 0">
+            {{ property.noiseRisk[0].description || 'Unknown' }}
+          </span>
+          <span v-else>No noise risk detected</span>
+        </div>
+        
+        <div class="hazard-item">
+          <strong>Coastal Erosion Risk:</strong>
+          <span v-if="property.coastalErosionRisk && property.coastalErosionRisk.length > 0">
+            {{ property.coastalErosionRisk[0].ovl2_desc || 'Unknown' }}
+          </span>
+          <span v-else>No coastal erosion risk detected</span>
+        </div>
+        
+        <div class="hazard-item">
+          <strong>Acid Sulfate Risk:</strong>
+          <span v-if="property.acidSulfateRisk && property.acidSulfateRisk.length > 0">
+            {{ property.acidSulfateRisk[0].acid_sulph || 'Unknown' }}
+          </span>
+          <span v-else>No acid sulfate risk detected</span>
+        </div>
       </div>
     </div>
-
-    <!-- Map Background Section -->
-    <div class="map-background">
-      <div class="map-overlay"></div>
-    </div>
-
-    <!-- Key Indicators Bar -->
-    <div class="indicators-bar">
-      <div class="indicator-item">
-        <div class="indicator-icon">🏠</div>
-        <span class="indicator-label">Easements</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">💧</div>
-        <span class="indicator-label">Flooding</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">🌊</div>
-        <span class="indicator-label">Overland Flow Flooding</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">📚</div>
-        <span class="indicator-label">Flood History</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">🛡️</div>
-        <span class="indicator-label">Flood Coastal</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">📋</div>
-        <span class="indicator-label">Flood Planning</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">🏘️</div>
-        <span class="indicator-label">Character</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">🖼️</div>
-        <span class="indicator-label">Historic Imagery</span>
-      </div>
-      <div class="indicator-item">
-        <div class="indicator-icon">🌿</div>
-        <span class="indicator-label">Vegetation</span>
-      </div>
-    </div>
-
-    <!-- At a Glance Section -->
-    <div class="at-glance-section">
-      <h3 class="section-title">At a glance</h3>
-      <p class="section-description">
-        This report provides important property information and identifies the common considerations when buying property, building or renovating.
-      </p>
-      
-      <div class="glance-grid">
-        <div class="glance-column">
-          <!-- Risk Categories -->
-          <div class="risk-categories">
-            <div class="risk-item status-no-issues">
-              <div class="risk-icon">🏠</div>
-              <span class="risk-label">Easements</span>
-              <div class="status-badge status-clear">
-                <span class="status-icon">✓</span>
-                <span class="status-text">NO CONSIDERATIONS IDENTIFIED</span>
-              </div>
+    
+    <div class="section">
+      <h3>Accessibility Assessment</h3>
+      <div v-if="walkabilityData.score > 0" class="accessibility-content">
+        <div class="walkability-score">
+          <div class="score-display">
+            <div class="score-circle" :class="getScoreColorClass(walkabilityData.score)">
+              <span class="score-number">{{ walkabilityData.score }}</span>
             </div>
-
-            <div class="risk-item status-considerations">
-              <div class="risk-icon">💧</div>
-              <span class="risk-label">Flooding</span>
-              <div class="status-badge status-warning">
-                <span class="status-icon">!</span>
-                <span class="status-text">CONSIDERATIONS IDENTIFIED</span>
-              </div>
-            </div>
-
-            <div class="risk-item status-considerations">
-              <div class="risk-icon">🏘️</div>
-              <span class="risk-label">Character</span>
-              <div class="status-badge status-warning">
-                <span class="status-icon">!</span>
-                <span class="status-text">CONSIDERATIONS IDENTIFIED</span>
-              </div>
-            </div>
-
-            <div class="risk-item status-considerations">
-              <div class="risk-icon">🌿</div>
-              <span class="risk-label">Vegetation</span>
-              <div class="status-badge status-warning">
-                <span class="status-icon">!</span>
-                <span class="status-text">CONSIDERATIONS IDENTIFIED</span>
-              </div>
-            </div>
-
-            <div class="risk-item status-no-issues">
-              <div class="risk-icon">🌍</div>
-              <span class="risk-label">Environment</span>
-              <div class="status-badge status-clear">
-                <span class="status-icon">✓</span>
-                <span class="status-text">NO CONSIDERATIONS IDENTIFIED</span>
-              </div>
-            </div>
-
-            <div class="risk-item status-no-issues">
-              <div class="risk-icon">🔥</div>
-              <span class="risk-label">Bushfire</span>
-              <div class="status-badge status-clear">
-                <span class="status-icon">✓</span>
-                <span class="status-text">NO CONSIDERATIONS IDENTIFIED</span>
-              </div>
-            </div>
-
-            <div class="risk-item status-considerations">
-              <div class="risk-icon">🔊</div>
-              <span class="risk-label">Noise</span>
-              <div class="status-badge status-warning">
-                <span class="status-icon">!</span>
-                <span class="status-text">CONSIDERATIONS IDENTIFIED</span>
-              </div>
+            <div class="score-description">
+              <strong>Walkability Score</strong>
+              <p class="score-text">{{ getScoreDescription(walkabilityData.score) }}</p>
             </div>
           </div>
         </div>
-
-        <div class="glance-column">
-          <!-- Property Details -->
-          <div class="property-details">
-            <div class="detail-group">
-              <h4 class="detail-title">DATE OF REPORT</h4>
-              <p class="detail-value">{{ new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) }}</p>
-            </div>
-
-            <div class="detail-group">
-              <h4 class="detail-title">ADDRESS</h4>
-              <p class="detail-value">{{ address.split(',')[0]?.toUpperCase() || '26 LANDSDOWNE STREET' }}</p>
-            </div>
-
-            <div class="detail-group" v-if="property.lotDetails">
-              <h4 class="detail-title">LOT/PLAN</h4>
-              <p class="detail-value">{{ property.lotDetails.lotplan || '6/RP125588' }}</p>
-            </div>
-
-            <div class="detail-group" v-if="property.lotDetails">
-              <h4 class="detail-title">COUNCIL</h4>
-              <p class="detail-value">{{ property.lotDetails.shire_name || 'Brisbane' }}</p>
-            </div>
-
-            <div class="detail-group">
-              <h4 class="detail-title">ZONING</h4>
-              <p class="detail-value">- Character Residential</p>
-              <p class="detail-value small">(Infill Housing)</p>
-            </div>
-
-            <div class="detail-group">
-              <h4 class="detail-title">UTILITIES</h4>
-              <ul class="utility-list">
-                <li>• Power</li>
-                <li>• Sewer</li>
-                <li>• Water</li>
-              </ul>
-            </div>
-
-            <div class="detail-group">
-              <h4 class="detail-title">SCHOOL CATCHMENTS</h4>
-              <ul class="school-list">
-                <li>• Coorparoo SS</li>
-                <li>• Coorparoo Secondary College</li>
-              </ul>
-            </div>
-
-            <div class="detail-group">
-              <h4 class="detail-title">CLOSEST CITY</h4>
-              <p class="detail-value">Brisbane - 3km</p>
-            </div>
+        
+        <div class="accessibility-grid">
+          <div v-for="item in walkabilityData.radarData" :key="item.name" class="accessibility-item">
+            <strong>{{ item.name }}:</strong>
+            <span :class="getAccessibilityRatingClass(item.value)">
+              {{ getAccessibilityRatingText(item.value) }} ({{ item.value }}/20)
+            </span>
           </div>
         </div>
+        
+        <div class="accessibility-summary">
+          <p><strong>Total Points of Interest:</strong> {{ walkabilityData.totalPOIs }}</p>
+          <p><strong>Assessment Area:</strong> 2 mile (3.2km) radius from property</p>
+        </div>
+      </div>
+      <div v-else class="accessibility-loading">
+        <p>Calculating accessibility score...</p>
       </div>
     </div>
-
-    <!-- Detailed Analysis Cards -->
-    <div class="analysis-section">
-      <h3 class="section-title">Detailed Analysis</h3>
-      
-      <div class="cards-grid">
-        <!-- Hazard Card -->
-        <div class="pdf-card">
-          <HazardCard />
-        </div>
-
-        <!-- Accessibility Card -->
-        <div class="pdf-card">
-          <AccessibilityCard />
-        </div>
-
-        <!-- Safety Card -->
-        <div class="pdf-card">
-          <SafetyCard />
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="pdf-footer">
-      <div class="footer-left">
-        <p class="footer-title">PROPERTY DUE DILIGENCE REPORT</p>
-        <p class="footer-address">| {{ address.split(',')[0]?.toUpperCase() || '26 LANDSDOWNE STREET' }}</p>
-      </div>
-      <div class="footer-right">
-        <span class="footer-brand">CliQ</span>
-      </div>
+    
+    <div class="footer">
+      <p>Generated by CliQ Property Analysis</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
 import { usePropertyData } from '~/composables/usePropertyData'
-import HazardCard from '@/components/HazardCard.vue'
-import AccessibilityCard from '@/components/AccessibilityCard.vue'
-import SafetyCard from '~/components/SafetyCard.vue'
-
-// Use PDF layout to exclude header
-definePageMeta({
-  layout: 'pdf'
-})
+import { useWalkabilityScore } from '~/composables/useWalkabilityScore'
+import { useWalkabilityState } from '~/composables/useWalkabilityState'
+import { watch, ref, onMounted } from 'vue'
+import * as turf from '@turf/turf'
 
 const route = useRoute()
-const address = ref(route.query.address || 'Sample Property Address, Brisbane QLD 4000')
+const address = route.query.address || 'Unknown Address'
+const lat = route.query.lat || 'N/A'
+const lng = route.query.lng || 'N/A'
+
+// Check for walkability data passed via URL parameters first
+const walkabilityScore = route.query.walkabilityScore ? parseInt(route.query.walkabilityScore) : 0
+const walkabilityRadarData = route.query.walkabilityRadarData ? JSON.parse(decodeURIComponent(route.query.walkabilityRadarData)) : []
+const walkabilityTotalPOIs = route.query.walkabilityTotalPOIs ? parseInt(route.query.walkabilityTotalPOIs) : 0
+
+console.log('📥 PDF received walkability params:', { walkabilityScore, walkabilityRadarData, walkabilityTotalPOIs })
 
 // Initialize property data
-const { property } = usePropertyData({
+const { property, isLoadingLotDetails } = usePropertyData({
   address: '',
   lotDetails: null,
 })
 
-// Set page title for PDF
+// Use shared walkability state
+const { hasDataForCoordinates, getWalkabilityData, setWalkabilityData, setLoading, setError } = useWalkabilityState()
+const { getWalkabilityScore } = useWalkabilityScore()
+
+// Initialize walkability data - use URL params first, then cache, then calculate
+const walkabilityData = ref({
+  score: walkabilityScore,
+  radarData: walkabilityRadarData,
+  pieData: [],
+  totalPOIs: walkabilityTotalPOIs,
+  categories: {}
+})
+
+// Generate walkability area and get score only if not already provided via URL params
+const calculateWalkability = async () => {
+  // If we already have walkability data from URL parameters, don't recalculate
+  if (walkabilityScore > 0 && walkabilityRadarData.length > 0) {
+    console.log('✅ PDF: Using walkability data from URL parameters')
+    return
+  }
+  
+  const latNum = parseFloat(lat)
+  const lngNum = parseFloat(lng)
+  
+  if (isNaN(latNum) || isNaN(lngNum)) {
+    console.log('Invalid coordinates for walkability calculation')
+    return
+  }
+  
+  // Check if we already have data for these coordinates in cache
+  if (hasDataForCoordinates(latNum, lngNum)) {
+    const cachedData = getWalkabilityData(latNum, lngNum)
+    if (cachedData) {
+      walkabilityData.value = cachedData
+      console.log('✅ PDF: Using cached walkability data:', cachedData)
+      return
+    }
+  }
+  
+  console.log('🔄 PDF: Calculating new walkability data for coordinates:', latNum, lngNum)
+  setLoading(true)
+  
+  try {
+    // Create a circle with radius of 3.218km (2 miles) - same as AccessibilityCard
+    const center = [lngNum, latNum]
+    const radiusInKm = 3.218 // 2 miles in km - must match AccessibilityCard
+    const options = { steps: 24, units: 'kilometers' }
+    const circle = turf.circle(center, radiusInKm, options)
+    const isochroneCoords = circle.geometry.coordinates
+    
+    // Get walkability data
+    const result = await getWalkabilityScore(isochroneCoords)
+    walkabilityData.value = result
+    
+    // Cache the result for future use
+    setWalkabilityData(latNum, lngNum, result)
+    
+    // Console log the accessibility/walkability data
+    console.log('Walkability Score:', result.score)
+    console.log('Walkability Radar Data:', result.radarData)
+    console.log('Walkability Categories:', result.categories)
+    console.log('Total POIs found:', result.totalPOIs)
+    
+  } catch (error) {
+    console.error('Error calculating walkability:', error)
+    setError('Error calculating walkability')
+  } finally {
+    setLoading(false)
+  }
+}
+
+// Console log property.floodRisk when it changes
+watch(() => property.value.floodRisk, (newValue) => {
+  console.log('property.floodRisk:', newValue)
+}, { immediate: true })
+
+// You can also log the entire property object
+watch(() => property.value, (newValue) => {
+  console.log('Full property object:', newValue)
+}, { immediate: true, deep: true })
+
+// Calculate walkability when component mounts and signal PDF ready after 3 seconds
+onMounted(() => {
+  if (lat !== 'N/A' && lng !== 'N/A') {
+    // Start calculations immediately
+    calculateWalkability()
+  }
+  
+  // Signal PDF is ready after 3 seconds regardless of calculation status
+  setTimeout(() => {
+    console.log('🎯 PDF: Page ready for PDF generation after 3 seconds')
+    // Set a data attribute on body to signal PDFShift the page is ready
+    document.body.setAttribute('data-pdf-ready', 'true')
+    // Dispatch a custom event that PDFShift can listen for
+    window.dispatchEvent(new CustomEvent('pdfReady', { detail: { ready: true } }))
+  }, 3000)
+})
+
+// Helper functions for accessibility display
+const getScoreDescription = (score) => {
+  if (score >= 108) return "Walker's Paradise" // 90% of 120
+  if (score >= 84) return "Very Walkable" // 70% of 120
+  if (score >= 60) return "Somewhat Walkable" // 50% of 120
+  if (score >= 30) return "Car-Dependent" // 25% of 120
+  return "Very Car-Dependent"
+}
+
+const getScoreColorClass = (score) => {
+  if (score >= 96) return 'score-excellent' // 80% of 120
+  if (score >= 72) return 'score-good' // 60% of 120
+  if (score >= 48) return 'score-fair' // 40% of 120
+  if (score >= 30) return 'score-poor' // 25% of 120
+  return 'score-very-poor'
+}
+
+const getAccessibilityRatingText = (value) => {
+  if (value >= 16) return 'Excellent'
+  if (value >= 12) return 'Good'
+  if (value >= 8) return 'Fair'
+  if (value >= 4) return 'Poor'
+  return 'Very Poor'
+}
+
+const getAccessibilityRatingClass = (value) => {
+  if (value >= 16) return 'rating-excellent'
+  if (value >= 12) return 'rating-good'
+  if (value >= 8) return 'rating-fair'
+  if (value >= 4) return 'rating-poor'
+  return 'rating-very-poor'
+}
+
+// Set page title
 useHead({
-  title: `Property Report - ${address.value}`,
+  title: `Property Report - ${address}`,
   meta: [
-    { name: 'description', content: `Property report for ${address.value}` }
+    { name: 'description', content: `Property report for ${address}` }
   ]
 })
 </script>
 
 <style scoped>
-.pdf-page {
-  font-family: 'Arial', sans-serif;
-  color: #000;
-  background: #fff;
+.simple-pdf-page {
   max-width: 210mm;
   margin: 0 auto;
-  line-height: 1.4;
-  position: relative;
+  padding: 20mm;
+  font-family: Arial, sans-serif;
+  background: white;
+  color: black;
+  line-height: 1.6;
 }
 
-/* PDF Page */
-.pdf-page {
-  font-family: 'Arial', sans-serif;
-  color: #000;
-  background: #fff;
-  max-width: 210mm;
-  margin: 0 auto;
-  line-height: 1.4;
-  position: relative;
-}
-
-/* Property Header */
-.property-header {
-  background: #fff;
-  padding: 10mm 20mm 8mm 20mm;
-  position: relative;
-}
-
-.title-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8mm;
-}
-
-.report-title {
-  font-size: 24px;
-  font-weight: bold;
+h1 {
   color: #1a365d;
-  margin: 0;
-  line-height: 1.2;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+h2 {
+  color: #2d3748;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: #4a5568;
+  font-size: 18px;
+  margin-bottom: 10px;
+  margin-top: 20px;
 }
 
 .property-info {
-  flex: 1;
-  margin: 0 15mm;
-}
-
-.property-address {
-  font-size: 20px;
-  font-weight: bold;
-  color: #000;
-  margin: 0 0 3px 0;
-  line-height: 1.2;
-}
-
-.property-location {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-}
-
-.brand-mark {
-  font-size: 28px;
-  font-weight: bold;
-  color: #1a365d;
-  letter-spacing: -1px;
-}
-
-/* Map Background */
-.map-background {
-  height: 25mm;
-  background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%);
-  position: relative;
-  margin: 0 20mm;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
-}
-
-.map-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10,10 Q50,5 90,10 Q95,50 90,90 Q50,95 10,90 Q5,50 10,10" fill="none" stroke="%23059669" stroke-width="0.5" opacity="0.3"/><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="none" stroke="%233b82f6" stroke-width="0.3" opacity="0.4"/></svg>') center/cover;
-}
-
-/* Indicators Bar */
-.indicators-bar {
-  background: #1a365d;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 6px 20mm;
-  margin: 0 20mm;
-  border-radius: 0 0 20px 20px;
-}
-
-.indicator-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #fff;
-  font-size: 9px;
-  text-align: center;
-  min-width: 45px;
-}
-
-.indicator-icon {
-  font-size: 14px;
-  margin-bottom: 3px;
-  filter: brightness(0) invert(1);
-}
-
-.indicator-label {
-  font-weight: 500;
-  line-height: 1.1;
-}
-
-/* At a Glance Section */
-.at-glance-section {
-  background: #f0f9ff;
-  margin: 10mm 20mm;
-  padding: 12mm;
+  background: #f7fafc;
+  padding: 15px;
   border-radius: 8px;
-  position: relative;
-  page-break-inside: avoid;
+  margin-bottom: 20px;
 }
 
-.section-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #1a365d;
-  margin: 0 0 8px 0;
+.section {
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.section-description {
-  font-size: 13px;
-  color: #374151;
-  margin: 0 0 15mm 0;
-  line-height: 1.4;
-}
-
-.glance-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20mm;
-}
-
-/* Risk Categories */
-.risk-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.risk-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-}
-
-.risk-icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
-}
-
-.risk-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  min-width: 75px;
-}
-
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 15px;
-  font-size: 9px;
-  font-weight: bold;
-  flex: 1;
-  justify-content: center;
-}
-
-.status-clear {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-warning {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.status-icon {
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.status-text {
-  font-size: 8px;
-  letter-spacing: 0.3px;
-}
-
-/* Property Details */
-.property-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.detail-group {
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 6px;
-}
-
-.detail-group:last-child {
+.section:last-of-type {
   border-bottom: none;
 }
 
-.detail-title {
-  font-size: 10px;
-  font-weight: bold;
-  color: #6b7280;
-  margin: 0 0 3px 0;
-  letter-spacing: 0.3px;
+ul {
+  margin: 10px 0;
+  padding-left: 20px;
 }
 
-.detail-value {
-  font-size: 12px;
-  color: #000;
-  margin: 0;
-  font-weight: 500;
+li {
+  margin: 5px 0;
 }
 
-.detail-value.small {
-  font-size: 10px;
-  color: #6b7280;
-  margin-top: 1px;
+.footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #1a365d;
+  text-align: center;
+  color: #718096;
+  font-size: 14px;
 }
 
-.utility-list,
-.school-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.utility-list li,
-.school-list li {
-  font-size: 12px;
-  color: #000;
-  margin: 1px 0;
-  font-weight: 500;
-}
-
-/* Analysis Section */
-.analysis-section {
-  margin: 10mm 20mm;
-  page-break-before: auto;
-}
-
-.cards-grid {
+.hazard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8mm;
-  margin-top: 8mm;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 15px 0;
 }
 
-.pdf-card {
-  page-break-inside: avoid;
-  break-inside: avoid;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  overflow: hidden;
-  min-height: 120mm;
+.hazard-item {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-left: 4px solid #3182ce;
+  border-radius: 4px;
 }
 
-/* Override card styles for PDF */
-.pdf-card :deep(.bg-gray-800),
-.pdf-card :deep(.bg-gray-900) {
-  background: #fff !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 15px !important;
-  box-shadow: none !important;
+.hazard-item strong {
+  color: #2d3748;
+  margin-right: 8px;
 }
 
-.pdf-card :deep(.text-white) {
-  color: #000 !important;
+.property-details p {
+  margin: 8px 0;
+  padding: 5px 0;
 }
 
-.pdf-card :deep(.text-gray-300) {
-  color: #374151 !important;
+.accessibility-content {
+  margin: 15px 0;
 }
 
-.pdf-card :deep(.text-gray-400) {
-  color: #6b7280 !important;
+.walkability-score {
+  margin-bottom: 20px;
 }
 
-.pdf-card :deep(.text-gray-100) {
-  color: #111827 !important;
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
-.pdf-card :deep(.text-gray-600) {
-  color: #4b5563 !important;
+.score-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 3px solid;
 }
 
-.pdf-card :deep(.bg-gray-600\/50) {
-  background: #f3f4f6 !important;
-  color: #374151 !important;
+.score-number {
+  font-size: 20px;
+  font-weight: bold;
 }
 
-.pdf-card :deep(.text-blue-400) {
-  color: #1d4ed8 !important;
+.score-description {
+  flex: 1;
 }
 
-.pdf-card :deep(.text-green-400) {
-  color: #047857 !important;
+.score-text {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #666;
 }
 
-.pdf-card :deep(.text-yellow-400) {
-  color: #d97706 !important;
+.score-excellent {
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #16a34a;
 }
 
-.pdf-card :deep(.text-red-400) {
-  color: #dc2626 !important;
+.score-good {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
-.pdf-card :deep(.text-orange-300) {
-  color: #ea580c !important;
+.score-fair {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #d97706;
 }
 
-.pdf-card :deep(.text-orange-400) {
-  color: #ea580c !important;
+.score-poor {
+  background: #fed7d7;
+  border-color: #dc2626;
+  color: #dc2626;
 }
 
-.pdf-card :deep(.text-orange-500) {
-  color: #f97316 !important;
+.score-very-poor {
+  background: #fee2e2;
+  border-color: #991b1b;
+  color: #991b1b;
 }
 
-.pdf-card :deep(.text-red-500) {
-  color: #ef4444 !important;
+.accessibility-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 15px 0;
 }
 
-.pdf-card :deep(.bg-blue-400\/20) {
-  background: #dbeafe !important;
-  color: #1d4ed8 !important;
-}
-
-.pdf-card :deep(.bg-green-400\/20) {
-  background: #d1fae5 !important;
-  color: #047857 !important;
-}
-
-.pdf-card :deep(.bg-yellow-400\/20) {
-  background: #fef3c7 !important;
-  color: #d97706 !important;
-}
-
-.pdf-card :deep(.bg-red-400\/20) {
-  background: #fee2e2 !important;
-  color: #dc2626 !important;
-}
-
-.pdf-card :deep(.bg-orange-300\/20) {
-  background: #fed7aa !important;
-  color: #ea580c !important;
-}
-
-.pdf-card :deep(.bg-orange-400\/20) {
-  background: #fed7aa !important;
-  color: #ea580c !important;
-}
-
-.pdf-card :deep(.bg-orange-500\/20) {
-  background: #fed7aa !important;
-  color: #f97316 !important;
-}
-
-.pdf-card :deep(.bg-red-500\/20) {
-  background: #fecaca !important;
-  color: #ef4444 !important;
-}
-
-/* Hide interactive elements */
-.pdf-card :deep(button),
-.pdf-card :deep(.cursor-pointer) {
-  display: none !important;
-}
-
-.pdf-card :deep(.hover\\:shadow-blue) {
-  box-shadow: none !important;
-}
-
-.pdf-card :deep(.transition-all) {
-  transition: none !important;
-}
-
-/* Footer */
-.pdf-footer {
-  background: #1a365d;
-  color: #fff;
-  padding: 6px 20mm;
-  margin: 15mm 20mm 0 20mm;
+.accessibility-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-left: 4px solid #6366f1;
+  border-radius: 4px;
 }
 
-.footer-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.accessibility-item strong {
+  color: #2d3748;
+  margin-right: 8px;
 }
 
-.footer-title {
-  font-weight: bold;
-  margin: 0;
+.rating-excellent {
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
-.footer-address {
-  margin: 0;
-  font-weight: normal;
+.rating-good {
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
-.footer-right {
-  display: flex;
-  align-items: center;
+.rating-fair {
+  color: #d97706;
+  background: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
-.footer-brand {
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: -0.5px;
+.rating-poor {
+  color: #dc2626;
+  background: #fed7d7;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.rating-very-poor {
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.accessibility-summary {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.accessibility-summary p {
+  margin: 5px 0;
+}
+
+.accessibility-loading {
+  text-align: center;
+  color: #666;
+  font-style: italic;
 }
 
 /* Print styles */
 @media print {
-  /* Suppress browser headers and footers */
-  @page {
-    margin: 8mm;
-    size: A4;
-  }
-  
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: auto !important;
-  }
-  
-  .pdf-page {
+  .simple-pdf-page {
     margin: 0;
-    padding: 0;
-    max-width: none;
+    padding: 15mm;
   }
   
-  .property-header {
-    padding: 8mm 15mm 6mm 15mm;
-  }
-  
-  .at-glance-section {
-    margin: 8mm 15mm;
-    padding: 10mm;
-    page-break-inside: avoid;
-  }
-  
-  .analysis-section {
-    margin: 8mm 15mm;
-    page-break-before: auto;
-  }
-  
-  .cards-grid {
-    page-break-inside: avoid;
-    grid-template-columns: 1fr;
-    gap: 6mm;
-  }
-  
-  .pdf-card {
-    page-break-inside: avoid;
+  .hazard-item, .accessibility-item {
     break-inside: avoid;
-    margin-bottom: 6mm;
-    min-height: auto;
   }
   
-  .map-background {
-    margin: 0 15mm;
-    height: 20mm;
-  }
-  
-  .indicators-bar {
-    margin: 0 15mm;
-    padding: 4px 15mm;
-  }
-  
-  .pdf-footer {
-    margin: 10mm 15mm 0 15mm;
-    page-break-inside: avoid;
-  }
-}
-
-/* Force white background for PDF and suppress print headers */
-* {
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-}
-
-/* Additional print optimization */
-@media print {
-  /* Hide any potential browser UI elements */
-  header, nav, .header, .navigation {
-    display: none !important;
-  }
-  
-  /* Ensure clean page breaks */
-  .pdf-page {
-    page-break-before: auto;
-    page-break-after: auto;
+  .score-display {
+    break-inside: avoid;
   }
 }
 </style>
