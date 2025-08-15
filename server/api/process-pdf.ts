@@ -39,7 +39,7 @@ const callRenderService = async (fileName: string, userId: string, supabase: any
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      pdf_url: urlData.signedUrl,
+      file: urlData.signedUrl,  // Changed from pdf_url to file
       fileName: fileName
     })
   })
