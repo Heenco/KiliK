@@ -46,30 +46,66 @@ def process_pdf(file_path):
         text_content = []
         for page_num, page in enumerate(doc):
             text_content.append(page.get_text())
-        result["text"] = "\n".join(text_content)
+        
+        full_text = "\n".join(text_content)
+        # Limit text to 2MB to prevent huge outputs
+        max_text_length = 2 * 1024 * 1024  # 2MB
+        if len(full_text) > max_text_length:
+            result["text"] = full_text[:max_text_length] + "\n\n[Text truncated - PDF contains more content...]"
+        else:
+            result["text"] = full_text
         
         # Remove duplicate images by hashing image bytes
         import hashlib
         seen_hashes = set()
+        image_count = 0
+        max_images = 50  # Limit to 50 images to allow more content
+        
         for page_num, page in enumerate(doc):
+            if image_count >= max_images:
+                break
+                
             image_list = page.get_images(full=True)
             for img_index, img in enumerate(image_list):
+                if image_count >= max_images:
+                    break
+                    
                 try:
                     xref = img[0]
                     base_image = doc.extract_image(xref)
                     image_bytes = base_image["image"]
+                    
                     # Hash the image bytes to detect duplicates
                     img_hash = hashlib.sha256(image_bytes).hexdigest()
                     if img_hash in seen_hashes:
                         continue  # skip duplicate
                     seen_hashes.add(img_hash)
+                    
                     image = Image.open(BytesIO(image_bytes))
                     if image.width < 100 or image.height < 100:
                         continue
+                    
+                    # Resize large images to reduce output size
+                    max_dimension = 800
+                    if image.width > max_dimension or image.height > max_dimension:
+                        ratio = min(max_dimension / image.width, max_dimension / image.height)
+                        new_size = (int(image.width * ratio), int(image.height * ratio))
+                        image = image.resize(new_size, Image.Resampling.LANCZOS)
+                    
                     buffered = BytesIO()
-                    image.convert("RGB").save(buffered, format="JPEG", quality=70)
-                    img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                    # Use lower quality for smaller file sizes
+                    quality = 50 if image.width > 400 else 70
+                    image.convert("RGB").save(buffered, format="JPEG", quality=quality)
+                    
+                    # Check if the base64 string would be too large
+                    img_data = buffered.getvalue()
+                    if len(img_data) > 2 * 1024 * 1024:  # Skip images larger than 2MB
+                        continue
+                        
+                    img_base64 = base64.b64encode(img_data).decode('utf-8')
                     result["images"].append(f"data:image/jpeg;base64,{img_base64}")
+                    image_count += 1
+                    
                 except Exception as e:
                     continue
         return result

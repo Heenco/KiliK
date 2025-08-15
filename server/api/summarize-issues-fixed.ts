@@ -24,8 +24,15 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
       return { issues: [], error: 'No text provided' };
     }
 
+    // Prepare the text to send (limit to 8000 characters)
+    const textToSend = text.substring(0, 8000);
+    console.log('Text being sent to OpenAI (length:', textToSend.length, 'characters):');
+    console.log('--- START TEXT ---');
+    console.log(textToSend);
+    console.log('--- END TEXT ---');
+
     // Get OpenAI API key from environment variables
-    const OPENAI_API_KEY = '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';
+    const OPENAI_API_KEY = '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';
     
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key is missing');
@@ -49,13 +56,24 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
           {
             role: 'user',
             content: `Extract all major and minor issues from the following inspection report text. 
-            Format the results as a JSON array of objects with the following structure:
-            { "issues": [{ "issue": "Issue title", "severity": "Major", "description": "Detailed description" }, ...] }
             
-            Only include actual issues, not general comments. Your response MUST be a valid JSON object.
+            You MUST respond with ONLY a valid JSON object in this exact format:
+            {
+              "issues": [
+                {
+                  "issue": "Issue title",
+                  "severity": "Major",
+                  "description": "Detailed description"
+                }
+              ]
+            }
             
-            Report text:
-            ${text.substring(0, 15000)}` // Limit text length to avoid token limits
+            Do not include any markdown formatting, explanations, or text outside the JSON.
+            Only include actual issues, not general comments.
+            Severity must be exactly "Major" or "Minor".
+            
+            Report text (truncated to fit token limits):
+            ${textToSend}` // Use the prepared text variable
           }
         ],
         temperature: 0.3,
@@ -90,12 +108,44 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
         throw new Error('Empty response from OpenAI API');
       }
       
+      // First, let's try to clean up the response if it has markdown formatting
+      let cleanContent = content.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
       let parsedContent;
       try {
-        parsedContent = JSON.parse(content);
+        parsedContent = JSON.parse(cleanContent);
       } catch (e) {
+        console.log('Direct JSON parse failed, trying extractValidJSON...');
+        console.log('Clean content:', cleanContent);
         // Fallback to robust extraction if direct parse fails
-        parsedContent = extractValidJSON(content);
+        try {
+          parsedContent = extractValidJSON(cleanContent);
+        } catch (extractError) {
+          console.error('extractValidJSON also failed:', extractError);
+          // If all else fails, try to extract issues manually
+          const issuePattern = /"issue":\s*"([^"]+)"[^}]*"severity":\s*"(Major|Minor)"[^}]*"description":\s*"([^"]+)"/g;
+          const manualIssues = [];
+          let match;
+          while ((match = issuePattern.exec(cleanContent)) !== null) {
+            manualIssues.push({
+              issue: match[1],
+              severity: match[2],
+              description: match[3]
+            });
+          }
+          if (manualIssues.length > 0) {
+            parsedContent = { issues: manualIssues };
+          } else {
+            throw new Error(`Could not parse response. Content: ${cleanContent.substring(0, 200)}...`);
+          }
+        }
       }
       // Support both array and object responses
       if (Array.isArray(parsedContent)) {
@@ -121,9 +171,9 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
       );
       
       console.log('Filtered issues count:', issues.length);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error parsing OpenAI response:', e);
-      return { issues: [], error: 'Failed to parse AI response: ' + e.message };
+      return { issues: [], error: 'Failed to parse AI response: ' + (e?.message || 'Unknown parsing error') };
     }
 
     return { issues };

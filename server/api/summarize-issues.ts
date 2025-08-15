@@ -22,7 +22,7 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
     if (!text) {
       return { issues: [], error: 'No text provided' };
     }    // Get OpenAI API key from environment variables
-    const OPENAI_API_KEY = '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';
+    const OPENAI_API_KEY = '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';
     
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key is missing');
