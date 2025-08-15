@@ -19,40 +19,53 @@ const callRenderService = async (fileName: string, userId: string, supabase: any
   const config = useRuntimeConfig()
   const renderUrl = config.pythonServiceUrl
   
-  // Get signed URL for the PDF file
+  console.log('Render URL:', renderUrl)
+  
+  // Download the PDF file from Supabase storage
   const filePath = `${userId}/${fileName}`
-  const { data: urlData, error: urlError } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from('inspection-reports')
-    .createSignedUrl(filePath, 60 * 60) // 1 hour expiry
+    .download(filePath)
 
-  if (urlError) {
+  if (error) {
+    console.error('Download error:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: `Error creating signed URL: ${urlError.message}`
+      statusMessage: `Error downloading file: ${error.message}`
     })
   }
 
-  // Call Render service with the signed URL
+  console.log('PDF downloaded successfully from Supabase')
+
+  // Convert Blob to Buffer for upload
+  const buffer = Buffer.from(await data.arrayBuffer())
+  
+  // Create FormData for file upload
+  const formData = new FormData()
+  const blob = new Blob([buffer], { type: 'application/pdf' })
+  formData.append('file', blob, fileName)
+  
+  console.log('Uploading PDF to Render service...')
+  
   const response = await fetch(`${renderUrl}/process-pdf`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      file: urlData.signedUrl,  // Changed from pdf_url to file
-      fileName: fileName
-    })
+    body: formData  // Send as multipart/form-data, not JSON
   })
+
+  console.log('Render service response status:', response.status)
 
   if (!response.ok) {
     const errorText = await response.text()
+    console.error('Render service error response:', errorText)
     throw createError({
       statusCode: response.status,
       statusMessage: `Render service error: ${errorText}`
     })
   }
 
-  return await response.json()
+  const result = await response.json()
+  console.log('Render service success response keys:', Object.keys(result))
+  return result
 }
 
 export default defineEventHandler(async (event) => {
