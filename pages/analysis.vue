@@ -13,25 +13,64 @@
           </CardHeader>
           <CardContent>
             <form @submit.prevent="uploadPdf">
-              <div class="mb-4">
-                <Label for="pdfFile" class="text-gray-300">Choose PDF file</Label>
-                <Input 
+              <!-- Drag and Drop Area -->
+              <div 
+                class="drag-drop-area"
+                :class="{ 'drag-over': isDragOver, 'has-file': selectedFile }"
+                @drop="handleDrop"
+                @dragover="handleDragOver"
+                @dragenter="handleDragEnter"
+                @dragleave="handleDragLeave"
+                @click="triggerFileInput"
+              >
+                <input 
                   ref="fileInput"
                   id="pdfFile" 
                   type="file" 
                   accept=".pdf" 
-                  class="mt-1 bg-gray-800/50 border-gray-700 text-gray-200" 
+                  class="hidden" 
                   @change="handleFileChange" 
                 />
+                
+                <div class="drag-drop-content">
+                  <div v-if="!selectedFile && !isUploading" class="text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-200 mb-2">Upload PDF Report</h3>
+                    <p class="text-gray-400 mb-4">Drag and drop your PDF file here, or click to browse</p>
+                    <p class="text-sm text-gray-500 mb-4">Supports PDF files up to 10MB</p>
+                    <button type="button" class="btn-auth-outline btn-sm">
+                      Browse Files
+                    </button>
+                  </div>
+                  
+                  <div v-else-if="isUploading" class="text-center">
+                    <svg class="mx-auto h-12 w-12 text-blue-400 mb-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-200 mb-2">Uploading...</h3>
+                    <p class="text-gray-400">{{ selectedFile?.name || 'Processing your PDF file' }}</p>
+                  </div>
+                  
+                  <div v-else class="text-center">
+                    <svg class="mx-auto h-12 w-12 text-green-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-200 mb-2">Upload Complete</h3>
+                    <p class="text-gray-300 font-medium">File uploaded successfully!</p>
+                    <p class="text-sm text-gray-500 mb-4">Ready for another upload</p>
+                    <button 
+                      type="button" 
+                      @click.stop="resetUploadArea" 
+                      class="btn-auth-outline btn-sm"
+                    >
+                      Upload Another File
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div v-if="selectedFile" class="mb-4">
-                <p class="text-sm text-gray-300">Selected file: {{ selectedFile.name }}</p>
-                <p class="text-sm text-gray-500">Size: {{ formatFileSize(selectedFile.size) }}</p>
-              </div>
-              <Button type="submit" :disabled="isUploading || !selectedFile" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-green-500/50">
-                <span v-if="isUploading">Uploading...</span>
-                <span v-else>Upload Report</span>
-              </Button>
             </form>
           </CardContent>
         </Card>
@@ -51,15 +90,15 @@
                 <p class="text-sm text-gray-500">{{ formatDate(file.created_at) }}</p>
               </div>
               <div class="flex gap-2">
-                <Button variant="outline" size="sm" @click="viewPdf(file.name)" class="border-gray-600 hover:border-green-500/50 text-gray-300">
+                <button @click="viewPdf(file.name)" class="btn-auth-outline btn-sm">
                   View
-                </Button>
-                <Button variant="outline" size="sm" @click="processPdf(file.name)" class="border-gray-600 hover:border-blue-500/50 text-blue-400">
+                </button>
+                <button @click="processPdf(file.name)" class="btn-auth-outline btn-sm text-blue-400 border-blue-700/50 hover:border-blue-500/50">
                   Process
-                </Button>
-                <Button variant="outline" size="sm" @click="deletePdf(file.name)" class="border-gray-600 hover:border-red-500/50 text-red-400">
+                </button>
+                <button @click="deletePdf(file.name)" class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50">
                   Delete
-                </Button>
+                </button>
               </div>
             </li>
           </ul>
@@ -71,9 +110,9 @@
             <CardHeader>
               <div class="flex justify-between items-center">
                 <CardTitle class="text-gray-100">PDF Analysis Results</CardTitle>
-                <Button variant="ghost" size="sm" @click="clearResults" class="text-gray-400 hover:text-gray-200">
+                <button @click="clearResults" class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50">
                   Clear Results
-                </Button>
+                </button>
               </div>
             </CardHeader>
             <CardContent>
@@ -105,36 +144,30 @@
                       <div class="flex justify-between items-center w-full">
                         <span>Extracted Text</span>
                         <div class="flex gap-2 mr-4" @click.stop>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <button 
                             @click="summarizeText" 
                             :disabled="isSummarizing || isAnalyzingOpenAI || isAnalyzingGensim || !extractedText"
-                            class="border-gray-600 hover:border-purple-500/50 text-purple-400"
+                            class="btn-auth-outline btn-sm text-purple-400 border-purple-700/50 hover:border-purple-500/50"
                           >
                             <span v-if="isSummarizing">Analyzing...</span>
                             <span v-else>Analyze (Python)</span>
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          </button>
+                          <button 
                             @click="analyzeWithOpenAI" 
                             :disabled="isSummarizing || isAnalyzingOpenAI || isAnalyzingGensim || !extractedText"
-                            class="border-gray-600 hover:border-blue-500/50 text-blue-400"
+                            class="btn-auth-outline btn-sm text-blue-400 border-blue-700/50 hover:border-blue-500/50"
                           >
                             <span v-if="isAnalyzingOpenAI">Analyzing...</span>
                             <span v-else>Analyze (OpenAI)</span>
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          </button>
+                          <button 
                             @click="analyzeWithGensim" 
                             :disabled="isSummarizing || isAnalyzingOpenAI || isAnalyzingGensim || !extractedText"
-                            class="border-gray-600 hover:border-green-500/50 text-green-400"
+                            class="btn-auth-outline btn-sm text-green-400 border-green-700/50 hover:border-green-500/50"
                           >
                             <span v-if="isAnalyzingGensim">Analyzing...</span>
                             <span v-else>Analyze (Gensim)</span>
-                          </Button>
+                          </button>
                         </div>
                       </div>
                     </AccordionTrigger>
@@ -151,15 +184,13 @@
               <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary" class="mb-6">
                 <div class="flex justify-between items-center mb-3">
                   <h4 class="font-medium text-gray-300">Analysis Results</h4>
-                  <Button 
+                  <button 
                     v-if="summarizedIssues.length > 0 || summarizeStatus || openAIStatus || gensimStatus || gensimSummary"
-                    variant="outline" 
-                    size="sm" 
                     @click="clearAnalysisResults"
-                    class="border-gray-600 hover:border-red-500/50 text-red-400"
+                    class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50"
                   >
                     Clear Results
-                  </Button>
+                  </button>
                 </div>
                 
                 <!-- Analysis Status Messages -->
@@ -313,16 +344,80 @@ const openAIStatus = ref('');
 const isAnalyzingGensim = ref(false);
 const gensimStatus = ref('');
 const gensimSummary = ref('');
+const isDragOver = ref(false);
 
-const handleFileChange = (event) => {
+const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (file && file.type === 'application/pdf') {
     selectedFile.value = file;
     uploadMessage.value = '';
+    // Automatically upload the selected file
+    await uploadPdf();
   } else {
     selectedFile.value = null;
     uploadMessage.value = 'Please select a valid PDF file';
     uploadSuccess.value = false;
+  }
+};
+
+// Drag and drop handlers
+const handleDrop = async (event) => {
+  event.preventDefault();
+  isDragOver.value = false;
+  
+  const files = event.dataTransfer.files;
+  if (files.length > 0) {
+    const file = files[0];
+    if (file.type === 'application/pdf') {
+      selectedFile.value = file;
+      uploadMessage.value = '';
+      // Automatically upload the dropped file
+      await uploadPdf();
+    } else {
+      uploadMessage.value = 'Please drop a valid PDF file';
+      uploadSuccess.value = false;
+    }
+  }
+};
+
+const handleDragOver = (event) => {
+  event.preventDefault();
+  isDragOver.value = true;
+};
+
+const handleDragEnter = (event) => {
+  event.preventDefault();
+  isDragOver.value = true;
+};
+
+const handleDragLeave = (event) => {
+  event.preventDefault();
+  // Only set to false if we're leaving the drop area completely
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    isDragOver.value = false;
+  }
+};
+
+const triggerFileInput = () => {
+  if (fileInput.value) {
+    fileInput.value.click();
+  }
+};
+
+const clearFile = () => {
+  selectedFile.value = null;
+  uploadMessage.value = '';
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+};
+
+const resetUploadArea = () => {
+  selectedFile.value = null;
+  uploadMessage.value = '';
+  uploadSuccess.value = false;
+  if (fileInput.value) {
+    fileInput.value.value = '';
   }
 };
 
@@ -390,16 +485,23 @@ const uploadPdf = async () => {
     uploadMessage.value = 'PDF uploaded successfully!';
     fetchUserFiles();
     
-    // Reset file input
+    // Clear file input but keep selectedFile for UI feedback
     if (fileInput.value) {
       fileInput.value.value = '';
     }
-    selectedFile.value = null;
+    
+    // Auto-reset after 3 seconds
+    setTimeout(() => {
+      if (uploadSuccess.value) {
+        resetUploadArea();
+      }
+    }, 3000);
     
   } catch (error) {
     console.error('Upload error:', error);
     uploadSuccess.value = false;
     uploadMessage.value = error.message || 'An error occurred during upload';
+    selectedFile.value = null;
   } finally {
     isUploading.value = false;
   }
@@ -743,6 +845,136 @@ onUnmounted(() => {
 .backdrop-blur {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* Button styles matching sign-in page */
+.btn-auth {
+  background: #22c55e;
+  color: #000;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-auth:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
+}
+
+.btn-auth:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-auth-outline {
+  background: rgba(31, 41, 55, 0.5);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-auth-outline:hover:not(:disabled) {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid #4ade80;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-auth-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Color variants for outline buttons */
+.btn-auth-outline.text-blue-400:hover:not(:disabled) {
+  border-color: #3b82f6;
+}
+
+.btn-auth-outline.text-red-400:hover:not(:disabled) {
+  border-color: #ef4444;
+}
+
+.btn-auth-outline.text-purple-400:hover:not(:disabled) {
+  border-color: #a855f7;
+}
+
+.btn-auth-outline.text-green-400:hover:not(:disabled) {
+  border-color: #22c55e;
+}
+
+/* Drag and Drop Area Styles */
+.drag-drop-area {
+  border: 2px dashed #374151;
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  background: rgba(31, 41, 55, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drag-drop-area:hover {
+  border-color: #4ade80;
+  background: rgba(31, 41, 55, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.drag-drop-area.drag-over {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.drag-drop-area.has-file {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.drag-drop-content {
+  width: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Spinning animation for upload indicator */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 /* Add some subtle animation for hover effects */
