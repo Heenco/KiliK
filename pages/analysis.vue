@@ -19,147 +19,29 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- Left Sidebar - Upload & Reports List -->
-          <div class="lg:col-span-1">
-            <!-- Upload Area -->
-            <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-4">
-              <CardHeader>
-                <CardTitle class="text-gray-100 text-base">Upload Report</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <!-- Drag and Drop Area -->
-                <div 
-                  class="drag-drop-area-compact"
-                  :class="{ 'drag-over': isDragOver }"
-                  @drop="handleDrop"
-                  @dragover="handleDragOver"
-                  @dragenter="handleDragEnter"
-                  @dragleave="handleDragLeave"
-                  @click="triggerFileInput"
-                >
-                  <input 
-                    ref="fileInput"
-                    id="pdfFile" 
-                    type="file" 
-                    accept=".pdf" 
-                    class="hidden" 
-                    @change="handleFileChange" 
-                  />
-                  
-                  <div v-if="!isUploading" class="text-center">
-                    <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <p class="text-sm text-gray-300 mb-1">Drop PDF or click to browse</p>
-                    <p class="text-xs text-gray-500">Max 10MB</p>
-                  </div>
-                  
-                  <div v-else class="text-center">
-                    <svg class="mx-auto h-8 w-8 text-blue-400 mb-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="text-sm text-gray-300">Uploading...</p>
-                  </div>
-                </div>
-                
-                <div v-if="uploadMessage" class="mt-3">
-                  <div :class="['p-2 rounded text-sm', uploadSuccess ? 'bg-green-900/30 border border-green-700 text-green-400' : 'bg-red-900/30 border border-red-700 text-red-400']">
-                    {{ uploadMessage }}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <!-- Reports List -->
-            <Card v-if="uploadedFiles.length > 0" class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl">
-              <CardHeader>
-                <CardTitle class="text-gray-100 text-base">Your Reports</CardTitle>
-              </CardHeader>
-              <CardContent class="p-0">
-                <div class="max-h-80 overflow-y-auto">
-                  <div 
-                    v-for="file in uploadedFiles" 
-                    :key="file.id" 
-                    class="p-4 border-b border-gray-700/50 last:border-b-0 hover:bg-gray-800/30 transition-colors cursor-pointer"
-                    :class="{ 'bg-gray-800/50': selectedReportId === file.id }"
-                    @click="selectReport(file.id)"
-                  >
-                    <div class="flex items-center justify-between">
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-200 truncate">{{ file.name }}</p>
-                        <p class="text-xs text-gray-500">{{ formatDate(file.created_at) }}</p>
-                      </div>
-                      <div class="flex items-center gap-1 ml-2">
-                        <button 
-                          @click.stop="deletePdf(file.name)"
-                          class="p-1 text-gray-500 hover:text-red-400 transition-colors"
-                          title="Delete"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <FileManager 
+            :selectedReportId="selectedReportId"
+            @report-selected="handleReportSelected"
+            @file-deleted="handleFileDeleted"
+            @file-uploaded="handleFileUploaded"
+          />
 
           <!-- Main Content Area -->
           <div class="lg:col-span-2">
             <!-- Empty State -->
-            <div v-if="!selectedReportId" class="text-center py-20">
-              <svg class="mx-auto h-24 w-24 text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <h3 class="text-lg font-medium text-gray-300 mb-2">No Report Selected</h3>
-              <p class="text-sm text-gray-500 mb-6">Upload a PDF report or select one from your list to begin analysis</p>
-              <button @click="triggerFileInput" class="btn-auth">
-                Upload Your First Report
-              </button>
-            </div>
+            <EmptyState 
+              v-if="!selectedReportId"
+              @upload-click="triggerFileUpload"
+            />
 
             <!-- Report Analysis Interface -->
             <div v-else-if="selectedReport">
               <!-- Report Header -->
-              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-4">
-                <CardContent class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <h2 class="text-lg text-gray-100">{{ selectedReport.name }}</h2>
-                      <p class="text-xs text-gray-400">Uploaded {{ formatDate(selectedReport.created_at) }}</p>
-                    </div>
-                    <div class="flex gap-2">
-                      <button 
-                        @click="viewPdf(selectedReport.name)" 
-                        class="p-2 text-gray-400 hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-800/50"
-                        title="View PDF"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                      </button>
-                      <button 
-                        @click="processPdf(selectedReport.name)" 
-                        :disabled="isProcessing"
-                        class="p-2 text-gray-400 hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        :title="isProcessing ? 'Processing...' : 'Process Report'"
-                      >
-                        <svg v-if="!isProcessing" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <ReportHeader 
+                :selectedReport="selectedReport"
+                @pdf-processed="handlePdfProcessed"
+                @pdf-view-requested="handlePdfViewRequested"
+              />
 
               <!-- Tabs Interface -->
               <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl">
@@ -170,7 +52,7 @@
                       <button
                         v-for="tab in tabs"
                         :key="tab.id"
-                        @click="activeTab = tab.id"
+                        @click="setActiveTab(tab.id)"
                         :class="[
                           'relative whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center justify-center',
                           activeTab === tab.id
@@ -215,7 +97,7 @@
                         <h3 class="text-base font-medium text-gray-300 mb-2">Report Not Processed</h3>
                         <p class="text-sm text-gray-500 mb-6">Click "Process Report" to extract text and images from this PDF</p>
                         <button 
-                          @click="processPdf(selectedReport.name)" 
+                          @click="handleProcessPdf(selectedReport.name)" 
                           :disabled="isProcessing"
                           class="btn-auth"
                         >
@@ -251,7 +133,7 @@
                           <h4 class="font-medium text-gray-300 mb-3 text-sm">Quick Analysis</h4>
                           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <button 
-                              @click="summarizeText" 
+                              @click="handleSummarizeText" 
                               :disabled="isSummarizing || !extractedText"
                               class="btn-auth-outline p-4 text-left"
                             >
@@ -269,7 +151,7 @@
                             </button>
 
                             <button 
-                              @click="analyzeWithOpenAI" 
+                              @click="handleAnalyzeWithOpenAI" 
                               :disabled="isAnalyzingOpenAI || !extractedText"
                               class="btn-auth-outline p-4 text-left"
                             >
@@ -287,7 +169,7 @@
                             </button>
 
                             <button 
-                              @click="analyzeWithGensim" 
+                              @click="handleAnalyzeWithGensim" 
                               :disabled="isAnalyzingGensim || !extractedText"
                               class="btn-auth-outline p-4 text-left"
                             >
@@ -311,7 +193,7 @@
                     <!-- Images Tab -->
                     <div v-else-if="activeTab === 'images'">
                       <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-colors aspect-square group cursor-pointer" @click="openImageModal(image, index)">
+                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-colors aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
                           <img 
                             :src="image" 
                             class="w-full h-full object-cover pointer-events-none" 
@@ -346,7 +228,7 @@
                           <h4 class="font-medium text-gray-300 text-sm">Extracted Text Content</h4>
                           <div class="flex gap-2">
                             <button 
-                              @click="summarizeText" 
+                              @click="handleSummarizeText" 
                               :disabled="isSummarizing || !extractedText"
                               class="btn-auth-outline btn-sm text-purple-400 border-purple-700/50 hover:border-purple-500/50"
                             >
@@ -357,7 +239,7 @@
                               <span v-else>Analyze (Python)</span>
                             </button>
                             <button 
-                              @click="analyzeWithOpenAI" 
+                              @click="handleAnalyzeWithOpenAI" 
                               :disabled="isAnalyzingOpenAI || !extractedText"
                               class="btn-auth-outline btn-sm text-blue-400 border-blue-700/50 hover:border-blue-500/50"
                             >
@@ -368,7 +250,7 @@
                               <span v-else>Analyze (OpenAI)</span>
                             </button>
                             <button 
-                              @click="analyzeWithGensim" 
+                              @click="handleAnalyzeWithGensim" 
                               :disabled="isAnalyzingGensim || !extractedText"
                               class="btn-auth-outline btn-sm text-green-400 border-green-700/50 hover:border-green-500/50"
                             >
@@ -389,15 +271,15 @@
                         <!-- Text Statistics -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ extractedText.length.toLocaleString() }}</div>
+                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().characters.toLocaleString() }}</div>
                             <div class="text-gray-400 text-xs">Characters</div>
                           </div>
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ extractedText.split(/\s+/).length.toLocaleString() }}</div>
+                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().words.toLocaleString() }}</div>
                             <div class="text-gray-400 text-xs">Words</div>
                           </div>
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ extractedText.split(/\n/).length.toLocaleString() }}</div>
+                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().lines.toLocaleString() }}</div>
                             <div class="text-gray-400 text-xs">Lines</div>
                           </div>
                         </div>
@@ -503,7 +385,7 @@
                         </svg>
                         <h3 class="text-base font-medium text-gray-300 mb-2">No Analysis Yet</h3>
                         <p class="text-sm text-gray-500 mb-6">Run an analysis from the Overview tab to see results here</p>
-                        <button @click="activeTab = 'overview'" class="btn-auth-outline">
+                        <button @click="setActiveTab('overview')" class="btn-auth-outline">
                           Go to Overview
                         </button>
                       </div>
@@ -596,7 +478,7 @@
             <!-- Previous Button -->
             <button 
               v-if="extractedImages.length > 1"
-              @click.stop="navigateImage('prev')" 
+              @click.stop="handleNavigateImage('prev')" 
               class="absolute left-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -612,7 +494,7 @@
             <!-- Next Button -->
             <button 
               v-if="extractedImages.length > 1"
-              @click.stop="navigateImage('next')" 
+              @click.stop="handleNavigateImage('next')" 
               class="absolute right-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -632,7 +514,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
@@ -640,129 +522,85 @@ import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
 
+// Import our new components
+import FileManager from '~/components/analysis/FileManager.vue';
+import ReportHeader from '~/components/analysis/ReportHeader.vue';
+import EmptyState from '~/components/analysis/EmptyState.vue';
+
+// Composables
+const {
+  selectedFile,
+  isUploading,
+  uploadMessage,
+  uploadSuccess,
+  uploadedFiles,
+  isDragOver,
+  uploadPdf,
+  deletePdf,
+  handleFileSelect,
+  clearFile,
+  resetUploadArea,
+  handleDragEnter,
+  handleDragLeave,
+  handleDragOver,
+  handleDrop,
+  formatFileSize,
+  formatDate
+} = useFileUpload();
+
+const {
+  extractedImages,
+  extractedText,
+  pdfMetadata,
+  isProcessing,
+  processingStatus,
+  processPdf,
+  viewPdf,
+  getTextStatistics
+} = usePdfProcessor();
+
+const {
+  summarizedIssues,
+  isSummarizing,
+  summarizeStatus,
+  isAnalyzingOpenAI,
+  openAIStatus,
+  isAnalyzingGensim,
+  gensimStatus,
+  gensimSummary,
+  summarizeText,
+  analyzeWithOpenAI,
+  analyzeWithGensim,
+  clearAnalysisResults
+} = useAnalysisTools();
+
+const {
+  selectedImage,
+  selectedImageIndex,
+  openImageModal,
+  navigateImage,
+  closeImageModal,
+  setupKeyboardNavigation
+} = useImageGallery();
+
+const {
+  selectedReportId,
+  activeTab,
+  selectedReport,
+  tabs,
+  selectReport,
+  setActiveTab
+} = useAnalysisState();
+
+// Local refs (still needed for some functionality)
 const fileInput = ref(null);
-const selectedFile = ref(null);
-const isUploading = ref(false);
-const uploadMessage = ref('');
-const uploadSuccess = ref(false);
-const uploadedFiles = ref([]);
-const user = useSupabaseUser();
-const supabase = useSupabaseClient();
-const extractedImages = ref([]);
-const extractedText = ref('');
-const pdfMetadata = ref(null);
-const selectedImage = ref(null);
-const selectedImageIndex = ref(0);
-const processingStatus = ref('');
-const isProcessing = ref(false);
-const summarizedIssues = ref([]);
-const isSummarizing = ref(false);
-const summarizeStatus = ref('');
-const isAnalyzingOpenAI = ref(false);
-const openAIStatus = ref('');
-const isAnalyzingGensim = ref(false);
-const gensimStatus = ref('');
-const gensimSummary = ref('');
-const isDragOver = ref(false);
 
-// New variables for improved UX
-const selectedReportId = ref('');
-const activeTab = ref('overview');
-
-// Computed properties
-const selectedReport = computed(() => {
-  return uploadedFiles.value.find(file => file.id === selectedReportId.value) || null;
-});
-
-// Tab configuration
-const tabs = computed(() => [
-  { 
-    id: 'overview', 
-    name: 'Overview', 
-    icon: 'overview-icon',
-    badge: null
-  },
-  { 
-    id: 'text', 
-    name: 'Text', 
-    icon: 'text-icon',
-    badge: extractedText.value ? '1' : null
-  },
-  { 
-    id: 'images', 
-    name: 'Images', 
-    icon: 'images-icon',
-    badge: extractedImages.value.length || null
-  },
-  { 
-    id: 'analysis', 
-    name: 'Analysis', 
-    icon: 'analysis-icon',
-    badge: (summarizedIssues.value.length || (gensimSummary.value ? 1 : 0)) || null
-  }
-]);
-
-// Methods
-const selectReport = (reportId) => {
-  selectedReportId.value = reportId;
-  // Clear current analysis data when switching reports
-  clearResults();
-};
-
-const switchReport = () => {
-  // Clear current analysis data when switching reports
-  clearResults();
-};
-
+// Local methods
 const handleFileChange = async (event) => {
   const file = event.target.files[0];
-  if (file && file.type === 'application/pdf') {
-    selectedFile.value = file;
-    uploadMessage.value = '';
+  if (handleFileSelect(file)) {
     // Automatically upload the selected file
     await uploadPdf();
-  } else {
-    selectedFile.value = null;
-    uploadMessage.value = 'Please select a valid PDF file';
-    uploadSuccess.value = false;
-  }
-};
-
-// Drag and drop handlers
-const handleDrop = async (event) => {
-  event.preventDefault();
-  isDragOver.value = false;
-  
-  const files = event.dataTransfer.files;
-  if (files.length > 0) {
-    const file = files[0];
-    if (file.type === 'application/pdf') {
-      selectedFile.value = file;
-      uploadMessage.value = '';
-      // Automatically upload the dropped file
-      await uploadPdf();
-    } else {
-      uploadMessage.value = 'Please drop a valid PDF file';
-      uploadSuccess.value = false;
-    }
-  }
-};
-
-const handleDragOver = (event) => {
-  event.preventDefault();
-  isDragOver.value = true;
-};
-
-const handleDragEnter = (event) => {
-  event.preventDefault();
-  isDragOver.value = true;
-};
-
-const handleDragLeave = (event) => {
-  event.preventDefault();
-  // Only set to false if we're leaving the drop area completely
-  if (!event.currentTarget.contains(event.relatedTarget)) {
-    isDragOver.value = false;
   }
 };
 
@@ -772,451 +610,107 @@ const triggerFileInput = () => {
   }
 };
 
-const clearFile = () => {
-  selectedFile.value = null;
-  uploadMessage.value = '';
-  if (fileInput.value) {
-    fileInput.value.value = '';
+const triggerFileUpload = () => {
+  // This is called from EmptyState component
+  triggerFileInput();
+};
+
+// Component event handlers
+const handleReportSelected = (reportId) => {
+  selectReport(reportId);
+};
+
+const handleFileDeleted = (fileName) => {
+  // If the deleted file was selected, clear selection
+  if (selectedReport.value && selectedReport.value.name === fileName) {
+    selectedReportId.value = '';
   }
 };
 
-const resetUploadArea = () => {
-  selectedFile.value = null;
-  uploadMessage.value = '';
-  uploadSuccess.value = false;
-  if (fileInput.value) {
-    fileInput.value.value = '';
-  }
+const handleFileUploaded = () => {
+  // File uploaded successfully - FileManager will handle auto-selection
+  console.log('File uploaded successfully');
 };
 
-const formatFileSize = (bytes) => {
-  if (bytes < 1024) return bytes + ' bytes';
-  else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
-  else return (bytes / 1048576).toFixed(2) + ' MB';
+const handlePdfProcessed = () => {
+  // PDF processed successfully
+  console.log('PDF processed successfully');
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric'
-  });
+const handlePdfViewRequested = () => {
+  // PDF view/download requested
+  console.log('PDF view requested');
 };
 
-const uploadPdf = async () => {
-  if (!selectedFile.value || !user.value) return;
-  
-  isUploading.value = true;
-  uploadMessage.value = '';
-  
-  try {
-    // Get original filename and sanitize it for storage
-    const originalName = selectedFile.value.name;
-    
-    // Sanitize the filename to remove special characters
-    const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, '_');
-    
-    // Create the path with user ID as folder
-    const filePath = `${user.value.id}/${sanitizedName}`;
-    
-    // Upload file to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('inspection-reports')
-      .upload(filePath, selectedFile.value, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (error) throw error;
-    
-    // Store metadata in database if needed
-    const { error: metadataError } = await supabase
-      .from('report_files')
-      .insert({
-        name: originalName, // Store the truly original name for display
-        user_id: user.value.id,
-        storage_path: filePath,
-        size: selectedFile.value.size
-      });
-    
-    if (metadataError) console.error('Metadata storage error:', metadataError);
-    
-    uploadSuccess.value = true;
-    uploadMessage.value = 'PDF uploaded successfully!';
-    fetchUserFiles();
-    
-    // Clear file input but keep selectedFile for UI feedback
-    if (fileInput.value) {
-      fileInput.value.value = '';
-    }
-    
-    // Auto-reset after 3 seconds and select the newly uploaded file
-    setTimeout(() => {
-      if (uploadSuccess.value) {
-        resetUploadArea();
-        // Auto-select the newly uploaded file
-        if (uploadedFiles.value.length > 0) {
-          const newestFile = uploadedFiles.value[0]; // Should be first due to desc sort
-          selectedReportId.value = newestFile.id;
-        }
-      }
-    }, 3000);
-    
-  } catch (error) {
-    console.error('Upload error:', error);
-    uploadSuccess.value = false;
-    uploadMessage.value = error.message || 'An error occurred during upload';
-    selectedFile.value = null;
-  } finally {
-    isUploading.value = false;
-  }
+// Enhanced methods using composables
+const handleDropWithUpload = async (event) => {
+  await handleDrop(event);
 };
 
-const fetchUserFiles = async () => {
-  if (!user.value) return;
-
-  try {
-    // Fetch all objects from the inspection-reports bucket
-    const { data, error } = await supabase.storage
-      .from('inspection-reports')
-      .list(user.value.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
-
-    if (error) throw error;
-
-    // Map the storage objects to the uploadedFiles array
-    uploadedFiles.value = data.map(file => ({
-      id: file.id || file.name, // Use name as fallback for id
-      name: file.name,
-      created_at: file.created_at || new Date().toISOString(), // Fallback to current date if missing
-      size: file.size || 0 // Fallback to 0 if size is missing
-    }));
-  } catch (error) {
-    console.error('Error fetching files from storage:', error);
-  }
-};
-
-const viewPdf = async (fileName) => {
-  try {
-    // Generate a signed URL for the file in the storage bucket
-    const filePath = `${user.value.id}/${fileName}`;
-    const { data: urlData, error: urlError } = await supabase.storage
-      .from('inspection-reports')
-      .createSignedUrl(filePath, 60 * 60); // 1 hour expiry
-
-    if (urlError) throw urlError;
-
-    // Trigger file download
-    const link = document.createElement('a');
-    link.href = urlData.signedUrl;
-    link.download = fileName;
-    link.click();
-  } catch (error) {
-    console.error('Error generating download URL:', error);
-    alert('Failed to download file: ' + (error.message || 'Unknown error'));
-  }
-};
-
-const processPdf = async (fileName) => {
-  if (isProcessing.value) return;
-  
-  isProcessing.value = true;
-  processingStatus.value = 'Processing PDF - extracting text and images...';
-  extractedImages.value = [];
-  extractedText.value = '';
-  pdfMetadata.value = null;
-  
-  try {
-    const response = await fetch('/api/process-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ fileName, userId: user.value.id }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to process PDF');
-    }
-
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
-    }
-    
-    // Update the UI with processed data
-    processingStatus.value = `PDF processed successfully! Found ${result.images?.length || 0} images.`;
-    extractedText.value = result.text || 'No text content found in PDF.';
-    extractedImages.value = result.images || [];
-    pdfMetadata.value = result.metadata || null;
-    
-    // Log metadata for debugging
-    if (result.metadata) {
-      console.log('PDF Metadata:', result.metadata);
-    }
-    
-  } catch (error) {
-    console.error('Error processing PDF:', error);
-    processingStatus.value = `Error: ${error.message || 'Unknown error processing PDF'}`;
-    extractedText.value = '';
-    extractedImages.value = [];
-    pdfMetadata.value = null;
-  } finally {
-    isProcessing.value = false;
-  }
-};
-
-const clearResults = () => {
-  processingStatus.value = '';
-  extractedText.value = '';
-  extractedImages.value = [];
-  pdfMetadata.value = null;
-  selectedImage.value = null;
-  selectedImageIndex.value = 0;
-  summarizedIssues.value = [];
-  summarizeStatus.value = '';
-  isSummarizing.value = false;
-  isAnalyzingOpenAI.value = false;
-  openAIStatus.value = '';
-  isAnalyzingGensim.value = false;
-  gensimStatus.value = '';
-  gensimSummary.value = '';
-};
-
-const openImageModal = (imageUrl, index) => {
-  console.log('openImageModal called with:', imageUrl, index);
-  console.log('Before setting selectedImage:', selectedImage.value);
-  selectedImage.value = imageUrl;
-  selectedImageIndex.value = index;
-  console.log('After setting selectedImage:', selectedImage.value);
-};
-
-const navigateImage = (direction) => {
-  if (extractedImages.value.length === 0) return;
-  
-  if (direction === 'next') {
-    selectedImageIndex.value = (selectedImageIndex.value + 1) % extractedImages.value.length;
-  } else {
-    selectedImageIndex.value = selectedImageIndex.value === 0 
-      ? extractedImages.value.length - 1 
-      : selectedImageIndex.value - 1;
-  }
-  
-  selectedImage.value = extractedImages.value[selectedImageIndex.value];
-};
-
-const closeImageModal = () => {
-  selectedImage.value = null;
-  selectedImageIndex.value = 0;
-};
-
-// Summarize extracted text using Python NLTK
-const summarizeText = async () => {
-  if (!extractedText.value || isSummarizing.value) return;
-  
-  isSummarizing.value = true;
-  summarizeStatus.value = 'Analyzing text for issues...';
-  summarizedIssues.value = [];
-  
-  try {
-    const response = await fetch('/api/summarize-python', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: extractedText.value }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to summarize text');
-    }
-
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
-    }
-    
-    summarizedIssues.value = result.issues || [];
-    summarizeStatus.value = `Found ${result.issues?.length || 0} issues in the inspection report.`;
-    
-    // Switch to analysis tab to show results
-    activeTab.value = 'analysis';
-    
-  } catch (error) {
-    console.error('Error summarizing text:', error);
-    summarizeStatus.value = `Error: ${error.message || 'Unknown error during summarization'}`;
-    summarizedIssues.value = [];
-  } finally {
-    isSummarizing.value = false;
-  }
-};
-
-// Analyze extracted text using OpenAI GPT-4
-const analyzeWithOpenAI = async () => {
-  if (!extractedText.value || isAnalyzingOpenAI.value) return;
-  
-  isAnalyzingOpenAI.value = true;
-  openAIStatus.value = 'Analyzing text with OpenAI GPT-4...';
-  summarizedIssues.value = [];
-  
-  try {
-    const response = await fetch('/api/summarize-issues-fixed', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: extractedText.value }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to analyze text');
-    }
-
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
-    }
-    
-    summarizedIssues.value = result.issues || [];
-    openAIStatus.value = `Found ${result.issues?.length || 0} issues in the inspection report.`;
-    
-    // Switch to analysis tab to show results
-    activeTab.value = 'analysis';
-    
-  } catch (error) {
-    console.error('Error analyzing text with OpenAI:', error);
-    openAIStatus.value = `Error: ${error.message || 'Unknown error during analysis'}`;
-    summarizedIssues.value = [];
-  } finally {
-    isAnalyzingOpenAI.value = false;
-  }
-};
-
-// Analyze extracted text using Gensim
-const analyzeWithGensim = async () => {
-  if (!extractedText.value || isAnalyzingGensim.value) return;
-  
-  isAnalyzingGensim.value = true;
-  gensimStatus.value = 'Analyzing text with Gensim...';
-  gensimSummary.value = '';
-  
-  try {
-    const response = await fetch('/api/summarize-gensim', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: extractedText.value }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to analyze text');
-    }
-
-    const result = await response.json();
-    
-    if (result.error) {
-      throw new Error(result.error);
-    }
-    
-    gensimSummary.value = result.summary || '';
-    gensimStatus.value = gensimSummary.value 
-      ? 'Text summarized successfully' 
-      : 'No summary generated';
-    
-    // Switch to analysis tab to show results
-    activeTab.value = 'analysis';
-    
-  } catch (error) {
-    console.error('Error analyzing text with Gensim:', error);
-    gensimStatus.value = `Error: ${error.message || 'Unknown error during analysis'}`;
-    gensimSummary.value = '';
-  } finally {
-    isAnalyzingGensim.value = false;
-  }
-};
-
-// Clear analysis results
-const clearAnalysisResults = () => {
-  summarizedIssues.value = [];
-  summarizeStatus.value = '';
-  openAIStatus.value = '';
-  gensimStatus.value = '';
-  gensimSummary.value = '';
-  isSummarizing.value = false;
-  isAnalyzingOpenAI.value = false;
-  isAnalyzingGensim.value = false;
-};
-
-// Keyboard navigation for image gallery
-const handleKeyPress = (event) => {
-  if (!selectedImage.value) return;
-  
-  if (event.key === 'ArrowLeft') {
-    navigateImage('prev');
-  } else if (event.key === 'ArrowRight') {
-    navigateImage('next');
-  } else if (event.key === 'Escape') {
-    closeImageModal();
-  }
-};
-
-const deletePdf = async (fileName) => {
+const handleDeletePdf = async (fileName) => {
   if (!confirm('Are you sure you want to delete this file?')) return;
 
   try {
-    // Delete the file from the storage bucket
-    const filePath = `${user.value.id}/${fileName}`;
-    const { error: storageError } = await supabase.storage
-      .from('inspection-reports')
-      .remove([filePath]);
-
-    if (storageError) throw storageError;
-
+    await deletePdf(fileName);
+    
     // If the deleted file was selected, clear selection
     if (selectedReport.value && selectedReport.value.name === fileName) {
       selectedReportId.value = '';
-      clearResults();
     }
-
-    // Refresh the file list
-    fetchUserFiles();
   } catch (error) {
-    console.error('Error deleting file:', error);
     alert('Failed to delete file: ' + (error.message || 'Unknown error'));
   }
 };
 
-// Watch for user changes and fetch files when the user is logged in
-watch(user, (newUser) => {
-  if (newUser) {
-    fetchUserFiles();
-  } else {
-    uploadedFiles.value = [];
-    selectedReportId.value = '';
-  }
-}, { immediate: true });
+const handleProcessPdf = async (fileName) => {
+  await processPdf(fileName);
+};
 
-// Watch for selectedReportId changes and clear analysis data
-watch(selectedReportId, () => {
-  clearResults();
-});
+const handleViewPdf = async (fileName) => {
+  try {
+    await viewPdf(fileName);
+  } catch (error) {
+    alert('Failed to download file: ' + (error.message || 'Unknown error'));
+  }
+};
+
+// Analysis methods using composables
+const handleSummarizeText = async () => {
+  const success = await summarizeText(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzeWithOpenAI = async () => {
+  const success = await analyzeWithOpenAI(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzeWithGensim = async () => {
+  const success = await analyzeWithGensim(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+// Image gallery methods
+const handleOpenImageModal = (imageUrl, index) => {
+  openImageModal(imageUrl, index, extractedImages.value);
+};
+
+const handleNavigateImage = (direction) => {
+  navigateImage(direction, extractedImages.value);
+};
+
+// Setup and cleanup
+let keyboardCleanup = null;
 
 onMounted(() => {
-  if (user.value) {
-    fetchUserFiles();
-  }
-  
-  // Add keyboard event listener for image gallery navigation
-  document.addEventListener('keydown', handleKeyPress);
+  // Setup keyboard navigation for image gallery
+  keyboardCleanup = setupKeyboardNavigation(extractedImages.value);
   
   // Check the current route to handle redirects from /upload-pdf
   const route = useRoute();
@@ -1226,9 +720,11 @@ onMounted(() => {
   }
 });
 
-// Clean up event listener on unmount
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyPress);
+  // Clean up keyboard event listener
+  if (keyboardCleanup) {
+    keyboardCleanup();
+  }
 });
 </script>
 
@@ -1312,64 +808,6 @@ onUnmounted(() => {
   border-color: #22c55e;
 }
 
-/* Compact Drag and Drop Area Styles */
-.drag-drop-area-compact {
-  border: 2px dashed #374151;
-  border-radius: 0.75rem;
-  padding: 2rem 1.5rem;
-  background: rgba(31, 41, 55, 0.3);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.drag-drop-area-compact:hover {
-  border-color: #4ade80;
-  background: rgba(31, 41, 55, 0.5);
-  transform: translateY(-1px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.drag-drop-area-compact.drag-over {
-  border-color: #22c55e;
-  background: rgba(34, 197, 94, 0.1);
-  transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
-}
-
-.hidden {
-  display: none;
-}
-
-/* Spinning animation for upload indicator */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Add some subtle animation for hover effects */
-.hover\:border-green-500\/50:hover {
-  box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
-  transition: all 0.2s ease;
-}
-
-.hover\:border-red-500\/50:hover {
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.15);
-  transition: all 0.2s ease;
-}
-
 /* Property Blueprint Background - matching sign-in page */
 .property-background {
   position: relative;
@@ -1402,25 +840,25 @@ onUnmounted(() => {
 }
 
 /* Better scrollbars for content areas */
-.max-h-80 {
+.max-h-96 {
   scrollbar-width: thin;
   scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
-.max-h-80::-webkit-scrollbar {
+.max-h-96::-webkit-scrollbar {
   width: 6px;
 }
 
-.max-h-80::-webkit-scrollbar-track {
+.max-h-96::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.max-h-80::-webkit-scrollbar-thumb {
+.max-h-96::-webkit-scrollbar-thumb {
   background-color: rgba(156, 163, 175, 0.5);
   border-radius: 3px;
 }
 
-.max-h-80::-webkit-scrollbar-thumb:hover {
+.max-h-96::-webkit-scrollbar-thumb:hover {
   background-color: rgba(156, 163, 175, 0.7);
 }
 
@@ -1432,16 +870,5 @@ onUnmounted(() => {
 /* Enhanced card layouts */
 .aspect-square {
   aspect-ratio: 1;
-}
-
-/* Loading states */
-.loading-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(2px);
 }
 </style>
