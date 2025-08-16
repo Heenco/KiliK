@@ -9,36 +9,21 @@
         <div class="mb-8">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-3xl font-bold text-gray-100">Analysis Dashboard</h1>
-              <p class="text-gray-400">Upload and analyze your inspection reports with AI</p>
-            </div>
-            
-            <!-- Report Selector -->
-            <div v-if="uploadedFiles.length > 0" class="flex items-center gap-4">
-              <label class="text-sm text-gray-400">Current Report:</label>
-              <select 
-                v-model="selectedReportId" 
-                @change="switchReport"
-                class="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-gray-200 text-sm min-w-[200px]"
-              >
-                <option value="">Select a report...</option>
-                <option v-for="file in uploadedFiles" :key="file.id" :value="file.id">
-                  {{ file.name }}
-                </option>
-              </select>
+              <h1 class="text-2xl font-bold text-gray-100">Analysis Dashboard</h1>
+              <p class="text-sm text-gray-400">Upload and analyze your inspection reports with AI</p>
             </div>
           </div>
         </div>
 
         <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <!-- Left Sidebar - Upload & Reports List -->
           <div class="lg:col-span-1">
             <!-- Upload Area -->
-            <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-6">
+            <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-4">
               <CardHeader>
-                <CardTitle class="text-gray-100 text-lg">Upload Report</CardTitle>
+                <CardTitle class="text-gray-100 text-base">Upload Report</CardTitle>
               </CardHeader>
               <CardContent>
                 <!-- Drag and Drop Area -->
@@ -88,7 +73,7 @@
             <!-- Reports List -->
             <Card v-if="uploadedFiles.length > 0" class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl">
               <CardHeader>
-                <CardTitle class="text-gray-100 text-lg">Your Reports</CardTitle>
+                <CardTitle class="text-gray-100 text-base">Your Reports</CardTitle>
               </CardHeader>
               <CardContent class="p-0">
                 <div class="max-h-80 overflow-y-auto">
@@ -129,8 +114,8 @@
               <svg class="mx-auto h-24 w-24 text-gray-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
-              <h3 class="text-xl font-medium text-gray-300 mb-2">No Report Selected</h3>
-              <p class="text-gray-500 mb-6">Upload a PDF report or select one from your list to begin analysis</p>
+              <h3 class="text-lg font-medium text-gray-300 mb-2">No Report Selected</h3>
+              <p class="text-sm text-gray-500 mb-6">Upload a PDF report or select one from your list to begin analysis</p>
               <button @click="triggerFileInput" class="btn-auth">
                 Upload Your First Report
               </button>
@@ -139,12 +124,12 @@
             <!-- Report Analysis Interface -->
             <div v-else-if="selectedReport">
               <!-- Report Header -->
-              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-6">
+              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-4">
                 <CardContent class="p-6">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h2 class="text-xl text-gray-100">{{ selectedReport.name }}</h2>
-                      <p class="text-sm text-gray-400">Uploaded {{ formatDate(selectedReport.created_at) }}</p>
+                      <h2 class="text-lg text-gray-100">{{ selectedReport.name }}</h2>
+                      <p class="text-xs text-gray-400">Uploaded {{ formatDate(selectedReport.created_at) }}</p>
                     </div>
                     <div class="flex gap-2">
                       <button 
@@ -181,20 +166,35 @@
                 <CardContent class="p-0">
                   <!-- Tab Navigation -->
                   <div class="border-b border-gray-700">
-                    <nav class="flex px-6" aria-label="Tabs">
+                    <nav class="flex px-4" aria-label="Tabs">
                       <button
                         v-for="tab in tabs"
                         :key="tab.id"
                         @click="activeTab = tab.id"
                         :class="[
-                          'relative whitespace-nowrap py-5 px-10 border-b-2 font-bold text-base transition-colors flex items-center justify-center',
+                          'relative whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center justify-center',
                           activeTab === tab.id
                             ? 'border-green-500 text-green-400'
                             : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
                         ]"
                       >
                         <div class="flex items-center gap-2">
-                          <component :is="tab.icon" class="w-4 h-4" />
+                          <!-- Overview Icon - Home/Dashboard -->
+                          <svg v-if="tab.icon === 'overview-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                          </svg>
+                          <!-- Text Icon -->
+                          <svg v-else-if="tab.icon === 'text-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                          </svg>
+                          <!-- Images Icon -->
+                          <svg v-else-if="tab.icon === 'images-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                          <!-- Analysis Icon - Chart/Graph -->
+                          <svg v-else-if="tab.icon === 'analysis-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                          </svg>
                           {{ tab.name }}
                           <span v-if="tab.badge" class="ml-1 bg-gray-700 text-gray-300 py-0.5 px-2 rounded-full text-xs">
                             {{ tab.badge }}
@@ -212,8 +212,8 @@
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-300 mb-2">Report Not Processed</h3>
-                        <p class="text-gray-500 mb-6">Click "Process Report" to extract text and images from this PDF</p>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">Report Not Processed</h3>
+                        <p class="text-sm text-gray-500 mb-6">Click "Process Report" to extract text and images from this PDF</p>
                         <button 
                           @click="processPdf(selectedReport.name)" 
                           :disabled="isProcessing"
@@ -228,14 +228,14 @@
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-300 mb-2">Processing Report</h3>
-                        <p class="text-gray-500">{{ processingStatus || 'Extracting text and images...' }}</p>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">Processing Report</h3>
+                        <p class="text-sm text-gray-500">{{ processingStatus || 'Extracting text and images...' }}</p>
                       </div>
 
-                      <div v-else class="space-y-6">
+                      <div v-else class="space-y-4">
                         <!-- PDF Metadata -->
                         <div v-if="pdfMetadata">
-                          <h4 class="font-medium text-gray-300 mb-3">Document Information</h4>
+                          <h4 class="font-medium text-gray-300 mb-3 text-sm">Document Information</h4>
                           <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                               <div v-if="pdfMetadata.title"><span class="text-gray-400">Title:</span> <span class="text-gray-200">{{ pdfMetadata.title }}</span></div>
@@ -248,8 +248,8 @@
 
                         <!-- Quick Actions -->
                         <div>
-                          <h4 class="font-medium text-gray-300 mb-3">Quick Analysis</h4>
-                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <h4 class="font-medium text-gray-300 mb-3 text-sm">Quick Analysis</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <button 
                               @click="summarizeText" 
                               :disabled="isSummarizing || !extractedText"
@@ -262,7 +262,7 @@
                                   </svg>
                                 </div>
                                 <div>
-                                  <div class="font-medium text-gray-200">Python Analysis</div>
+                                  <div class="font-medium text-gray-200 text-sm">Python Analysis</div>
                                   <div class="text-xs text-gray-400">NLTK processing</div>
                                 </div>
                               </div>
@@ -280,7 +280,7 @@
                                   </svg>
                                 </div>
                                 <div>
-                                  <div class="font-medium text-gray-200">AI Analysis</div>
+                                  <div class="font-medium text-gray-200 text-sm">AI Analysis</div>
                                   <div class="text-xs text-gray-400">OpenAI GPT-4</div>
                                 </div>
                               </div>
@@ -298,7 +298,7 @@
                                   </svg>
                                 </div>
                                 <div>
-                                  <div class="font-medium text-gray-200">Text Summary</div>
+                                  <div class="font-medium text-gray-200 text-sm">Text Summary</div>
                                   <div class="text-xs text-gray-400">Gensim processing</div>
                                 </div>
                               </div>
@@ -310,7 +310,7 @@
 
                     <!-- Images Tab -->
                     <div v-else-if="activeTab === 'images'">
-                      <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-colors aspect-square group cursor-pointer" @click="openImageModal(image, index)">
                           <img 
                             :src="image" 
@@ -333,8 +333,8 @@
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-300 mb-2">No Images Found</h3>
-                        <p class="text-gray-500">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">No Images Found</h3>
+                        <p class="text-sm text-gray-500">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
                       </div>
                     </div>
 
@@ -343,7 +343,7 @@
                       <div v-if="extractedText" class="space-y-4">
                         <!-- Text Actions -->
                         <div class="flex justify-between items-center">
-                          <h4 class="font-medium text-gray-300">Extracted Text Content</h4>
+                          <h4 class="font-medium text-gray-300 text-sm">Extracted Text Content</h4>
                           <div class="flex gap-2">
                             <button 
                               @click="summarizeText" 
@@ -387,18 +387,18 @@
                         </div>
 
                         <!-- Text Statistics -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-lg font-semibold text-gray-200">{{ extractedText.length.toLocaleString() }}</div>
-                            <div class="text-gray-400">Characters</div>
+                            <div class="text-base font-semibold text-gray-200">{{ extractedText.length.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs">Characters</div>
                           </div>
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-lg font-semibold text-gray-200">{{ extractedText.split(/\s+/).length.toLocaleString() }}</div>
-                            <div class="text-gray-400">Words</div>
+                            <div class="text-base font-semibold text-gray-200">{{ extractedText.split(/\s+/).length.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs">Words</div>
                           </div>
                           <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-lg font-semibold text-gray-200">{{ extractedText.split(/\n/).length.toLocaleString() }}</div>
-                            <div class="text-gray-400">Lines</div>
+                            <div class="text-base font-semibold text-gray-200">{{ extractedText.split(/\n/).length.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs">Lines</div>
                           </div>
                         </div>
                       </div>
@@ -407,15 +407,15 @@
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-300 mb-2">No Text Extracted</h3>
-                        <p class="text-gray-500">Process the report first to extract text content</p>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">No Text Extracted</h3>
+                        <p class="text-sm text-gray-500">Process the report first to extract text content</p>
                       </div>
                     </div>
 
                     <!-- Analysis Tab -->
                     <div v-else-if="activeTab === 'analysis'">
                       <!-- Analysis Results -->
-                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary" class="space-y-6">
+                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary" class="space-y-4">
                         <!-- Analysis Status Messages -->
                         <div v-if="summarizeStatus" class="p-4 rounded-lg bg-purple-900/30 border border-purple-700">
                           <div class="flex items-center gap-2 mb-2">
@@ -501,8 +501,8 @@
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-300 mb-2">No Analysis Yet</h3>
-                        <p class="text-gray-500 mb-6">Run an analysis from the Overview tab to see results here</p>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">No Analysis Yet</h3>
+                        <p class="text-sm text-gray-500 mb-6">Run an analysis from the Overview tab to see results here</p>
                         <button @click="activeTab = 'overview'" class="btn-auth-outline">
                           Go to Overview
                         </button>
@@ -513,9 +513,9 @@
               </Card>
 
               <!-- AI Chat Interface - Separate Card -->
-              <Card v-if="selectedReport && extractedText" class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mt-6">
+              <Card v-if="selectedReport && extractedText" class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mt-4">
                 <CardHeader>
-                  <CardTitle class="text-gray-100 text-lg flex items-center gap-2">
+                  <CardTitle class="text-gray-100 text-base flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                     </svg>
@@ -679,25 +679,25 @@ const tabs = computed(() => [
   { 
     id: 'overview', 
     name: 'Overview', 
-    icon: 'svg',
+    icon: 'overview-icon',
     badge: null
   },
   { 
     id: 'text', 
     name: 'Text', 
-    icon: 'svg',
+    icon: 'text-icon',
     badge: extractedText.value ? '1' : null
   },
   { 
     id: 'images', 
     name: 'Images', 
-    icon: 'svg',
+    icon: 'images-icon',
     badge: extractedImages.value.length || null
   },
   { 
     id: 'analysis', 
     name: 'Analysis', 
-    icon: 'svg',
+    icon: 'analysis-icon',
     badge: (summarizedIssues.value.length || (gensimSummary.value ? 1 : 0)) || null
   }
 ]);
@@ -1204,6 +1204,11 @@ watch(user, (newUser) => {
     selectedReportId.value = '';
   }
 }, { immediate: true });
+
+// Watch for selectedReportId changes and clear analysis data
+watch(selectedReportId, () => {
+  clearResults();
+});
 
 onMounted(() => {
   if (user.value) {
