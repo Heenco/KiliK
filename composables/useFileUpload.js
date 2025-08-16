@@ -1,14 +1,16 @@
 import { ref, watch } from 'vue'
 
-export const useFileUpload = () => {
-  // State
-  const selectedFile = ref(null)
-  const isUploading = ref(false)
-  const uploadMessage = ref('')
-  const uploadSuccess = ref(false)
-  const uploadedFiles = ref([])
-  const isDragOver = ref(false)
+// Shared reactive state (singleton)
+const selectedFile = ref(null)
+const isUploading = ref(false)
+const uploadMessage = ref('')
+const uploadSuccess = ref(false)
+const uploadedFiles = ref([])
+const isDragOver = ref(false)
 
+let _setupDone = false
+
+export const useFileUpload = () => {
   // Supabase
   const user = useSupabaseUser()
   const supabase = useSupabaseClient()
@@ -66,11 +68,27 @@ export const useFileUpload = () => {
       // Clear the selected file first
       selectedFile.value = null
       
-      // Refresh file list and ensure it's updated
+      // Wait a moment for Supabase to process the upload, then refresh
+      await new Promise(resolve => setTimeout(resolve, 1000))
       await fetchUserFiles()
       
-      // Force reactivity update by creating a new array reference
-      uploadedFiles.value = [...uploadedFiles.value]
+      // If the file still isn't there, try once more
+      if (!uploadedFiles.value.find(f => f.name === sanitizedName)) {
+        console.log('File not found in list, retrying fetch...', { 
+          looking_for: sanitizedName, 
+          found_files: uploadedFiles.value.map(f => f.name) 
+        })
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        await fetchUserFiles()
+        
+        // Final check
+        if (!uploadedFiles.value.find(f => f.name === sanitizedName)) {
+          console.warn('File still not found after retry:', { 
+            looking_for: sanitizedName, 
+            found_files: uploadedFiles.value.map(f => f.name) 
+          })
+        }
+      }
       
       return true
     } catch (error) {
@@ -99,15 +117,17 @@ export const useFileUpload = () => {
 
       if (error) throw error
 
+      console.log('Raw storage data:', data) // Debug log
+
       // Create new array to ensure reactivity
       const newFiles = data.map(file => ({
-        id: file.id || file.name,
+        id: file.name, // Use filename as consistent ID
         name: file.name,
         created_at: file.created_at || new Date().toISOString(),
         size: file.size || 0
       }))
       
-      console.log('Files fetched:', newFiles.length, newFiles) // Debug log
+      console.log('Files fetched:', newFiles.length, newFiles.map(f => ({ id: f.id, name: f.name }))) // Debug log
       uploadedFiles.value = newFiles
     } catch (error) {
       console.error('Error fetching files from storage:', error)
@@ -227,19 +247,23 @@ export const useFileUpload = () => {
   }
 
   // Watch for user changes and fetch files when logged in
-  watch(user, (newUser) => {
-    if (newUser) {
-      console.log('User logged in, fetching files...') // Debug log
-      fetchUserFiles()
-    } else {
-      uploadedFiles.value = []
-    }
-  }, { immediate: true })
+  if (!_setupDone) {
+    watch(user, (newUser) => {
+      if (newUser) {
+        console.log('User logged in, fetching files...') // Debug log
+        fetchUserFiles()
+      } else {
+        uploadedFiles.value = []
+      }
+    }, { immediate: true })
 
-  // Also watch uploadedFiles for changes
-  watch(uploadedFiles, (newFiles) => {
-    console.log('Upload files changed:', newFiles.length) // Debug log
-  }, { deep: true })
+    // Also watch uploadedFiles for changes
+    watch(uploadedFiles, (newFiles) => {
+      console.log('Upload files changed:', newFiles.length) // Debug log
+    }, { deep: true })
+
+    _setupDone = true
+  }
 
   // Force refresh files (can be called externally)
   const forceRefreshFiles = async () => {

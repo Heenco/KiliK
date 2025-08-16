@@ -34,6 +34,15 @@
               @upload-click="triggerFileUpload"
             />
 
+            <!-- Loading State when we have ID but no report object yet -->
+            <div v-else-if="selectedReportId && !selectedReport" class="text-center py-12">
+              <svg class="mx-auto h-16 w-16 text-green-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <h3 class="text-base font-medium text-gray-300 mb-2">Loading Report</h3>
+              <p class="text-sm text-gray-500">Preparing report data...</p>
+            </div>
+
             <!-- Report Analysis Interface -->
             <div v-else-if="selectedReport">
               <!-- Report Header -->
@@ -90,7 +99,17 @@
                   <div class="p-6">
                     <!-- Overview Tab -->
                     <div v-if="activeTab === 'overview'">
-                      <div v-if="!extractedText && !isProcessing" class="text-center py-12">
+                      <!-- Report Selection Loading State -->
+                      <div v-if="isSelectingReport" class="text-center py-12">
+                        <svg class="mx-auto h-16 w-16 text-green-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">Loading Report</h3>
+                        <p class="text-sm text-gray-500">Preparing report for analysis...</p>
+                      </div>
+                      
+                      <!-- Report Not Processed State -->
+                      <div v-else-if="!extractedText && !isProcessing" class="text-center py-12">
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
@@ -617,6 +636,7 @@ const triggerFileUpload = () => {
 
 // Component event handlers
 const handleReportSelected = (reportId) => {
+  console.log('Analysis page: Report selected', reportId); // Debug log
   selectReport(reportId);
 };
 

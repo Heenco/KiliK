@@ -43,18 +43,17 @@ const handleFileDeleted = (fileName) => {
 const handleFileUploaded = async () => {
   console.log('File uploaded, refreshing list...') // Debug log
   
-  // Force refresh the file list with a slight delay to ensure backend is updated
-  setTimeout(async () => {
-    await forceRefreshFiles()
-    console.log('Files after upload:', uploadedFiles.value.length) // Debug log
-    
-    emit('file-uploaded')
-    
-    // Auto-select the newly uploaded file
-    if (uploadedFiles.value.length > 0) {
-      const newestFile = uploadedFiles.value[0] // Should be first due to desc sort
-      emit('report-selected', newestFile.id)
-    }
-  }, 1000) // Wait a bit longer for the backend to process
+  // Force refresh the file list
+  await forceRefreshFiles()
+  console.log('Files after upload:', uploadedFiles.value.length) // Debug log
+  
+  emit('file-uploaded')
+  
+  // Auto-select the newest file immediately
+  if (uploadedFiles.value.length > 0) {
+    const newestFile = uploadedFiles.value[0] // Should be first due to desc sort
+    console.log('Auto-selecting newest file:', newestFile.name, 'with ID:', newestFile.id) // Debug log
+    emit('report-selected', newestFile.id)
+  }
 }
 </script>

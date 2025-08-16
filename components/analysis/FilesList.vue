@@ -72,6 +72,7 @@ const filesList = computed(() => uploadedFiles.value)
 
 // Methods
 const handleSelectReport = (reportId) => {
+  console.log('FilesList: Selecting report', reportId) // Debug log
   emit('report-selected', reportId)
 }
 

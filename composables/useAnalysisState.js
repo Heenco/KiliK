@@ -12,7 +12,26 @@ export const useAnalysisState = () => {
 
   // Computed properties
   const selectedReport = computed(() => {
-    return fileUpload.uploadedFiles.value.find(file => file.id === selectedReportId.value) || null
+    console.log('selectedReport computed triggered')
+    console.log('selectedReportId.value:', selectedReportId.value)
+    console.log('fileUpload.uploadedFiles.value:', fileUpload.uploadedFiles.value)
+    
+    if (!selectedReportId.value) {
+      console.log('No selectedReportId, returning null')
+      return null
+    }
+    
+    if (!fileUpload.uploadedFiles.value || !fileUpload.uploadedFiles.value.length) {
+      console.log('No uploadedFiles, returning null')
+      return null
+    }
+    
+    const report = fileUpload.uploadedFiles.value.find(file => 
+      file.id === selectedReportId.value || file.name === selectedReportId.value
+    )
+    
+    console.log('Found report:', report)
+    return report || null
   })
 
   // Tab configuration
@@ -49,9 +68,9 @@ export const useAnalysisState = () => {
 
   // Actions
   const selectReport = (reportId) => {
+    console.log('selectReport called with:', reportId)
     selectedReportId.value = reportId
-    // Clear current analysis data when switching reports
-    clearAllResults()
+    console.log('selectedReportId.value is now:', selectedReportId.value)
   }
 
   const setActiveTab = (tabId) => {
@@ -64,8 +83,10 @@ export const useAnalysisState = () => {
   }
 
   // Watch for selectedReportId changes and clear analysis data
-  watch(selectedReportId, () => {
-    clearAllResults()
+  watch(selectedReportId, (newId, oldId) => {
+    if (newId !== oldId) {
+      clearAllResults()
+    }
   })
 
   // Get current state summary
