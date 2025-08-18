@@ -150,7 +150,7 @@
                         <!-- Quick Actions -->
                         <div>
                           <h4 class="font-medium text-gray-300 mb-3 text-sm">Quick Analysis</h4>
-                          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <button 
                               @click="handleSummarizeText" 
                               :disabled="isSummarizing || !extractedText"
@@ -201,6 +201,22 @@
                                 <div>
                                   <div class="font-medium text-gray-200 text-sm">Text Summary</div>
                                   <div class="text-xs text-gray-400">Gensim processing</div>
+                                </div>
+                              </div>
+                            </button>
+
+                            <button 
+                              @click="handleAnalyzeWithOllama"
+                              :disabled="isAnalyzingOllama || !extractedText"
+                              class="btn-auth-outline p-4 text-left"
+                            >
+                              <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
+                                </div>
+                                <div>
+                                  <div class="font-medium text-gray-200 text-sm">Ollama Analysis</div>
+                                  <div class="text-xs text-gray-400">llama2 via ngrok</div>
                                 </div>
                               </div>
                             </button>
@@ -279,6 +295,16 @@
                               <span v-if="isAnalyzingGensim">Analyzing...</span>
                               <span v-else>Analyze (Gensim)</span>
                             </button>
+
+                            <button
+                              @click="handleAnalyzeWithOllama"
+                              :disabled="isAnalyzingOllama || !extractedText"
+                              class="btn-auth-outline btn-sm text-indigo-400 border-indigo-700/50 hover:border-indigo-500/50"
+                            >
+                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
+                              <span v-if="isAnalyzingOllama">Analyzing...</span>
+                              <span v-else>Analyze (Ollama)</span>
+                            </button>
                           </div>
                         </div>
 
@@ -316,7 +342,7 @@
                     <!-- Analysis Tab -->
                     <div v-else-if="activeTab === 'analysis'">
                       <!-- Analysis Results -->
-                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary" class="space-y-4">
+                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary" class="space-y-4">
                         <!-- Analysis Status Messages -->
                         <div v-if="summarizeStatus" class="p-4 rounded-lg bg-purple-900/30 border border-purple-700">
                           <div class="flex items-center gap-2 mb-2">
@@ -348,15 +374,32 @@
                           <p class="text-green-200">{{ gensimStatus }}</p>
                         </div>
                         
+                        <div v-if="ollamaStatus" class="p-4 rounded-lg bg-indigo-900/30 border border-indigo-700">
+                          <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
+                            <span class="font-medium text-indigo-300">Ollama Analysis</span>
+                          </div>
+                          <p class="text-indigo-200">{{ ollamaStatus }}</p>
+                        </div>
+                        
                         <!-- Gensim Summary Text -->
                         <div v-if="gensimSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
                           <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             Text Summary
                           </h5>
                           <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ gensimSummary }}</div>
+                        </div>
+                        
+                        <!-- Ollama Summary Text -->
+                        <div v-if="ollamaSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+                          <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
+                            Ollama Result
+                          </h5>
+                          <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ ollamaSummary }}</div>
                         </div>
                         
                         <!-- Issues List -->
@@ -427,8 +470,9 @@
                 <CardContent>
                   <div class="space-y-4">
                     <!-- Chat Messages Area -->
-                    <div class="h-96 bg-gray-800/50 border border-gray-700 rounded-lg p-4 overflow-y-auto">
-                      <div class="flex items-center justify-center h-full text-center">
+                    <div ref="chatContainer" class="h-96 bg-gray-800/50 border border-gray-700 rounded-lg p-4 overflow-y-auto">
+                      <!-- Empty state when no messages -->
+                      <div v-if="chatMessages.length === 0" class="flex items-center justify-center h-full text-center">
                         <div>
                           <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -445,35 +489,98 @@
                           </div>
                         </div>
                       </div>
+
+                      <!-- Chat messages -->
+                      <div v-else class="space-y-4">
+                        <div 
+                          v-for="(message, index) in chatMessages" 
+                          :key="index"
+                          :class="[
+                            'flex',
+                            message.role === 'user' ? 'justify-end' : 'justify-start'
+                          ]"
+                        >
+                          <div 
+                            :class="[
+                              'max-w-[80%] rounded-lg px-4 py-2',
+                              message.role === 'user' 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-gray-700 text-gray-100'
+                            ]"
+                          >
+                            <div class="text-sm whitespace-pre-wrap">{{ message.content }}</div>
+                            <div class="text-xs opacity-70 mt-1">
+                              {{ new Date(message.timestamp).toLocaleTimeString() }}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Typing indicator -->
+                        <div v-if="isChatting" class="flex justify-start">
+                          <div class="bg-gray-700 text-gray-100 rounded-lg px-4 py-2">
+                            <div class="flex items-center space-x-2">
+                              <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                              </div>
+                              <span class="text-sm text-gray-400">AI is thinking...</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- Chat Input -->
                     <div class="flex gap-2">
                       <input 
+                        v-model="chatInput"
+                        @keypress="handleChatKeyPress"
                         type="text" 
                         placeholder="Ask about your inspection report..." 
-                        class="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-                        disabled
+                        :disabled="isChatting || !extractedText"
+                        class="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 disabled:opacity-50"
                       />
                       <button 
+                        @click="handleSendChatMessage"
+                        :disabled="isChatting || !chatInput.trim() || !extractedText"
                         class="btn-auth px-6 py-3" 
-                        disabled
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg v-if="!isChatting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                       </button>
                     </div>
 
-                    <!-- Coming Soon Notice -->
-                    <div class="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4">
-                      <div class="flex items-center gap-2 text-blue-300 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="font-medium">AI Chat Coming Soon</span>
+                    <!-- Chat Controls -->
+                    <div class="flex justify-between items-center">
+                      <div class="text-sm text-gray-400">
+                        <span v-if="!extractedText">Process a report first to enable chat</span>
+                        <span v-else-if="chatMessages.length > 0">{{ chatMessages.length }} messages</span>
+                        <span v-else>Powered by Ollama llama3</span>
                       </div>
-                      <p class="text-blue-200/80 text-sm mt-1">This feature will allow you to have natural conversations with your inspection reports using advanced AI.</p>
+                      <button 
+                        v-if="chatMessages.length > 0"
+                        @click="clearChatHistory"
+                        class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50"
+                      >
+                        Clear Chat
+                      </button>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div v-if="chatError" class="bg-red-900/20 border border-red-700/50 rounded-lg p-4">
+                      <div class="flex items-center gap-2 text-red-300 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-medium">Chat Error</span>
+                      </div>
+                      <p class="text-red-200/80 text-sm mt-1">{{ chatError }}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -533,7 +640,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
@@ -587,10 +694,21 @@ const {
   isAnalyzingGensim,
   gensimStatus,
   gensimSummary,
+  isAnalyzingOllama,
+  ollamaStatus,
+  ollamaSummary,
   summarizeText,
   analyzeWithOpenAI,
   analyzeWithGensim,
-  clearAnalysisResults
+  analyzeWithOllama,
+  clearAnalysisResults,
+  
+  // Chat functionality
+  chatMessages,
+  isChatting,
+  chatError,
+  sendChatMessage,
+  clearChatHistory
 } = useAnalysisTools();
 
 const {
@@ -613,6 +731,8 @@ const {
 
 // Local refs (still needed for some functionality)
 const fileInput = ref(null);
+const chatInput = ref('');
+const chatContainer = ref(null);
 
 // Local methods
 const handleFileChange = async (event) => {
@@ -713,6 +833,45 @@ const handleAnalyzeWithGensim = async () => {
   const success = await analyzeWithGensim(extractedText.value);
   if (success) {
     setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzeWithOllama = async () => {
+  console.log('Ollama clicked, extractedText length:', extractedText.value?.length);
+  const success = await analyzeWithOllama(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+// Chat methods
+const handleSendChatMessage = async () => {
+  if (!chatInput.value.trim() || isChatting.value) return;
+  
+  const message = chatInput.value.trim();
+  chatInput.value = ''; // Clear input immediately
+  
+  // Prepare report context
+  const reportContext = {
+    extractedText: extractedText.value,
+    pdfMetadata: pdfMetadata.value,
+    extractedImages: extractedImages.value
+  };
+  
+  await sendChatMessage(message, reportContext);
+  
+  // Scroll to bottom of chat
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    }
+  });
+};
+
+const handleChatKeyPress = (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    handleSendChatMessage();
   }
 };
 

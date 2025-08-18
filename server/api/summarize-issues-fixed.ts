@@ -24,15 +24,15 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
       return { issues: [], error: 'No text provided' };
     }
 
-    // Prepare the text to send (limit to 8000 characters)
-    const textToSend = text.substring(0, 8000);
+    // Prepare the text to send (limit to 10000 characters)
+    const textToSend = text.substring(0, 10000);
     console.log('Text being sent to OpenAI (length:', textToSend.length, 'characters):');
     console.log('--- START TEXT ---');
     console.log(textToSend);
     console.log('--- END TEXT ---');
 
     // Get OpenAI API key from environment variables
-    const OPENAI_API_KEY = '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';
+    const OPENAI_API_KEY = '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';
     
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key is missing');

@@ -146,7 +146,10 @@ onMounted(() => {
 
   map = new maplibregl.Map({
     container: 'map',
-    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    // Previous style (commented out for easy rollback):
+    // style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    // Use Stadia dark base map as requested
+    style: 'https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json',
     center: lat && lng ? [lng, lat] : [153.0281, -27.4678],
     zoom: lat && lng ? 16 : 12, // Zoom in if we have specific coordinates
   });
@@ -305,16 +308,31 @@ onMounted(() => {
       }
     });
 
-    // Add clicked point layer
+    // Add clicked point layer (replace with highlight layers to match MapContainer style)
+    // Outer highlight ring
     map.addLayer({
-      id: 'clicked-point',
+      id: 'highlight-layer',
       type: 'circle',
       source: 'clicked-point',
       paint: {
-        'circle-radius': 8,
-        'circle-color': '#ff0000',
-        'circle-stroke-width': 2,
+        'circle-radius': 12,
+        'circle-color': '#ffffff',
+        'circle-opacity': 1.0,
+        'circle-stroke-width': 1.3,
         'circle-stroke-color': '#ffffff'
+      }
+    });
+
+    // Inner center point (magenta)
+    map.addLayer({
+      id: 'highlight-center-layer',
+      type: 'circle',
+      source: 'clicked-point',
+      paint: {
+        'circle-radius': 5,
+        'circle-color': '#E91E63',
+        'circle-opacity': 1.0,
+        'circle-stroke-width': 0
       }
     });
 
