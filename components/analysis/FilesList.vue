@@ -1,6 +1,6 @@
 <template>
   <!-- Always show the card, but with different content based on file count -->
-  <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl">
+  <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl font-apple">
     <CardHeader class="pb-3">
       <CardTitle class="text-gray-100 text-base">Your Reports</CardTitle>
     </CardHeader>
@@ -16,7 +16,7 @@
         >
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-200 truncate">{{ file.name }}</p>
+              <p class="text-sm text-gray-200 truncate">{{ file.name }}</p>
               <p class="text-xs text-gray-500 mt-1">{{ formatDate(file.created_at) }}</p>
             </div>
             <div class="flex items-center gap-1 ml-2">
@@ -91,6 +91,13 @@ const handleDeleteFile = async (fileName) => {
 </script>
 
 <style scoped>
+/* Use Apple system font for PDF list */
+.font-apple {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
 /* Better scrollbars for content areas */
 .max-h-80 {
   scrollbar-width: thin;

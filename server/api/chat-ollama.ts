@@ -9,66 +9,109 @@ interface ChatMessage {
 
 interface ChatRequest {
   message: string;
-  context?: string; // Optional inspection report context
-  chatHistory?: ChatMessage[];
+  reportContext?: any; // Report context including text, metadata, etc.
+  conversationHistory?: ChatMessage[];
 }
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
     const body = await readBody(event) as ChatRequest;
-    const { message, context, chatHistory = [] } = body;
+    const { message, reportContext, conversationHistory = [] } = body;
     
-    console.log('Chat with Ollama - User message:', message);
+    console.log('Chat with DeepInfra - User message:', message);
     
     if (!message?.trim()) {
       return { response: '', error: 'No message provided' };
     }
 
-    // Build context-aware prompt
-    let systemPrompt = 'You are a helpful AI assistant specializing in property inspection reports. Provide clear, helpful responses.';
-    
-    if (context) {
-      systemPrompt += `\n\nYou have access to the following inspection report content:\n${context.substring(0, 5000)}`;
+    const deepInfraToken = "RZDmyvBu0dfJ8IuOddkaT9awvxucbUA5";
+    if (!deepInfraToken) {
+      return { response: '', error: 'DeepInfra API token not configured' };
     }
 
-    // Include recent chat history for context (last 5 messages)
-    const recentHistory = chatHistory.slice(-5);
-    let conversationContext = '';
+    // Build messages array for DeepInfra API
+    const messages = [];
+
+    // System message with inspection report context
+    let systemContent = 'You are a helpful AI assistant specializing in property inspection reports. Provide clear, helpful responses based on the inspection report data.';
     
-    if (recentHistory.length > 0) {
-      conversationContext = '\n\nRecent conversation:\n';
-      recentHistory.forEach(msg => {
-        conversationContext += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
+    if (reportContext?.text) {
+      systemContent += `\n\nInspection Report Content:\n${reportContext.text.substring(0, 50000)}`;
+    }
+
+    // Add analysis results if available
+    if (reportContext?.analysisResults) {
+      const { issues, gensimSummary, ollamaSummary, deepInfraSummary } = reportContext.analysisResults;
+      
+      if (issues?.length > 0) {
+        systemContent += '\n\nIdentified Issues:\n';
+        issues.slice(0, 10).forEach((issue: any, index: number) => {
+          systemContent += `${index + 1}. ${issue.issue} (${issue.severity}): ${issue.description}\n`;
+        });
+      }
+      
+      if (deepInfraSummary) {
+        systemContent += `\n\nPrevious Analysis Summary:\n${deepInfraSummary.substring(0, 2000)}`;
+      } else if (gensimSummary) {
+        systemContent += `\n\nText Summary:\n${gensimSummary.substring(0, 2000)}`;
+      }
+    }
+
+    messages.push({
+      role: "system",
+      content: systemContent
+    });
+
+    // Add recent conversation history (last 10 messages)
+    const recentHistory = conversationHistory.slice(-10);
+    recentHistory.forEach(msg => {
+      messages.push({
+        role: msg.role,
+        content: msg.content
       });
-    }
+    });
 
-    const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
+    // Add current user message
+    messages.push({
+      role: "user",
+      content: message
+    });
 
-    console.log('Sending to Ollama with context length:', fullPrompt.length);
+    console.log('Sending to DeepInfra with', messages.length, 'messages');
 
-    const ollamaRes = await fetch('https://0a321ecd30ab.ngrok-free.app/api/generate', {
+    const response = await fetch('https://api.deepinfra.com/v1/openai/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${deepInfraToken}`
+      },
       body: JSON.stringify({
-        model: 'llama3',
-        prompt: fullPrompt,
-        stream: false // Use non-streaming for chat for simplicity
+        model: "Qwen/Qwen2.5-VL-32B-Instruct",
+        messages: messages,
+        max_tokens: 1000,
+        temperature: 0.7
       })
     });
 
-    if (!ollamaRes.ok) {
-      const errorText = await ollamaRes.text();
-      console.error('Ollama API error:', ollamaRes.status, errorText);
-      return { response: '', error: `Ollama API error (${ollamaRes.status}): ${errorText}` };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('DeepInfra API error:', response.status, errorText);
+      return { response: '', error: `DeepInfra API error (${response.status}): ${errorText}` };
     }
 
-    const data = await ollamaRes.json();
-    const response = data.response || '';
+    const data = await response.json();
     
-    console.log('Ollama chat response:', response.substring(0, 200) + '...');
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid DeepInfra response:', data);
+      return { response: '', error: 'Invalid response from DeepInfra API' };
+    }
+
+    const assistantResponse = data.choices[0].message.content;
+    
+    console.log('DeepInfra chat response:', assistantResponse.substring(0, 200) + '...');
     
     return { 
-      response: response.trim(),
+      response: assistantResponse.trim(),
       error: '' 
     };
 

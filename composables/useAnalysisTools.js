@@ -13,6 +13,9 @@ export const useAnalysisTools = () => {
   const isAnalyzingOllama = ref(false)
   const ollamaStatus = ref('')
   const ollamaSummary = ref('')
+  const isAnalyzingDeepInfra = ref(false)
+  const deepInfraStatus = ref('')
+  const deepInfraSummary = ref('')
   
   // Chat state
   const chatMessages = ref([])
@@ -196,7 +199,56 @@ export const useAnalysisTools = () => {
     }
   }
 
-  // Chat with Ollama
+  // DeepInfra Analysis
+  const analyzeWithDeepInfra = async (text) => {
+    if (!text || isAnalyzingDeepInfra.value) return false
+    
+    console.log('Starting DeepInfra analysis with text length:', text.length);
+    isAnalyzingDeepInfra.value = true
+    deepInfraStatus.value = 'Analyzing with DeepInfra Qwen2.5-VL-32B...'
+    deepInfraSummary.value = ''
+    
+    try {
+      const response = await fetch('/api/summarize-deepinfra', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      })
+
+      console.log('DeepInfra response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('DeepInfra fetch error:', response.status, errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}` || 'Failed to analyze text')
+      }
+
+      const result = await response.json()
+      console.log('DeepInfra result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      deepInfraSummary.value = result.summary || ''
+      deepInfraStatus.value = deepInfraSummary.value 
+        ? 'DeepInfra analysis complete' 
+        : 'No summary generated'
+      
+      return true
+    } catch (error) {
+      console.error('Error analyzing text with DeepInfra:', error)
+      deepInfraStatus.value = `Error: ${error.message || 'Unknown error during analysis'}`
+      deepInfraSummary.value = ''
+      return false
+    } finally {
+      isAnalyzingDeepInfra.value = false
+    }
+  }
+
+  // Chat with DeepInfra (updated to use DeepInfra instead of Ollama)
   const sendChatMessage = async (message, reportContext = null) => {
     if (!message?.trim() || isChatting.value) return false
     
@@ -213,7 +265,7 @@ export const useAnalysisTools = () => {
     chatMessages.value.push(userMessage)
     
     try {
-      // Prepare context from current report
+      // Prepare context from current report and analysis results
       const context = {
         text: reportContext?.extractedText || '',
         metadata: reportContext?.pdfMetadata || null,
@@ -221,7 +273,8 @@ export const useAnalysisTools = () => {
         analysisResults: {
           issues: summarizedIssues.value,
           gensimSummary: gensimSummary.value,
-          ollamaSummary: ollamaSummary.value
+          ollamaSummary: ollamaSummary.value,
+          deepInfraSummary: deepInfraSummary.value  // Include DeepInfra summary
         }
       }
       
@@ -290,10 +343,13 @@ export const useAnalysisTools = () => {
     gensimSummary.value = ''
     ollamaStatus.value = ''
     ollamaSummary.value = ''
+    deepInfraStatus.value = ''
+    deepInfraSummary.value = ''
     isSummarizing.value = false
     isAnalyzingOpenAI.value = false
     isAnalyzingGensim.value = false
     isAnalyzingOllama.value = false
+    isAnalyzingDeepInfra.value = false
     // Don't clear chat on analysis clear
   }
 
@@ -302,14 +358,16 @@ export const useAnalysisTools = () => {
     const hasIssues = summarizedIssues.value.length > 0
     const hasSummary = !!gensimSummary.value
     const hasOllamaSummary = !!ollamaSummary.value
-    const hasAnalysis = hasIssues || hasSummary || hasOllamaSummary
+    const hasDeepInfraSummary = !!deepInfraSummary.value
+    const hasAnalysis = hasIssues || hasSummary || hasOllamaSummary || hasDeepInfraSummary
     
     return {
       hasAnalysis,
       issuesCount: summarizedIssues.value.length,
       hasSummary,
       hasOllamaSummary,
-      isProcessing: isSummarizing.value || isAnalyzingOpenAI.value || isAnalyzingGensim.value || isAnalyzingOllama.value
+      hasDeepInfraSummary,
+      isProcessing: isSummarizing.value || isAnalyzingOpenAI.value || isAnalyzingGensim.value || isAnalyzingOllama.value || isAnalyzingDeepInfra.value
     }
   }
 
@@ -326,6 +384,9 @@ export const useAnalysisTools = () => {
     isAnalyzingOllama,
     ollamaStatus,
     ollamaSummary,
+    isAnalyzingDeepInfra,
+    deepInfraStatus,
+    deepInfraSummary,
     
     // Chat state
     chatMessages,
@@ -337,6 +398,7 @@ export const useAnalysisTools = () => {
     analyzeWithOpenAI,
     analyzeWithGensim,
     analyzeWithOllama,
+    analyzeWithDeepInfra,
     clearAnalysisResults,
     
     // Chat methods

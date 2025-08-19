@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 text-gray-100 pt-20 property-background">
+  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 text-gray-100 pt-20 property-background font-apple">
     <!-- Property Grid Background -->
     <div class="property-grid"></div>
-    <div class="container mx-auto px-4 py-8 relative z-10">
-      <div class="max-w-6xl mx-auto">
+    <div class="max-w-screen-2xl mx-auto px-6 py-8 relative z-10">
+      <div class="max-w-screen-2xl mx-auto">
         
         <!-- Header with Report Selector -->
         <div class="mb-8">
@@ -16,18 +16,23 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-[calc(100vh-5rem)]">
           
-          <!-- Left Sidebar - Upload & Reports List -->
-          <FileManager 
-            :selectedReportId="selectedReportId"
-            @report-selected="handleReportSelected"
-            @file-deleted="handleFileDeleted"
-            @file-uploaded="handleFileUploaded"
-          />
+          <!-- Left Sidebar - Upload & Reports List (full-height) -->
+          <div class="lg:col-span-1 flex min-h-0">
+            <div class="w-full h-full flex flex-col min-h-0">
+              <FileManager
+                class="flex-1 overflow-auto"
+                :selectedReportId="selectedReportId"
+                @report-selected="handleReportSelected"
+                @file-deleted="handleFileDeleted"
+                @file-uploaded="handleFileUploaded"
+              />
+            </div>
+          </div>
 
           <!-- Main Content Area -->
-          <div class="lg:col-span-2">
+          <div class="lg:col-span-3 flex flex-col">
             <!-- Empty State -->
             <EmptyState 
               v-if="!selectedReportId"
@@ -53,54 +58,32 @@
               />
 
               <!-- Tabs Interface -->
-              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl">
-                <CardContent class="p-0">
-                  <!-- Tab Navigation -->
-                  <div class="border-b border-gray-700">
-                    <nav class="flex px-4" aria-label="Tabs">
-                      <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        @click="setActiveTab(tab.id)"
-                        :class="[
-                          'relative whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors flex items-center justify-center',
-                          activeTab === tab.id
-                            ? 'border-green-500 text-green-400'
-                            : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                        ]"
+              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl rounded-xl">
+                <CardContent class="p-6">
+                  <!-- Shadcn/ui Tabs Component -->
+                  <Tabs :value="activeTab" @update:value="setActiveTab" class="w-full">
+                    <TabsList class="bg-gray-800/50 border border-gray-700 p-1 rounded-lg w-full grid grid-cols-4 gap-1 mb-6 tabs-dark">
+                      <TabsTrigger 
+                        v-for="tab in tabs" 
+                        :key="tab.id" 
+                        :value="tab.id"
+                        class="data-[state=active]:bg-gray-700 data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-400 hover:text-gray-300 rounded-md transition-all duration-200 font-medium"
                       >
                         <div class="flex items-center gap-2">
-                          <!-- Overview Icon - Home/Dashboard -->
-                          <svg v-if="tab.icon === 'overview-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                          <!-- Analysis Icon - Enhanced Chart -->
+                          <svg v-if="tab.icon === 'analysis-icon'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           </svg>
-                          <!-- Text Icon -->
-                          <svg v-else-if="tab.icon === 'text-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                          </svg>
-                          <!-- Images Icon -->
-                          <svg v-else-if="tab.icon === 'images-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                          </svg>
-                          <!-- Analysis Icon - Chart/Graph -->
-                          <svg v-else-if="tab.icon === 'analysis-icon'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                          </svg>
-                          {{ tab.name }}
-                          <span v-if="tab.badge" class="ml-1 bg-gray-700 text-gray-300 py-0.5 px-2 rounded-full text-xs">
-                            {{ tab.badge }}
+                          <span class="font-medium">{{ tab.name }}</span>
+                          <span v-if="tab.badge" class="ml-1 bg-gray-600 data-[state=active]:bg-green-500/20 text-gray-300 data-[state=active]:text-green-300 py-0.5 px-1.5 rounded-full text-xs font-medium">
                           </span>
                         </div>
-                      </button>
-                    </nav>
-                  </div>
-
-                  <!-- Tab Content -->
-                  <div class="p-6">
-                    <!-- Overview Tab -->
-                    <div v-if="activeTab === 'overview'">
-                      <!-- Report Selection Loading State -->
-                      <div v-if="isSelectingReport" class="text-center py-12">
+                      </TabsTrigger>
+                    </TabsList>
+                    <!-- Tab Content -->
+                    <TabsContent value="overview" class="mt-0">
+                      <!-- Overview Tab -->
+                        <!-- Report Selection Loading State -->
+                        <div v-if="isSelectingReport" class="text-center py-12">
                         <svg class="mx-auto h-16 w-16 text-green-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
@@ -136,99 +119,23 @@
                       <div v-else class="space-y-4">
                         <!-- PDF Metadata -->
                         <div v-if="pdfMetadata">
-                          <h4 class="font-medium text-gray-300 mb-3 text-sm">Document Information</h4>
-                          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+                          <h4 class="font-semibold text-gray-200 mb-4 text-sm tracking-wide">Document Information</h4>
+                          <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 backdrop-blur-sm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div v-if="pdfMetadata.title"><span class="text-gray-400">Title:</span> <span class="text-gray-200">{{ pdfMetadata.title }}</span></div>
-                              <div v-if="pdfMetadata.author"><span class="text-gray-400">Author:</span> <span class="text-gray-200">{{ pdfMetadata.author }}</span></div>
-                              <div v-if="pdfMetadata.pageCount"><span class="text-gray-400">Pages:</span> <span class="text-gray-200">{{ pdfMetadata.pageCount }}</span></div>
-                              <div v-if="pdfMetadata.creator"><span class="text-gray-400">Creator:</span> <span class="text-gray-200">{{ pdfMetadata.creator }}</span></div>
+                              <div v-if="pdfMetadata.title"><span class="text-gray-400 font-medium">Title:</span> <span class="text-gray-200">{{ pdfMetadata.title }}</span></div>
+                              <div v-if="pdfMetadata.author"><span class="text-gray-400 font-medium">Author:</span> <span class="text-gray-200">{{ pdfMetadata.author }}</span></div>
+                              <div v-if="pdfMetadata.pageCount"><span class="text-gray-400 font-medium">Pages:</span> <span class="text-gray-200">{{ pdfMetadata.pageCount }}</span></div>
+                              <div v-if="pdfMetadata.creator"><span class="text-gray-400 font-medium">Creator:</span> <span class="text-gray-200">{{ pdfMetadata.creator }}</span></div>
                             </div>
                           </div>
                         </div>
-
-                        <!-- Quick Actions -->
-                        <div>
-                          <h4 class="font-medium text-gray-300 mb-3 text-sm">Quick Analysis</h4>
-                          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <button 
-                              @click="handleSummarizeText" 
-                              :disabled="isSummarizing || !extractedText"
-                              class="btn-auth-outline p-4 text-left"
-                            >
-                              <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                  </svg>
-                                </div>
-                                <div>
-                                  <div class="font-medium text-gray-200 text-sm">Python Analysis</div>
-                                  <div class="text-xs text-gray-400">NLTK processing</div>
-                                </div>
-                              </div>
-                            </button>
-
-                            <button 
-                              @click="handleAnalyzeWithOpenAI" 
-                              :disabled="isAnalyzingOpenAI || !extractedText"
-                              class="btn-auth-outline p-4 text-left"
-                            >
-                              <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                  </svg>
-                                </div>
-                                <div>
-                                  <div class="font-medium text-gray-200 text-sm">AI Analysis</div>
-                                  <div class="text-xs text-gray-400">OpenAI GPT-4</div>
-                                </div>
-                              </div>
-                            </button>
-
-                            <button 
-                              @click="handleAnalyzeWithGensim" 
-                              :disabled="isAnalyzingGensim || !extractedText"
-                              class="btn-auth-outline p-4 text-left"
-                            >
-                              <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                                  <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                  </svg>
-                                </div>
-                                <div>
-                                  <div class="font-medium text-gray-200 text-sm">Text Summary</div>
-                                  <div class="text-xs text-gray-400">Gensim processing</div>
-                                </div>
-                              </div>
-                            </button>
-
-                            <button 
-                              @click="handleAnalyzeWithOllama"
-                              :disabled="isAnalyzingOllama || !extractedText"
-                              class="btn-auth-outline p-4 text-left"
-                            >
-                              <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
-                                </div>
-                                <div>
-                                  <div class="font-medium text-gray-200 text-sm">Ollama Analysis</div>
-                                  <div class="text-xs text-gray-400">llama2 via ngrok</div>
-                                </div>
-                              </div>
-                            </button>
-                          </div>
-                        </div>
                       </div>
-                    </div>
+                    </TabsContent>
 
                     <!-- Images Tab -->
-                    <div v-else-if="activeTab === 'images'">
-                      <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-lg overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-colors aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
+                    <TabsContent value="images" class="mt-0">
+                      <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-xl overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-all duration-200 hover:shadow-lg aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
                           <img 
                             :src="image" 
                             class="w-full h-full object-cover pointer-events-none" 
@@ -241,7 +148,7 @@
                               </svg>
                             </div>
                           </div>
-                          <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                          <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md font-medium">
                             {{ index + 1 }}
                           </div>
                         </div>
@@ -253,96 +160,51 @@
                         <h3 class="text-base font-medium text-gray-300 mb-2">No Images Found</h3>
                         <p class="text-sm text-gray-500">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
                       </div>
-                    </div>
+                    </TabsContent>
 
                     <!-- Text Tab -->
-                    <div v-else-if="activeTab === 'text'">
+                    <TabsContent value="text" class="mt-0">
                       <div v-if="extractedText" class="space-y-4">
                         <!-- Text Actions -->
                         <div class="flex justify-between items-center">
-                          <h4 class="font-medium text-gray-300 text-sm">Extracted Text Content</h4>
-                          <div class="flex gap-2">
-                            <button 
-                              @click="handleSummarizeText" 
-                              :disabled="isSummarizing || !extractedText"
-                              class="btn-auth-outline btn-sm text-purple-400 border-purple-700/50 hover:border-purple-500/50"
-                            >
-                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                              </svg>
-                              <span v-if="isSummarizing">Analyzing...</span>
-                              <span v-else>Analyze (Python)</span>
-                            </button>
-                            <button 
-                              @click="handleAnalyzeWithOpenAI" 
-                              :disabled="isAnalyzingOpenAI || !extractedText"
-                              class="btn-auth-outline btn-sm text-blue-400 border-blue-700/50 hover:border-blue-500/50"
-                            >
-                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                              </svg>
-                              <span v-if="isAnalyzingOpenAI">Analyzing...</span>
-                              <span v-else>Analyze (OpenAI)</span>
-                            </button>
-                            <button 
-                              @click="handleAnalyzeWithGensim" 
-                              :disabled="isAnalyzingGensim || !extractedText"
-                              class="btn-auth-outline btn-sm text-green-400 border-green-700/50 hover:border-green-500/50"
-                            >
-                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                              </svg>
-                              <span v-if="isAnalyzingGensim">Analyzing...</span>
-                              <span v-else>Analyze (Gensim)</span>
-                            </button>
-
-                            <button
-                              @click="handleAnalyzeWithOllama"
-                              :disabled="isAnalyzingOllama || !extractedText"
-                              class="btn-auth-outline btn-sm text-indigo-400 border-indigo-700/50 hover:border-indigo-500/50"
-                            >
-                              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
-                              <span v-if="isAnalyzingOllama">Analyzing...</span>
-                              <span v-else>Analyze (Ollama)</span>
-                            </button>
-                          </div>
+                          <h4 class="font-semibold text-gray-200 text-sm tracking-wide">Extracted Text Content</h4>
                         </div>
 
                         <!-- Text Content -->
-                        <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 max-h-96 overflow-y-auto">
+                        <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 max-h-96 overflow-y-auto backdrop-blur-sm">
                           <pre class="whitespace-pre-wrap text-gray-300 text-sm leading-relaxed">{{ extractedText }}</pre>
                         </div>
 
                         <!-- Text Statistics -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().characters.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs">Characters</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().characters.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs font-medium">Characters</div>
                           </div>
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().words.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs">Words</div>
+                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().words.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs font-medium">Words</div>
                           </div>
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center">
-                            <div class="text-base font-semibold text-gray-200">{{ getTextStatistics().lines.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs">Lines</div>
+                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().lines.toLocaleString() }}</div>
+                            <div class="text-gray-400 text-xs font-medium">Lines</div>
                           </div>
                         </div>
                       </div>
                       
                       <div v-else class="text-center py-12">
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         <h3 class="text-base font-medium text-gray-300 mb-2">No Text Extracted</h3>
                         <p class="text-sm text-gray-500">Process the report first to extract text content</p>
                       </div>
-                    </div>
+                    </TabsContent>
 
                     <!-- Analysis Tab -->
-                    <div v-else-if="activeTab === 'analysis'">
+                    <TabsContent value="analysis" class="mt-0">
                       <!-- Analysis Results -->
-                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary" class="space-y-4">
+                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary || deepInfraStatus || deepInfraSummary" class="space-y-4">
                         <!-- Analysis Status Messages -->
                         <div v-if="summarizeStatus" class="p-4 rounded-lg bg-purple-900/30 border border-purple-700">
                           <div class="flex items-center gap-2 mb-2">
@@ -367,7 +229,7 @@
                         <div v-if="gensimStatus" class="p-4 rounded-lg bg-green-900/30 border border-green-700">
                           <div class="flex items-center gap-2 mb-2">
                             <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             <span class="font-medium text-green-300">Gensim Summary</span>
                           </div>
@@ -380,6 +242,16 @@
                             <span class="font-medium text-indigo-300">Ollama Analysis</span>
                           </div>
                           <p class="text-indigo-200">{{ ollamaStatus }}</p>
+                        </div>
+                        
+                        <div v-if="deepInfraStatus" class="p-4 rounded-lg bg-orange-900/30 border border-orange-700">
+                          <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            <span class="font-medium text-orange-300">DeepInfra Analysis</span>
+                          </div>
+                          <p class="text-orange-200">{{ deepInfraStatus }}</p>
                         </div>
                         
                         <!-- Gensim Summary Text -->
@@ -400,6 +272,17 @@
                             Ollama Result
                           </h5>
                           <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ ollamaSummary }}</div>
+                        </div>
+                        
+                        <!-- DeepInfra Summary Text -->
+                        <div v-if="deepInfraSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+                          <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            DeepInfra Analysis
+                          </h5>
+                          <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ deepInfraSummary }}</div>
                         </div>
                         
                         <!-- Issues List -->
@@ -445,14 +328,50 @@
                         <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">No Analysis Yet</h3>
-                        <p class="text-sm text-gray-500 mb-6">Run an analysis from the Overview tab to see results here</p>
-                        <button @click="setActiveTab('overview')" class="btn-auth-outline">
-                          Go to Overview
-                        </button>
+                        <h3 class="text-base font-medium text-gray-300 mb-2">Start Analysis</h3>
+                        <p class="text-sm text-gray-500 mb-6">Choose an analysis method to begin processing your inspection report</p>
+                        
+                        <!-- Analysis Action Buttons -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
+                          <button 
+                            @click="handleSummarizeText" 
+                            :disabled="isSummarizing || !extractedText"
+                            class="group btn-auth-outline p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 bg-purple-500/20 group-hover:bg-purple-500/30 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                              </div>
+                              <div>
+                                <div class="font-semibold text-gray-200 text-sm group-hover:text-white transition-colors">Python Analysis</div>
+                                <div class="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">NLTK processing</div>
+                              </div>
+                            </div>
+                          </button>
+
+                          <button 
+                            @click="handleAnalyzeWithDeepInfra"
+                            :disabled="isAnalyzingDeepInfra || !extractedText"
+                            class="group btn-auth-outline p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 bg-orange-500/20 group-hover:bg-orange-500/30 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                              </div>
+                              <div>
+                                <div class="font-semibold text-gray-200 text-sm group-hover:text-white transition-colors">DeepInfra Analysis</div>
+                                <div class="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">Qwen2.5-VL-32B</div>
+                              </div>
+                            </div>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
@@ -561,7 +480,7 @@
                       <div class="text-sm text-gray-400">
                         <span v-if="!extractedText">Process a report first to enable chat</span>
                         <span v-else-if="chatMessages.length > 0">{{ chatMessages.length }} messages</span>
-                        <span v-else>Powered by Ollama llama3</span>
+                        <span v-else>Powered by DeepInfra Qwen2.5-VL-32B</span>
                       </div>
                       <button 
                         v-if="chatMessages.length > 0"
@@ -647,6 +566,7 @@ import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 
 // Import our new components
 import FileManager from '~/components/analysis/FileManager.vue';
@@ -697,10 +617,14 @@ const {
   isAnalyzingOllama,
   ollamaStatus,
   ollamaSummary,
+  isAnalyzingDeepInfra,
+  deepInfraStatus,
+  deepInfraSummary,
   summarizeText,
   analyzeWithOpenAI,
   analyzeWithGensim,
   analyzeWithOllama,
+  analyzeWithDeepInfra,
   clearAnalysisResults,
   
   // Chat functionality
@@ -814,7 +738,6 @@ const handleViewPdf = async (fileName) => {
   }
 };
 
-// Analysis methods using composables
 const handleSummarizeText = async () => {
   const success = await summarizeText(extractedText.value);
   if (success) {
@@ -839,6 +762,14 @@ const handleAnalyzeWithGensim = async () => {
 const handleAnalyzeWithOllama = async () => {
   console.log('Ollama clicked, extractedText length:', extractedText.value?.length);
   const success = await analyzeWithOllama(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzeWithDeepInfra = async () => {
+  console.log('DeepInfra clicked, extractedText length:', extractedText.value?.length);
+  const success = await analyzeWithDeepInfra(extractedText.value);
   if (success) {
     setActiveTab('analysis');
   }
@@ -987,6 +918,10 @@ onUnmounted(() => {
   border-color: #22c55e;
 }
 
+.btn-auth-outline.text-orange-400:hover:not(:disabled) {
+  border-color: #f97316;
+}
+
 /* Property Blueprint Background - matching sign-in page */
 .property-background {
   position: relative;
@@ -1049,5 +984,37 @@ onUnmounted(() => {
 /* Enhanced card layouts */
 .aspect-square {
   aspect-ratio: 1;
+}
+
+/* Use Apple system font on Analysis page */
+.font-apple {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px; /* slightly larger base size */
+  line-height: 1.45;
+}
+</style>
+
+<style scoped>
+:deep(.tabs-dark) {
+  background: rgba(17, 24, 39, 0.6) !important; /* dark slate */
+  border-color: #374151 !important; /* md gray */
+}
+
+:deep(.tabs-dark) :deep(button) {
+  background: transparent !important;
+  color: #9ca3af !important; /* gray-400 */
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.5rem !important;
+}
+
+:deep(.tabs-dark) :deep(button[aria-selected="true"]) {
+  background: #374151 !important; /* gray-700 */
+  color: #4ade80 !important; /* green-400 */
+  font-weight: 700 !important;
+}
+
+:deep(.tabs-dark) :deep(button):hover {
+  background: rgba(55,65,81,0.45) !important;
+  color: #d1d5db !important;
 }
 </style>
