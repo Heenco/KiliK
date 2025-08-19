@@ -32,7 +32,7 @@ export default defineEventHandler(async (event: H3Event): Promise<SummaryRespons
     console.log('--- END TEXT ---');
 
     // Get OpenAI API key from environment variables
-    const OPENAI_API_KEY = '';
+    const OPENAI_API_KEY = 'testtest';
     
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key is missing');

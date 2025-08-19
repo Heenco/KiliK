@@ -282,7 +282,7 @@
                             </svg>
                             DeepInfra Analysis
                           </h5>
-                          <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ deepInfraSummary }}</div>
+                          <div class="text-gray-300 text-sm leading-relaxed markdown-content" v-html="renderMarkdown(deepInfraSummary)"></div>
                         </div>
                         
                         <!-- Issues List -->
@@ -815,6 +815,32 @@ const handleNavigateImage = (direction) => {
   navigateImage(direction, extractedImages.value);
 };
 
+// Markdown rendering function
+const renderMarkdown = (text) => {
+  if (!text) return '';
+  
+  // Simple markdown to HTML conversion
+  let html = text
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-gray-200 mt-4 mb-2">$1</h3>')
+    .replace(/^#### (.*$)/gim, '<h4 class="text-base font-semibold text-gray-200 mt-3 mb-2">$1</h4>')
+    .replace(/^##### (.*$)/gim, '<h5 class="text-sm font-semibold text-gray-200 mt-2 mb-1">$1</h5>')
+    
+    // Bold text
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>')
+    
+    // Bullet points
+    .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">$1</li>')
+    
+    // Wrap consecutive list items in ul tags
+    .replace(/(<li.*<\/li>\s*)+/g, '<ul class="list-disc list-inside mb-3 space-y-1">$&</ul>')
+    
+    // Line breaks
+    .replace(/\n/g, '<br>');
+  
+  return html;
+};
+
 // Setup and cleanup
 let keyboardCleanup = null;
 
@@ -991,6 +1017,33 @@ onUnmounted(() => {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 16px; /* slightly larger base size */
   line-height: 1.45;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content h3 {
+  border-bottom: 1px solid #374151;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-content h4 {
+  border-bottom: 1px solid #4b5563;
+  padding-bottom: 0.25rem;
+}
+
+.markdown-content ul {
+  padding-left: 1rem;
+}
+
+.markdown-content li {
+  position: relative;
+}
+
+.markdown-content strong {
+  color: #f3f4f6;
 }
 </style>
 
