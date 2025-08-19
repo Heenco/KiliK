@@ -1,11 +1,11 @@
-<template>  <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-blue hover:-translate-y-2 transition-all">
+<template>  <div class="p-6 bg-card/80 backdrop-blur rounded-lg shadow-lg border border-border hover:shadow-blue hover:-translate-y-2 transition-all">
     <h2 class="text-xl font-bold text-green-400 mb-2">Accessibility</h2>
-    <p class="text-gray-300 text-sm mb-4">Assess ease of access to amenities and transportation.</p>
+    <p class="text-muted-foreground text-sm mb-4">Assess ease of access to amenities and transportation.</p>
     
     <!-- Loading state -->
     <div v-if="isLoading" class="mt-4 flex items-center justify-center py-2">
       <div class="h-5 w-5 rounded-full border-2 border-t-transparent border-green-400 animate-spin"></div>
-      <span class="ml-2 text-gray-300 text-sm">Calculating walkability...</span>
+      <span class="ml-2 text-muted-foreground text-sm">Calculating walkability...</span>
     </div>
     
     <!-- Error state -->
@@ -20,21 +20,21 @@
           <span class="font-bold text-lg">{{ walkabilityData.score }}</span>
         </div>
         <div>
-          <div class="text-white font-medium">Walkability Score</div>
-          <div class="text-xs text-gray-300">{{ scoreDescription }}</div>
+          <div class="text-card-foreground font-medium">Walkability Score</div>
+          <div class="text-xs text-muted-foreground">{{ scoreDescription }}</div>
         </div>
       </div>
       
       <div class="mt-4 space-y-2">
         <div v-for="(item, index) in walkabilityData.radarData" :key="index" class="flex justify-between items-center">
-          <span class="text-gray-300">{{ item.name }}</span>
+          <span class="text-card-foreground">{{ item.name }}</span>
           <span class="px-2 py-1 rounded text-xs" :class="getRatingClass(item.value)">
             {{ getRatingText(item.value) }}
           </span>
         </div>
         
-        <div v-if="coordinates" class="mt-4 pt-2 border-t border-gray-700">
-          <div class="text-xs text-gray-400 flex items-center justify-between">
+        <div v-if="coordinates" class="mt-4 pt-2 border-t border-border">
+          <div class="text-xs text-muted-foreground flex items-center justify-between">
             <span>{{ walkabilityData.totalPOIs }} points of interest found</span>
             <button 
               v-if="showChartButton" 
@@ -56,15 +56,15 @@
     <!-- Fallback state (if no data) -->
     <div v-else class="mt-4 space-y-2">
       <div class="flex justify-between items-center">
-        <span class="text-gray-300">Public Transit</span>
+        <span class="text-card-foreground">Public Transit</span>
         <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">High</span>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300">Schools</span>
+        <span class="text-card-foreground">Schools</span>
         <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">High</span>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300">Shopping</span>
+        <span class="text-card-foreground">Shopping</span>
         <span class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">Medium</span>
       </div>
     </div>

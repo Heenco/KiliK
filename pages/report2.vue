@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900">
+  <div class="min-h-screen flex flex-col bg-background text-foreground">
     <!-- Header -->
     <Header />
 
@@ -8,11 +8,11 @@
       
       
       <!-- Property Info Card - Full Width -->
-      <div class="bg-gray-800 rounded-lg shadow-lg mb-6 overflow-hidden">
+      <div class="bg-card/80 backdrop-blur rounded-lg shadow-lg border border-border mb-6 overflow-hidden">
         <div class="flex flex-col md:flex-row">
           <!-- Address Information -->          <div class="p-6 flex-1">            <div class="mb-4">
-              <p class="text-3xl text-white font-semibold">{{ address.split(',')[0] }}</p>
-              <p class="text-base text-white text-opacity-80 mt-1">{{ address.split(',').slice(1, -1).join(',') }}</p>
+              <p class="text-3xl text-card-foreground font-semibold">{{ address.split(',')[0] }}</p>
+              <p class="text-base text-muted-foreground mt-1">{{ address.split(',').slice(1, -1).join(',') }}</p>
               <div v-if="property.lotDetails" class="inline-flex items-center mt-2">
                 <span class="px-2 py-1 text-xs rounded bg-blue-400/20 text-blue-400 font-medium">
                   {{ property.lotDetails.lotplan }}
@@ -21,7 +21,7 @@
                 <a 
                   @click="goToMap"
                   href="javascript:void(0)"
-                  class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm font-medium transition duration-150 cursor-pointer ml-4"
+                  class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition duration-150 cursor-pointer ml-4"
                 >
                   <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -31,28 +31,28 @@
                 </a>
               </div>
               <div v-else-if="isLoadingLotDetails" class="mt-2">
-                <span class="text-xs text-gray-400">Loading property details...</span>
+                <span class="text-xs text-muted-foreground">Loading property details...</span>
               </div>
             </div>            <div class="grid grid-cols-2 gap-4 mt-4">              
               <div class="border-l-2 border-green-400 pl-3">
-                <p class="text-sm text-gray-400">Property Type</p>
-                <p class="text-lg text-white">
+                <p class="text-sm text-muted-foreground">Property Type</p>
+                <p class="text-lg text-card-foreground">
                   {{ property.lotDetails?.tenure || 'Residential' }}
                 </p>
               </div>
 
               <div v-if="property.lotDetails?.shire_name" class="border-l-2 border-purple-400 pl-3 md:mt-2">
-                <p class="text-sm text-gray-400">Local Government</p>
-                <p class="text-lg text-white">{{ property.lotDetails.shire_name }}</p>
+                <p class="text-sm text-muted-foreground">Local Government</p>
+                <p class="text-lg text-card-foreground">{{ property.lotDetails.shire_name }}</p>
               </div>
 
               <div v-if="property.lotDetails?.lot_area" class="border-l-2 border-yellow-400 pl-3">
-                <p class="text-sm text-gray-400">Land Area</p>
-                <p class="text-lg text-white">{{ property.lotDetails.lot_area }} m²</p>
+                <p class="text-sm text-muted-foreground">Land Area</p>
+                <p class="text-lg text-card-foreground">{{ property.lotDetails.lot_area }} m²</p>
               </div>
             </div></div>
             <!-- Property Image with 360 Street View -->          <div class="md:w-1/4 relative h-20 md:h-auto p-2">
-            <div class="border-2 border-gray-600 rounded-lg shadow-lg overflow-hidden h-full relative">
+            <div class="border-2 border-border rounded-lg shadow-lg overflow-hidden h-full relative">
               <div class="h-full cursor-pointer group" @click="openStreetView360">
                 <img
                   :src="propertyImageUrl"
@@ -60,7 +60,7 @@
                   class="object-cover w-full h-full"
                   @error="imageError = true"
                 />
-                <div v-if="imageError" class="absolute inset-0 flex items-center justify-center bg-gray-700 text-gray-400 text-sm font-semibold">
+                <div v-if="imageError" class="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground text-sm font-semibold">
                   No Image available
                 </div>
                 <div v-else class="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -77,7 +77,7 @@
                 :href="property.lotDetails.smis_map" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                class="text-xs flex items-center justify-center py-1 px-2 bg-gray-700 hover:bg-gray-600 text-blue-300 rounded transition duration-150"
+                class="text-xs flex items-center justify-center py-1 px-2 bg-secondary hover:bg-secondary/80 text-blue-400 rounded transition duration-150"
               >
                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
@@ -109,13 +109,13 @@
         <FinancialAssessmentCard />
       </div>
         <!-- AI-Powered Financial Assessment -->
-      <div class="mt-6">
+      <!-- <div class="mt-6">
         <FinancialAssessment2Card />
-      </div>        <!-- Price Estimate Card -->
+      </div> -->        <!-- Price Estimate Card -->
       <!-- Property Search Card -->
-      <div class="mt-6">
+      <!-- <div class="mt-6">
         <PropertySearch />
-      </div>
+      </div> -->
       
       <!-- Building Specifications Card -->
       <div class="mt-6">
@@ -135,26 +135,26 @@
       <button 
         @click="generatePDF" 
         :disabled="isGeneratingPDF"
-        class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-all transform hover:scale-105"
+        class="bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground px-6 py-3 rounded-lg shadow-lg border border-border flex items-center space-x-2 transition-all transform hover:scale-105"
       >
         <svg v-if="!isGeneratingPDF" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div v-else class="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
         <span>{{ isGeneratingPDF ? 'Generating...' : 'Generate PDF' }}</span>
       </button>
     </div>
 
     <!-- Footer -->
-    <footer class="py-4 bg-gray-900 text-center text-gray-400 text-sm">
+    <footer class="py-4 bg-card text-center text-muted-foreground text-sm border-t border-border">
       © 2025 CliQ Property Insights
     </footer>
 
     <!-- Street View Modal -->
     <div v-if="showStreetView360" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div class="relative w-full max-w-5xl h-[80vh] bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+      <div class="relative w-full max-w-5xl h-[80vh] bg-card rounded-lg shadow-xl border border-border overflow-hidden">
         <div class="w-full h-full" id="street-view-360"></div>
-        <button @click="closeStreetView360" class="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-gray-700 rounded-full p-2 shadow transition">
+        <button @click="closeStreetView360" class="absolute top-4 right-4 z-10 bg-background/80 hover:bg-background text-foreground rounded-full p-2 shadow transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -432,16 +432,16 @@ function initStreetView360() {
           });
         } else {
           // Show error if no street view available
-          svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-700 text-gray-400 text-lg font-semibold">No Street View available for this location.</div>';
+          svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-muted text-muted-foreground text-lg font-semibold">No Street View available for this location.</div>';
         }
       });
     } else {
       // Show error for missing coordinates
-      svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-700 text-gray-400 text-lg font-semibold">Missing coordinates for Street View.</div>';
+      svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-muted text-muted-foreground text-lg font-semibold">Missing coordinates for Street View.</div>';
     }
   } else {
     // Google Maps API not loaded
-    svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-700 text-gray-400 text-lg font-semibold">Google Maps API not loaded.</div>';
+    svDiv.innerHTML = '<div class="flex items-center justify-center h-full bg-muted text-muted-foreground text-lg font-semibold">Google Maps API not loaded.</div>';
   }
 }
 </script>
@@ -452,7 +452,7 @@ main {
 }
 
 footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid hsl(var(--border));
 }
 
 .hover\:shadow-green:hover {
@@ -490,10 +490,5 @@ footer {
   to { opacity: 1; }
 }
 
-/* Subtle grid pattern for cards */
-.bg-gray-800 {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-color: rgb(31, 41, 55);
-}
+/* Remove old grid pattern - now using design tokens */
 </style>

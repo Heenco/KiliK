@@ -1,7 +1,7 @@
 <template>
   <div class="distance-matrix">
     <!-- Tabs navigation -->
-    <div class="flex border-b border-gray-700 mb-3">
+    <div class="flex border-b border-border mb-3">
       <button 
         v-for="(tab, index) in categories" 
         :key="index"
@@ -10,7 +10,7 @@
         :class="[
           activeTab === tab 
             ? 'text-green-400 border-b-2 border-green-400' 
-            : 'text-gray-400 hover:text-gray-300'
+            : 'text-muted-foreground hover:text-foreground'
         ]"
       >
         {{ formatCategoryName(tab) }}
@@ -20,22 +20,22 @@
     <!-- Tab content -->
     <div v-if="places[activeTab] && places[activeTab].length > 0" class="text-sm">
       <div class="max-h-[200px] overflow-y-auto pr-1">
-        <div v-for="(place, index) in places[activeTab]" :key="index" class="flex justify-between py-1.5 border-b border-gray-700/50">
-          <div class="text-gray-300 truncate pr-2 flex-1">
+        <div v-for="(place, index) in places[activeTab]" :key="index" class="flex justify-between py-1.5 border-b border-border/50">
+          <div class="text-card-foreground truncate pr-2 flex-1">
             {{ place.name || `${formatCategoryName(activeTab)} #${index + 1}` }}
           </div>
-          <div class="text-gray-300 flex-shrink-0">
-            <span class="text-green-400">{{ formatDistance(place.distance) }}</span>
+          <div class="text-card-foreground flex-shrink-0">
+            <span class="text-muted-foreground">{{ formatDistance(place.distance) }}</span>
           </div>
         </div>
       </div>
       
-      <div class="mt-2 text-xs text-gray-400">
+      <div class="mt-2 text-xs text-muted-foreground">
         Showing {{ places[activeTab].length }} nearby {{ formatCategoryName(activeTab).toLowerCase() }} locations
       </div>
     </div>
     
-    <div v-else class="text-center py-4 text-gray-400 text-sm">
+    <div v-else class="text-center py-4 text-muted-foreground text-sm">
       No nearby {{ formatCategoryName(activeTab).toLowerCase() }} found
     </div>
   </div>
@@ -83,7 +83,7 @@ const formatCategoryName = (category) => {
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: rgba(31, 41, 55, 0.5);
+  background: hsl(var(--muted) / 0.5);
   border-radius: 3px;
 }
 

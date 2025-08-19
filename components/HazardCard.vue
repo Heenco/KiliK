@@ -1,12 +1,12 @@
 <template>
-  <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-green hover:-translate-y-2 transition-all">
-    <h2 class="text-xl font-bold text-white mb-2">Hazard</h2>
-    <p class="text-gray-300 text-sm mb-4">Evaluate potential risks and hazards in the area.</p>
+  <div class="p-6 bg-card/80 backdrop-blur rounded-lg shadow-lg border border-border hover:shadow-green hover:-translate-y-2 transition-all">
+    <h2 class="text-xl font-bold text-card-foreground mb-2">Hazard</h2>
+    <p class="text-muted-foreground text-sm mb-4">Evaluate potential risks and hazards in the area.</p>
     <div class="mt-4 space-y-2">
       <div class="flex justify-between items-center">
-        <span class="text-gray-300 cursor-pointer hover:text-gray-100" @click="loadFloodRiskManually">Flood Risk</span>
+        <span class="text-card-foreground cursor-pointer hover:text-foreground" @click="loadFloodRiskManually">Flood Risk</span>
         <div>
-          <div v-if="isLoadingFloodRisk" class="px-2 py-1 bg-gray-600/50 text-gray-300 rounded text-xs">
+          <div v-if="isLoadingFloodRisk" class="px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs">
             Loading...
           </div>
           <div v-else-if="floodRiskError" class="px-2 py-1 bg-red-400/20 text-red-400 rounded text-xs">
@@ -23,16 +23,16 @@
               }"
               :title="getFloodRiskTooltip()"
             >
-              {{ property.highestFloodRisk.flood_risk }} ({{ property.highestFloodRisk.flood_type }})
+              {{ property.highestFloodRisk.flood_risk }}
             </span>          </div>          <span v-else class="px-2 py-1 bg-green-400/20 text-green-400 rounded text-xs">
             No flood risk detected
           </span>
         </div>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300 cursor-pointer hover:text-gray-100" @click="loadBushfireRiskManually">Bushfire Risk</span>
+        <span class="text-card-foreground cursor-pointer hover:text-foreground" @click="loadBushfireRiskManually">Bushfire Risk</span>
         <div>
-          <div v-if="isLoadingBushfireRisk" class="px-2 py-1 bg-gray-600/50 text-gray-300 rounded text-xs">
+          <div v-if="isLoadingBushfireRisk" class="px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs">
             Loading...
           </div>
           <div v-else-if="bushfireRiskError" class="px-2 py-1 bg-red-400/20 text-red-400 rounded text-xs">
@@ -58,9 +58,9 @@
         </div>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300 cursor-pointer hover:text-gray-100" @click="loadNoiseRiskManually">Noise Risk</span>
+        <span class="text-card-foreground cursor-pointer hover:text-foreground" @click="loadNoiseRiskManually">Noise Risk</span>
         <div>
-          <div v-if="isLoadingNoiseRisk" class="px-2 py-1 bg-gray-600/50 text-gray-300 rounded text-xs">
+          <div v-if="isLoadingNoiseRisk" class="px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs">
             Loading...
           </div>
           <div v-else-if="noiseRiskError" class="px-2 py-1 bg-red-400/20 text-red-400 rounded text-xs">
@@ -88,9 +88,9 @@
         </div>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300 cursor-pointer hover:text-gray-100" @click="loadCoastalErosionRiskManually">Coastal Erosion Risk</span>
+        <span class="text-card-foreground cursor-pointer hover:text-foreground" @click="loadCoastalErosionRiskManually">Coastal Erosion Risk</span>
         <div>
-          <div v-if="isLoadingCoastalErosionRisk" class="px-2 py-1 bg-gray-600/50 text-gray-300 rounded text-xs">
+          <div v-if="isLoadingCoastalErosionRisk" class="px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs">
             Loading...
           </div>
           <div v-else-if="coastalErosionRiskError" class="px-2 py-1 bg-red-400/20 text-red-400 rounded text-xs">
@@ -116,9 +116,9 @@
         </div>
       </div>
       <div class="flex justify-between items-center">
-        <span class="text-gray-300 cursor-pointer hover:text-gray-100" @click="loadAcidSulfateRiskManually">Acid Sulfate Risk</span>
+        <span class="text-card-foreground cursor-pointer hover:text-foreground" @click="loadAcidSulfateRiskManually">Acid Sulfate Risk</span>
         <div>
-          <div v-if="isLoadingAcidSulfateRisk" class="px-2 py-1 bg-gray-600/50 text-gray-300 rounded text-xs">
+          <div v-if="isLoadingAcidSulfateRisk" class="px-2 py-1 bg-muted/50 text-muted-foreground rounded text-xs">
             Loading...
           </div>
           <div v-else-if="acidSulfateRiskError" class="px-2 py-1 bg-red-400/20 text-red-400 rounded text-xs">

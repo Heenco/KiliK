@@ -1,8 +1,31 @@
 <template>
-  <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-purple hover:-translate-y-2 transition-all">
-    <h2 class="text-xl font-bold text-purple-400 mb-2">
-      Building Specifications
-    </h2>
+  <div class="p-6 bg-card/80 backdrop-blur rounded-lg shadow-lg border border-border hover:shadow-purple hover:-translate-y-2 transition-all relative">
+    <!-- Coming Soon Overlay -->
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+      <div class="text-center">
+        <div class="mb-4">
+          <svg class="w-16 h-16 mx-auto text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-foreground mb-2">Coming Soon</h3>
+        <p class="text-muted-foreground text-sm max-w-xs mx-auto">Detailed building specifications and construction data will be available shortly.</p>
+        <div class="mt-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Detailed Analysis
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Original Content (blurred in background) -->
+    <div class="filter blur-sm">
+      <h2 class="text-xl font-bold text-purple-400 mb-2">
+        Building Specifications
+      </h2>
     
     <!-- Loading state -->
     <div v-if="isLoading" class="mt-4 flex items-center justify-center py-2">
@@ -287,6 +310,7 @@
         </div>
       </div>
     </div>
+    </div> <!-- End of blurred content -->
   </div>
 </template>
 

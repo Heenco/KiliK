@@ -1,8 +1,31 @@
-<template>  <div class="p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-purple hover:-translate-y-2 transition-all">
-    <h2 class="text-xl font-bold text-purple-400 mb-2">
-      Financial Assessment
-      <span class="ml-2 text-sm font-normal text-gray-400">{{ financialData.recommendationText }}</span>
-    </h2>
+<template>  <div class="p-6 bg-card/80 backdrop-blur rounded-lg shadow-lg border border-border hover:shadow-purple hover:-translate-y-2 transition-all relative">
+    <!-- Coming Soon Overlay -->
+    <div class="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+      <div class="text-center">
+        <div class="mb-4">
+          <svg class="w-16 h-16 mx-auto text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-foreground mb-2">Coming Soon</h3>
+        <p class="text-muted-foreground text-sm max-w-xs mx-auto">Advanced financial analysis and property investment insights will be available shortly.</p>
+        <div class="mt-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            Enhanced Features
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Original Content (blurred in background) -->
+    <div class="filter blur-sm">
+      <h2 class="text-xl font-bold text-purple-400 mb-2">
+        Financial Assessment
+        <span class="ml-2 text-sm font-normal text-muted-foreground">{{ financialData.recommendationText }}</span>
+      </h2>
     
     <!-- Loading state -->
     <div v-if="isLoading" class="mt-4 flex items-center justify-center py-2">
@@ -356,6 +379,7 @@
         </div>
       </div>
     </div>
+    </div> <!-- End of blurred content -->
   </div>
 </template>
 
