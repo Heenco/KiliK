@@ -46,8 +46,10 @@
               <div class="py-2 px-3 border-b border-border">
                 <div class="text-xs text-muted-foreground mb-2">Navigation</div>
                 <div class="grid grid-cols-2 gap-2">
+                  <NuxtLink to="/blog" class="p-2 rounded hover:bg-accent text-foreground text-xs">Blog</NuxtLink>
                   <NuxtLink to="/map" class="p-2 rounded hover:bg-accent text-foreground text-xs">Map</NuxtLink>
                   <NuxtLink to="/analysis" class="p-2 rounded hover:bg-accent text-foreground text-xs">Analysis</NuxtLink>
+                  <NuxtLink to="/products" class="p-2 rounded hover:bg-accent text-foreground text-xs">Pricing</NuxtLink>
                 </div>
               </div>
               
@@ -62,6 +64,18 @@
                 <div class="font-medium text-sm mb-1 text-foreground">Welcome to KiliK</div>
                 <div class="text-xs text-muted-foreground">Sign in to access your account</div>
               </div>
+              
+              <!-- Navigation Links for non-authenticated users -->
+              <div class="py-2 px-3 border-b border-border">
+                <div class="text-xs text-muted-foreground mb-2">Explore</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <NuxtLink to="/blog" class="p-2 rounded hover:bg-accent text-foreground text-xs">Blog</NuxtLink>
+                  <NuxtLink to="/products" class="p-2 rounded hover:bg-accent text-foreground text-xs">Pricing</NuxtLink>
+                  <NuxtLink to="/index2" class="p-2 rounded hover:bg-accent text-foreground text-xs">Vision</NuxtLink>
+                  <NuxtLink to="/" class="p-2 rounded hover:bg-accent text-foreground text-xs">Search</NuxtLink>
+                </div>
+              </div>
+              
               <div class="py-2"></div> <!-- Extra space above sign in button -->
               <DropdownMenuItem as-child class="p-3">
                 <Button @click="signIn" class="w-full text-left text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border transition-all duration-300 hover:border-ring hover:shadow-md">Sign In</Button>

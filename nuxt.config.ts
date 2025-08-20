@@ -54,7 +54,7 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ["shadcn-nuxt", 'nuxt-lucide-icons', '@i2d/nuxt-pdf-frame','@nuxtjs/supabase'],
+  modules: ["shadcn-nuxt", 'nuxt-lucide-icons', '@i2d/nuxt-pdf-frame','@nuxtjs/supabase', '@nuxt/content'],
   shadcn: {
     /**
      * Prefix for all the imported component
@@ -83,7 +83,7 @@ export default defineNuxtConfig({
   redirectOptions: {
     login: '/signin',
     callback: '/confirm',
-    exclude: ['/', '/signin', '/confirm', '/PDF_report/pdf','/PDF_report/simple'],
+    exclude: ['/', '/signin', '/confirm', '/PDF_report/pdf','/PDF_report/simple', '/blog', '/blog/**'],
   },
 },
 });

@@ -47,11 +47,75 @@
             </button>
           </div>
         </div>
-      </main>      <div class="w-full flex justify-center items-center mb-2">
+      </main>
+
+      <!-- Featured Blog Posts Section -->
+      <section class="w-full max-w-6xl mx-auto px-4 py-16 mt-8">
+        <div class="text-center mb-12">
+          <h3 class="text-2xl md:text-3xl font-bold text-foreground mb-4">
+            Latest Property Insights
+          </h3>
+          <p class="text-muted-foreground max-w-2xl mx-auto">
+            Expert guides and market insights to help you make informed property decisions
+          </p>
+        </div>
+
+        <div v-if="featuredPosts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article 
+            v-for="post in featuredPosts" 
+            :key="post.slug"
+            class="group bg-card/50 backdrop-blur rounded-lg border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+            @click="router.push(`/blog/${post.slug}`)"
+          >
+            <!-- Image -->
+            <div class="aspect-video overflow-hidden">
+              <img 
+                :src="post.image" 
+                :alt="post.title"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            
+            <!-- Content -->
+            <div class="p-4">
+              <!-- Category Badge -->
+              <div class="mb-3">
+                <span 
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                  :class="post.categoryClass"
+                >
+                  {{ post.category }}
+                </span>
+              </div>
+
+              <!-- Title -->
+              <h4 class="font-semibold text-card-foreground mb-2 line-clamp-2 leading-tight">
+                {{ post.title }}
+              </h4>
+
+              <!-- Description -->
+              <p class="text-muted-foreground text-sm line-clamp-2 mb-4">
+                {{ post.description }}
+              </p>
+
+              <!-- Meta -->
+              <div class="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{{ post.readTime }} min read</span>
+                <span>{{ post.date }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div v-else class="text-center">
+          <p class="text-muted-foreground">Loading blog posts... ({{ featuredPosts.length }} posts found)</p>
+        </div>
+      </section>
+
+      <div class="w-full flex justify-center items-center mb-2">
         <nav class="flex gap-6">
-          <a href="#" class="text-muted-foreground hover:text-foreground transition text-xs">Blog</a>
+          <NuxtLink to="/blog" class="text-muted-foreground hover:text-foreground transition text-xs">Blog</NuxtLink>
           <NuxtLink to="/products" class="text-muted-foreground hover:text-foreground transition text-xs">Pricing</NuxtLink>
-          <NuxtLink to="/index2" class="text-muted-foreground hover:text-foreground transition text-xs">Alternative Home</NuxtLink>
+          <NuxtLink to="/index2" class="text-muted-foreground hover:text-foreground transition text-xs">Vision</NuxtLink>
         </nav>
       </div>
       <footer class="w-full py-4 mt-0 border-t border-border text-center text-muted-foreground text-xs">
@@ -62,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { SearchIcon, MapPinIcon, ChevronRightIcon } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -73,6 +137,67 @@ const searchQuery = ref('')
 const suggestions = ref([])
 const debounceTimeout = ref(null)
 const router = useRouter()
+
+// Blog posts functionality - load from API
+const featuredPosts = ref([])
+
+// Load featured posts from API
+const loadFeaturedPosts = async () => {
+  try {
+    console.log('Attempting to fetch blog posts from API...')
+    const posts = await $fetch('/api/blog/featured')
+    console.log('API response:', posts)
+    featuredPosts.value = posts
+    
+    if (!posts || posts.length === 0) {
+      console.log('No posts returned from API, using fallback')
+      throw new Error('No posts returned')
+    }
+  } catch (error) {
+    console.error('Error loading featured posts:', error)
+    // Fallback to static data if API fails
+    featuredPosts.value = [
+      {
+        slug: 'neighborhood-safety-evaluation',
+        title: 'Evaluate Neighborhood Safety',
+        description: 'Access comprehensive, up-to-date crime statistics to assess the safety of the area.',
+        image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop&auto=format',
+        category: 'Safety',
+        categoryClass: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400',
+        readTime: 5,
+        date: '2024-12-15'
+      },
+      {
+        slug: 'flood-risk-assessment',
+        title: 'Assess Flood Risk Levels',
+        description: 'Evaluate flood risk levels for properties using detailed historical data to avoid future surprises.',
+        image: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=800&h=600&fit=crop&auto=format',
+        category: 'Risk Assessment',
+        categoryClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
+        readTime: 7,
+        date: '2024-12-12'
+      },
+      {
+        slug: 'property-investment-tips',
+        title: 'Smart Property Investment Strategies',
+        description: 'Learn proven strategies for property investment success.',
+        image: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=800&h=600&fit=crop&auto=format',
+        category: 'Investment',
+        categoryClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+        readTime: 10,
+        date: '2024-12-10'
+      }
+    ]
+    console.log('Using fallback posts:', featuredPosts.value)
+  }
+}
+
+// Load posts when component mounts
+onMounted(async () => {
+  console.log('Component mounted, loading featured posts...')
+  await loadFeaturedPosts()
+  console.log('Featured posts after load:', featuredPosts.value)
+})
 
 const handleSearch = async () => {
   if (debounceTimeout.value) clearTimeout(debounceTimeout.value)
@@ -268,5 +393,19 @@ const buttonClass = "hover:bg-orange-500/10 text-gray-200"
 .scrollbar-thumb-gray-700::-webkit-scrollbar-thumb {
   background: hsl(var(--muted-foreground));
   border-radius: 3px;
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Blog card hover effects */
+.group:hover .group-hover\:scale-105 {
+  transform: scale(1.05);
 }
 </style>
