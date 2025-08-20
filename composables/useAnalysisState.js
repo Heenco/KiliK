@@ -71,10 +71,19 @@ export const useAnalysisState = () => {
     console.log('selectReport called with:', reportId)
     selectedReportId.value = reportId
     console.log('selectedReportId.value is now:', selectedReportId.value)
+    
+    // Automatically set active tab to overview when selecting a report
+    activeTab.value = 'overview'
+    console.log('Automatically selected overview tab')
   }
 
   const setActiveTab = (tabId) => {
     activeTab.value = tabId
+  }
+
+  // Simple initialization function to ensure overview tab is selected
+  const initializeState = () => {
+    activeTab.value = 'overview'
   }
 
   const clearAllResults = () => {
@@ -111,6 +120,7 @@ export const useAnalysisState = () => {
     selectReport,
     setActiveTab,
     clearAllResults,
-    getCurrentState
+    getCurrentState,
+    initializeState
   }
 }

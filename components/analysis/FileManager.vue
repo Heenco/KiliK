@@ -16,6 +16,7 @@
 <script setup>
 import UploadArea from './UploadArea.vue'
 import FilesList from './FilesList.vue'
+import { onMounted, watch } from 'vue'
 
 // Props
 const props = defineProps({
@@ -56,4 +57,32 @@ const handleFileUploaded = async () => {
     emit('report-selected', newestFile.id)
   }
 }
+
+// Auto-select first report on initial load if none is selected
+onMounted(async () => {
+  // Make sure we have the latest files
+  await fetchUserFiles()
+  
+  // If there are files but no selection, auto-select the first file
+  if (uploadedFiles.value.length > 0 && !props.selectedReportId) {
+    console.log('Initial load: Auto-selecting first file:', uploadedFiles.value[0].id)
+    emit('report-selected', uploadedFiles.value[0].id)
+  }
+})
+
+// Watch for changes in uploaded files list
+watch(uploadedFiles, (newFiles) => {
+  // If we now have files but nothing is selected, select the first one
+  if (newFiles.length > 0 && !props.selectedReportId) {
+    console.log('Files loaded: Auto-selecting first file:', newFiles[0].id)
+    emit('report-selected', newFiles[0].id)
+  }
+  
+  // If selected file was deleted, clear selection
+  if (props.selectedReportId && newFiles.length > 0 && 
+      !newFiles.some(file => file.id === props.selectedReportId)) {
+    console.log('Selected file no longer exists, selecting first available file')
+    emit('report-selected', newFiles[0].id)
+  }
+}, { deep: true })
 </script>

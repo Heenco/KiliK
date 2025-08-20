@@ -1,22 +1,24 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-900 text-gray-100 pt-20 property-background font-apple">
+  <div class="min-h-screen flex flex-col bg-background text-foreground property-background">
     <!-- Property Grid Background -->
     <div class="property-grid"></div>
-    <div class="max-w-screen-2xl mx-auto px-6 py-8 relative z-10">
-      <div class="max-w-screen-2xl mx-auto">
+    <div class="container mx-auto px-4 flex-1 flex flex-col">
+      
+      <!-- Main Content -->
+      <main class="flex flex-col items-center min-h-[60vh] py-6 flex-1 pt-20">
         
         <!-- Header with Report Selector -->
-        <div class="mb-8">
+        <div class="w-full max-w-screen-2xl mb-8">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h1 class="text-2xl font-bold text-gray-100">Analysis Dashboard</h1>
-              <p class="text-sm text-gray-400">Upload and analyze your inspection reports with AI</p>
+              <h1 class="text-2xl font-bold text-foreground">Analysis Dashboard</h1>
+              <p class="text-sm text-muted-foreground">Upload and analyze your inspection reports with AI</p>
             </div>
           </div>
         </div>
 
         <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-[calc(100vh-5rem)]">
+        <div class="w-full max-w-screen-2xl grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-[calc(100vh-5rem)]">
           
           <!-- Left Sidebar - Upload & Reports List (full-height) -->
           <div class="lg:col-span-1 flex min-h-0">
@@ -44,8 +46,8 @@
               <svg class="mx-auto h-16 w-16 text-green-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
               </svg>
-              <h3 class="text-base font-medium text-gray-300 mb-2">Loading Report</h3>
-              <p class="text-sm text-gray-500">Preparing report data...</p>
+              <h3 class="text-base font-medium text-foreground mb-2">Loading Report</h3>
+              <p class="text-sm text-muted-foreground">Preparing report data...</p>
             </div>
 
             <!-- Report Analysis Interface -->
@@ -58,23 +60,23 @@
               />
 
               <!-- Tabs Interface -->
-              <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl rounded-xl">
+              <Card class="border border-border bg-card/50 backdrop-blur shadow-xl rounded-xl">
                 <CardContent class="p-6">
                   <!-- Shadcn/ui Tabs Component -->
-                  <Tabs :value="activeTab" @update:value="setActiveTab" class="w-full">
-                    <TabsList class="bg-gray-800/50 border border-gray-700 p-1 rounded-lg w-full grid grid-cols-4 gap-1 mb-6 tabs-dark">
+                  <Tabs :value="activeTab || 'overview'" defaultValue="overview" @update:value="setActiveTab" class="w-full">
+                    <TabsList class="bg-muted/50 border border-border p-1 rounded-lg w-full grid grid-cols-4 gap-1 mb-6">
                       <TabsTrigger 
                         v-for="tab in tabs" 
                         :key="tab.id" 
                         :value="tab.id"
-                        class="data-[state=active]:bg-gray-700 data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-400 hover:text-gray-300 rounded-md transition-all duration-200 font-medium"
+                        class="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground rounded-md transition-all duration-200 font-medium"
                       >
                         <div class="flex items-center gap-2">
                           <!-- Analysis Icon - Enhanced Chart -->
                           <svg v-if="tab.icon === 'analysis-icon'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           </svg>
                           <span class="font-medium">{{ tab.name }}</span>
-                          <span v-if="tab.badge" class="ml-1 bg-gray-600 data-[state=active]:bg-green-500/20 text-gray-300 data-[state=active]:text-green-300 py-0.5 px-1.5 rounded-full text-xs font-medium">
+                          <span v-if="tab.badge" class="ml-1 bg-muted data-[state=active]:bg-green-500/20 text-muted-foreground data-[state=active]:text-green-600 py-0.5 px-1.5 rounded-full text-xs font-medium">
                           </span>
                         </div>
                       </TabsTrigger>
@@ -87,21 +89,21 @@
                         <svg class="mx-auto h-16 w-16 text-green-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">Loading Report</h3>
-                        <p class="text-sm text-gray-500">Preparing report for analysis...</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">Loading Report</h3>
+                        <p class="text-sm text-muted-foreground">Preparing report for analysis...</p>
                       </div>
                       
                       <!-- Report Not Processed State -->
                       <div v-else-if="!extractedText && !isProcessing" class="text-center py-12">
-                        <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">Report Not Processed</h3>
-                        <p class="text-sm text-gray-500 mb-6">Click "Process Report" to extract text and images from this PDF</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">Report Not Processed</h3>
+                        <p class="text-sm text-muted-foreground mb-6">Click "Process Report" to extract text and images from this PDF</p>
                         <button 
                           @click="handleProcessPdf(selectedReport.name)" 
                           :disabled="isProcessing"
-                          class="btn-auth"
+                          class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold shadow-sm hover:bg-primary/90 transition disabled:opacity-50"
                         >
                           {{ isProcessing ? 'Processing...' : 'Process Report' }}
                         </button>
@@ -112,20 +114,20 @@
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">Processing Report</h3>
-                        <p class="text-sm text-gray-500">{{ processingStatus || 'Extracting text and images...' }}</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">Processing Report</h3>
+                        <p class="text-sm text-muted-foreground">{{ processingStatus || 'Extracting text and images...' }}</p>
                       </div>
 
                       <div v-else class="space-y-4">
                         <!-- PDF Metadata -->
                         <div v-if="pdfMetadata">
-                          <h4 class="font-semibold text-gray-200 mb-4 text-sm tracking-wide">Document Information</h4>
-                          <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 backdrop-blur-sm">
+                          <h4 class="font-semibold text-foreground mb-4 text-sm tracking-wide">Document Information</h4>
+                          <div class="bg-card/50 border border-border rounded-xl p-4 backdrop-blur-sm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div v-if="pdfMetadata.title"><span class="text-gray-400 font-medium">Title:</span> <span class="text-gray-200">{{ pdfMetadata.title }}</span></div>
-                              <div v-if="pdfMetadata.author"><span class="text-gray-400 font-medium">Author:</span> <span class="text-gray-200">{{ pdfMetadata.author }}</span></div>
-                              <div v-if="pdfMetadata.pageCount"><span class="text-gray-400 font-medium">Pages:</span> <span class="text-gray-200">{{ pdfMetadata.pageCount }}</span></div>
-                              <div v-if="pdfMetadata.creator"><span class="text-gray-400 font-medium">Creator:</span> <span class="text-gray-200">{{ pdfMetadata.creator }}</span></div>
+                              <div v-if="pdfMetadata.title"><span class="text-muted-foreground font-medium">Title:</span> <span class="text-foreground">{{ pdfMetadata.title }}</span></div>
+                              <div v-if="pdfMetadata.author"><span class="text-muted-foreground font-medium">Author:</span> <span class="text-foreground">{{ pdfMetadata.author }}</span></div>
+                              <div v-if="pdfMetadata.pageCount"><span class="text-muted-foreground font-medium">Pages:</span> <span class="text-foreground">{{ pdfMetadata.pageCount }}</span></div>
+                              <div v-if="pdfMetadata.creator"><span class="text-muted-foreground font-medium">Creator:</span> <span class="text-foreground">{{ pdfMetadata.creator }}</span></div>
                             </div>
                           </div>
                         </div>
@@ -135,7 +137,7 @@
                     <!-- Images Tab -->
                     <TabsContent value="images" class="mt-0">
                       <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-gray-700 rounded-xl overflow-hidden bg-gray-800/50 hover:border-gray-500 transition-all duration-200 hover:shadow-lg aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
+                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-border rounded-xl overflow-hidden bg-card/50 hover:border-ring transition-all duration-200 hover:shadow-lg aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
                           <img 
                             :src="image" 
                             class="w-full h-full object-cover pointer-events-none" 
@@ -154,11 +156,11 @@
                         </div>
                       </div>
                       <div v-else class="text-center py-12">
-                        <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">No Images Found</h3>
-                        <p class="text-sm text-gray-500">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">No Images Found</h3>
+                        <p class="text-sm text-muted-foreground">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
                       </div>
                     </TabsContent>
 
@@ -167,37 +169,37 @@
                       <div v-if="extractedText" class="space-y-4">
                         <!-- Text Actions -->
                         <div class="flex justify-between items-center">
-                          <h4 class="font-semibold text-gray-200 text-sm tracking-wide">Extracted Text Content</h4>
+                          <h4 class="font-semibold text-foreground text-sm tracking-wide">Extracted Text Content</h4>
                         </div>
 
                         <!-- Text Content -->
-                        <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 max-h-96 overflow-y-auto backdrop-blur-sm">
-                          <pre class="whitespace-pre-wrap text-gray-300 text-sm leading-relaxed">{{ extractedText }}</pre>
+                        <div class="bg-card/50 border border-border rounded-xl p-4 max-h-96 overflow-y-auto backdrop-blur-sm">
+                          <pre class="whitespace-pre-wrap text-foreground text-sm leading-relaxed">{{ extractedText }}</pre>
                         </div>
 
                         <!-- Text Statistics -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
-                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().characters.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs font-medium">Characters</div>
+                          <div class="bg-card/30 border border-border rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-foreground">{{ getTextStatistics().characters.toLocaleString() }}</div>
+                            <div class="text-muted-foreground text-xs font-medium">Characters</div>
                           </div>
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
-                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().words.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs font-medium">Words</div>
+                          <div class="bg-card/30 border border-border rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-foreground">{{ getTextStatistics().words.toLocaleString() }}</div>
+                            <div class="text-muted-foreground text-xs font-medium">Words</div>
                           </div>
-                          <div class="bg-gray-800/30 border border-gray-700 rounded-xl p-4 text-center backdrop-blur-sm">
-                            <div class="text-lg font-bold text-gray-200">{{ getTextStatistics().lines.toLocaleString() }}</div>
-                            <div class="text-gray-400 text-xs font-medium">Lines</div>
+                          <div class="bg-card/30 border border-border rounded-xl p-4 text-center backdrop-blur-sm">
+                            <div class="text-lg font-bold text-foreground">{{ getTextStatistics().lines.toLocaleString() }}</div>
+                            <div class="text-muted-foreground text-xs font-medium">Lines</div>
                           </div>
                         </div>
                       </div>
                       
                       <div v-else class="text-center py-12">
-                        <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">No Text Extracted</h3>
-                        <p class="text-sm text-gray-500">Process the report first to extract text content</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">No Text Extracted</h3>
+                        <p class="text-sm text-muted-foreground">Process the report first to extract text content</p>
                       </div>
                     </TabsContent>
 
@@ -244,50 +246,50 @@
                           <p class="text-indigo-200">{{ ollamaStatus }}</p>
                         </div>
                         
-                        <div v-if="deepInfraStatus" class="p-4 rounded-lg bg-orange-900/30 border border-orange-700">
+                        <div v-if="deepInfraStatus" class="p-4 rounded-lg bg-card/50 border border-border">
                           <div class="flex items-center gap-2 mb-2">
-                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                             </svg>
-                            <span class="font-medium text-orange-300">DeepInfra Analysis</span>
+                            <span class="font-medium text-foreground">DeepInfra Analysis</span>
                           </div>
-                          <p class="text-orange-200">{{ deepInfraStatus }}</p>
+                          <p class="text-muted-foreground">{{ deepInfraStatus }}</p>
                         </div>
                         
                         <!-- Gensim Summary Text -->
-                        <div v-if="gensimSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                          <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
+                        <div v-if="gensimSummary" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             Text Summary
                           </h5>
-                          <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ gensimSummary }}</div>
+                          <div class="text-foreground text-sm whitespace-pre-wrap leading-relaxed">{{ gensimSummary }}</div>
                         </div>
                         
                         <!-- Ollama Summary Text -->
-                        <div v-if="ollamaSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                          <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
+                        <div v-if="ollamaSummary" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path></svg>
                             Ollama Result
                           </h5>
-                          <div class="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{{ ollamaSummary }}</div>
+                          <div class="text-foreground text-sm whitespace-pre-wrap leading-relaxed">{{ ollamaSummary }}</div>
                         </div>
                         
                         <!-- DeepInfra Summary Text -->
-                        <div v-if="deepInfraSummary" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                          <h5 class="font-medium text-gray-200 mb-3 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div v-if="deepInfraSummary" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                             </svg>
                             DeepInfra Analysis
                           </h5>
-                          <div class="text-gray-300 text-sm leading-relaxed markdown-content" v-html="renderMarkdown(deepInfraSummary)"></div>
+                          <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(deepInfraSummary)"></div>
                         </div>
                         
                         <!-- Issues List -->
                         <div v-if="summarizedIssues.length > 0">
-                          <h5 class="font-medium text-gray-200 mb-4 flex items-center gap-2">
+                          <h5 class="font-medium text-foreground mb-4 flex items-center gap-2">
                             <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                             </svg>
@@ -297,10 +299,10 @@
                             <div 
                               v-for="(issue, index) in summarizedIssues" 
                               :key="index" 
-                              class="bg-gray-800/50 border border-gray-700 rounded-lg p-4"
+                              class="bg-card/50 border border-border rounded-lg p-4"
                             >
                               <div class="flex justify-between items-start mb-2">
-                                <h6 class="font-medium text-gray-200">{{ issue.issue }}</h6>
+                                <h6 class="font-medium text-foreground">{{ issue.issue }}</h6>
                                 <span 
                                   :class="[
                                     'px-2 py-1 rounded text-xs font-medium',
@@ -312,31 +314,31 @@
                                   {{ issue.severity }}
                                 </span>
                               </div>
-                              <p class="text-gray-400 text-sm">{{ issue.description }}</p>
+                              <p class="text-muted-foreground text-sm">{{ issue.description }}</p>
                             </div>
                           </div>
                         </div>
 
                         <div class="flex justify-end">
-                          <button @click="clearAnalysisResults" class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50">
+                          <button @click="clearAnalysisResults" class="inline-flex items-center px-3 py-2 border border-border bg-background/80 rounded-lg text-sm text-red-400 hover:border-red-500/50 transition">
                             Clear Analysis Results
                           </button>
                         </div>
                       </div>
 
                       <div v-else class="text-center py-12">
-                        <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-gray-300 mb-2">Start Analysis</h3>
-                        <p class="text-sm text-gray-500 mb-6">Choose an analysis method to begin processing your inspection report</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">Start Analysis</h3>
+                        <p class="text-sm text-muted-foreground mb-6">Choose an analysis method to begin processing your inspection report</p>
                         
                         <!-- Analysis Action Buttons -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
                           <button 
                             @click="handleSummarizeText" 
                             :disabled="isSummarizing || !extractedText"
-                            class="group btn-auth-outline p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                            class="group border border-border bg-background/80 p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
                           >
                             <div class="flex items-center gap-3">
                               <div class="w-10 h-10 bg-purple-500/20 group-hover:bg-purple-500/30 rounded-xl flex items-center justify-center transition-colors">
@@ -345,8 +347,8 @@
                                 </svg>
                               </div>
                               <div>
-                                <div class="font-semibold text-gray-200 text-sm group-hover:text-white transition-colors">Python Analysis</div>
-                                <div class="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">NLTK processing</div>
+                                <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">Python Analysis</div>
+                                <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">NLTK processing</div>
                               </div>
                             </div>
                           </button>
@@ -354,17 +356,17 @@
                           <button 
                             @click="handleAnalyzeWithDeepInfra"
                             :disabled="isAnalyzingDeepInfra || !extractedText"
-                            class="group btn-auth-outline p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                            class="group border border-border bg-background/80 p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
                           >
                             <div class="flex items-center gap-3">
-                              <div class="w-10 h-10 bg-orange-500/20 group-hover:bg-orange-500/30 rounded-xl flex items-center justify-center transition-colors">
-                                <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div class="w-10 h-10 bg-primary/10 group-hover:bg-primary/20 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                 </svg>
                               </div>
                               <div>
-                                <div class="font-semibold text-gray-200 text-sm group-hover:text-white transition-colors">DeepInfra Analysis</div>
-                                <div class="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">Qwen2.5-VL-32B</div>
+                                <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">DeepInfra Analysis</div>
+                                <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Qwen2.5-VL-32B</div>
                               </div>
                             </div>
                           </button>
@@ -376,29 +378,29 @@
               </Card>
 
               <!-- AI Chat Interface - Separate Card -->
-              <Card v-if="selectedReport && extractedText" class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mt-4">
+              <Card v-if="selectedReport && extractedText" class="border border-border bg-card/50 backdrop-blur shadow-xl mt-4">
                 <CardHeader>
-                  <CardTitle class="text-gray-100 text-base flex items-center gap-2">
+                  <CardTitle class="text-foreground text-base flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                     </svg>
                     AI Chat Assistant
-                    <span class="ml-2 text-xs text-gray-400 font-normal">Ask questions about your inspection report</span>
+                    <span class="ml-2 text-xs text-muted-foreground font-normal">Ask questions about your inspection report</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div class="space-y-4">
                     <!-- Chat Messages Area -->
-                    <div ref="chatContainer" class="h-96 bg-gray-800/50 border border-gray-700 rounded-lg p-4 overflow-y-auto">
+                    <div ref="chatContainer" class="h-96 bg-card/50 border border-border rounded-lg p-4 overflow-y-auto">
                       <!-- Empty state when no messages -->
                       <div v-if="chatMessages.length === 0" class="flex items-center justify-center h-full text-center">
                         <div>
-                          <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                           </svg>
-                          <h3 class="text-lg font-medium text-gray-300 mb-2">Start a Conversation</h3>
-                          <p class="text-gray-500 mb-4">Ask me anything about your inspection report!</p>
-                          <div class="text-sm text-gray-400">
+                          <h3 class="text-lg font-medium text-foreground mb-2">Start a Conversation</h3>
+                          <p class="text-muted-foreground mb-4">Ask me anything about your inspection report!</p>
+                          <div class="text-sm text-muted-foreground">
                             <p>Try asking:</p>
                             <ul class="mt-2 space-y-1">
                               <li>"What are the main issues found?"</li>
@@ -424,7 +426,7 @@
                               'max-w-[80%] rounded-lg px-4 py-2',
                               message.role === 'user' 
                                 ? 'bg-green-600 text-white' 
-                                : 'bg-gray-700 text-gray-100'
+                                : 'bg-muted text-foreground'
                             ]"
                           >
                             <div class="text-sm whitespace-pre-wrap">{{ message.content }}</div>
@@ -436,14 +438,14 @@
                         
                         <!-- Typing indicator -->
                         <div v-if="isChatting" class="flex justify-start">
-                          <div class="bg-gray-700 text-gray-100 rounded-lg px-4 py-2">
+                          <div class="bg-muted text-foreground rounded-lg px-4 py-2">
                             <div class="flex items-center space-x-2">
                               <div class="flex space-x-1">
-                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                <div class="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                               </div>
-                              <span class="text-sm text-gray-400">AI is thinking...</span>
+                              <span class="text-sm text-muted-foreground">AI is thinking...</span>
                             </div>
                           </div>
                         </div>
@@ -458,13 +460,13 @@
                         type="text" 
                         placeholder="Ask about your inspection report..." 
                         :disabled="isChatting || !extractedText"
-                        class="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-gray-200 placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                        class="flex-1 bg-background border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:opacity-50"
                       />
                       <button 
                         @click="handleSendChatMessage"
                         :disabled="isChatting || !chatInput.trim() || !extractedText"
-                        class="btn-auth px-6 py-3" 
-                      >
+                        class="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold shadow-sm hover:bg-primary/90 transition disabled:opacity-50" 
+                       >
                         <svg v-if="!isChatting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                         </svg>
@@ -477,7 +479,7 @@
 
                     <!-- Chat Controls -->
                     <div class="flex justify-between items-center">
-                      <div class="text-sm text-gray-400">
+                      <div class="text-sm text-muted-foreground">
                         <span v-if="!extractedText">Process a report first to enable chat</span>
                         <span v-else-if="chatMessages.length > 0">{{ chatMessages.length }} messages</span>
                         <span v-else>Powered by DeepInfra Qwen2.5-VL-32B</span>
@@ -485,7 +487,7 @@
                       <button 
                         v-if="chatMessages.length > 0"
                         @click="clearChatHistory"
-                        class="btn-auth-outline btn-sm text-red-400 border-red-700/50 hover:border-red-500/50"
+                        class="inline-flex items-center px-3 py-2 border border-border bg-background/80 rounded-lg text-sm text-red-400 hover:border-red-500/50 transition"
                       >
                         Clear Chat
                       </button>
@@ -507,50 +509,49 @@
             </div>
           </div>
         </div>
+      </main>
 
-        <!-- Image Modal Gallery with Navigation -->
-        <!-- Debug: selectedImage = {{ selectedImage }} -->
-        <div v-if="selectedImage" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" @click="closeImageModal">
-          <div class="relative max-w-6xl max-h-full w-full h-full flex items-center justify-center">
-            <!-- Close Button -->
-            <button @click="closeImageModal" class="absolute top-16 right-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-2 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-            
-            <!-- Previous Button -->
-            <button 
-              v-if="extractedImages.length > 1"
-              @click.stop="handleNavigateImage('prev')" 
-              class="absolute left-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15,18 9,12 15,6"></polyline>
-              </svg>
-            </button>
-            
-            <!-- Image -->
-            <div class="flex items-center justify-center w-full h-full" @click.stop>
-              <img :src="selectedImage" class="max-w-full max-h-full object-contain" :alt="`Image ${selectedImageIndex + 1} of ${extractedImages.length}`" />
-            </div>
-            
-            <!-- Next Button -->
-            <button 
-              v-if="extractedImages.length > 1"
-              @click.stop="handleNavigateImage('next')" 
-              class="absolute right-4 z-10 bg-gray-900/80 hover:bg-gray-800 text-white rounded-full p-3 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9,18 15,12 9,6"></polyline>
-              </svg>
-            </button>
-            
-            <!-- Image Counter -->
-            <div v-if="extractedImages.length > 1" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900/80 text-white px-4 py-2 rounded-full text-sm">
-              {{ selectedImageIndex + 1 }} / {{ extractedImages.length }}
-            </div>
+      <!-- Image Modal Gallery with Navigation -->
+      <div v-if="selectedImage" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" @click="closeImageModal">
+        <div class="relative max-w-6xl max-h-full w-full h-full flex items-center justify-center">
+          <!-- Close Button -->
+          <button @click="closeImageModal" class="absolute top-16 right-4 z-10 bg-background/80 hover:bg-background border border-border text-foreground rounded-full p-2 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <!-- Previous Button -->
+          <button 
+            v-if="extractedImages.length > 1"
+            @click.stop="handleNavigateImage('prev')" 
+            class="absolute left-4 z-10 bg-background/80 hover:bg-background border border-border text-foreground rounded-full p-3 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Image -->
+          <div class="flex items-center justify-center w-full h-full" @click.stop>
+            <img :src="selectedImage" class="max-w-full max-h-full object-contain" :alt="`Image ${selectedImageIndex + 1} of ${extractedImages.length}`" />
+          </div>
+          
+          <!-- Next Button -->
+          <button 
+            v-if="extractedImages.length > 1"
+            @click.stop="handleNavigateImage('next')" 
+            class="absolute right-4 z-10 bg-background/80 hover:bg-background border border-border text-foreground rounded-full p-3 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Image Counter -->
+          <div v-if="extractedImages.length > 1" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background/80 border border-border text-foreground px-4 py-2 rounded-full text-sm">
+            {{ selectedImageIndex + 1 }} / {{ extractedImages.length }}
           </div>
         </div>
       </div>
@@ -650,7 +651,8 @@ const {
   selectedReport,
   tabs,
   selectReport,
-  setActiveTab
+  setActiveTab,
+  initializeState
 } = useAnalysisState();
 
 // Local refs (still needed for some functionality)
@@ -822,21 +824,27 @@ const renderMarkdown = (text) => {
   // Simple markdown to HTML conversion
   let html = text
     // Headers
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-gray-200 mt-4 mb-2">$1</h3>')
-    .replace(/^#### (.*$)/gim, '<h4 class="text-base font-semibold text-gray-200 mt-3 mb-2">$1</h4>')
-    .replace(/^##### (.*$)/gim, '<h5 class="text-sm font-semibold text-gray-200 mt-2 mb-1">$1</h5>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-foreground mt-4 mb-2">$1</h3>')
+    .replace(/^#### (.*$)/gim, '<h4 class="text-base font-semibold text-foreground mt-3 mb-2">$1</h4>')
+    .replace(/^##### (.*$)/gim, '<h5 class="text-sm font-semibold text-foreground mt-2 mb-1">$1</h5>')
     
     // Bold text
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
     
     // Bullet points
-    .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">$1</li>')
+    .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1 text-foreground">$1</li>')
     
     // Wrap consecutive list items in ul tags
-    .replace(/(<li.*<\/li>\s*)+/g, '<ul class="list-disc list-inside mb-3 space-y-1">$&</ul>')
+    .replace(/(<li.*<\/li>\s*)+/g, '<ul class="list-disc list-inside mb-3 space-y-1 text-foreground">$&</ul>')
     
-    // Line breaks
+    // Line breaks and paragraphs
+    .replace(/\n\n/g, '</p><p class="text-foreground mb-2">')
     .replace(/\n/g, '<br>');
+    
+  // Wrap all content in a paragraph if not already wrapped
+  if (!html.startsWith('<h') && !html.startsWith('<p')) {
+    html = '<p class="text-foreground">' + html + '</p>';
+  }
   
   return html;
 };
@@ -845,6 +853,12 @@ const renderMarkdown = (text) => {
 let keyboardCleanup = null;
 
 onMounted(() => {
+  // Force the overview tab to be selected on page load
+  nextTick(() => {
+    activeTab.value = 'overview';
+    setActiveTab('overview');
+  });
+  
   // Setup keyboard navigation for image gallery
   keyboardCleanup = setupKeyboardNavigation(extractedImages.value);
   
@@ -870,88 +884,14 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Button styles matching sign-in page */
-.btn-auth {
-  background: #22c55e;
-  color: #000;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
+/* NOTE: Removed .btn-auth and .btn-auth-outline hard-coded styles so buttons inherit theme tokens
+   Use utility classes in template: bg-primary text-primary-foreground, border-border, bg-background/80, etc. */
 
-.btn-auth:hover:not(:disabled) {
-  background: #16a34a;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.4);
-}
-
-.btn-auth:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-auth-outline {
-  background: rgba(31, 41, 55, 0.5);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  border: 1px solid #374151;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.btn-auth-outline:hover:not(:disabled) {
-  background: rgba(31, 41, 55, 0.8);
-  border: 1px solid #4ade80;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.btn-auth-outline:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Small button variant */
-.btn-sm {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-
-/* Color variants for outline buttons */
-.btn-auth-outline.text-blue-400:hover:not(:disabled) {
-  border-color: #3b82f6;
-}
-
-.btn-auth-outline.text-red-400:hover:not(:disabled) {
-  border-color: #ef4444;
-}
-
-.btn-auth-outline.text-purple-400:hover:not(:disabled) {
-  border-color: #a855f7;
-}
-
-.btn-auth-outline.text-green-400:hover:not(:disabled) {
-  border-color: #22c55e;
-}
-
-.btn-auth-outline.text-orange-400:hover:not(:disabled) {
-  border-color: #f97316;
-}
-
-/* Property Blueprint Background - matching sign-in page */
+/* Property Blueprint Background - theme-aware using design tokens */
 .property-background {
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  /* Use theme tokens so the header theme toggle (.dark) controls colors */
+  background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--card)));
 }
 
 .property-grid {
@@ -961,90 +901,52 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   z-index: 0;
-  opacity: 0.15;
-  background-image: 
-    /* Blueprint grid lines */
-    linear-gradient(to right, rgba(66, 153, 225, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(66, 153, 225, 0.1) 1px, transparent 1px),
+  opacity: 0.12;
+  background-image:
+    /* Blueprint grid lines (use ring token) */
+    linear-gradient(to right, hsl(var(--ring) / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--ring) / 0.08) 1px, transparent 1px),
     /* Room outlines */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' viewBox='0 0 500 500'%3E%3Cpath fill='none' stroke='rgba(49, 130, 206, 0.2)' stroke-width='2' d='M100,100 L100,250 L200,250 L200,180 L280,180 L280,100 Z'/%3E%3Cpath fill='none' stroke='rgba(49, 130, 206, 0.2)' stroke-width='2' d='M300,300 L300,400 L400,400 L400,300 Z'/%3E%3Cpath fill='none' stroke='rgba(49, 130, 206, 0.2)' stroke-width='2' d='M80,300 L80,380 L180,380 L180,300 Z'/%3E%3Cpath fill='none' stroke='rgba(49, 130, 206, 0.15)' stroke-width='1.5' d='M200,100 L240,60 L420,60 L420,180 L380,180 L380,120 L280,120'/%3E%3C/svg%3E"),
-    /* Location pins for properties */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Ccircle cx='150' cy='150' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3Ccircle cx='450' cy='250' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3Ccircle cx='300' cy='420' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3Ccircle cx='100' cy='350' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3Ccircle cx='500' cy='100' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3Ccircle cx='400' cy='500' r='6' fill='rgba(52, 211, 153, 0.4)'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' viewBox='0 0 500 500'%3E%3Cpath fill='none' stroke='hsl(%25%28var%28--ring%29%29 / 0.2)' stroke-width='2' d='M100,100 L100,250 L200,250 L200,180 L280,180 L280,100 Z'/%3E%3Cpath fill='none' stroke='hsl(%25%28var%28--ring%29%29 / 0.2)' stroke-width='2' d='M300,300 L300,400 L400,400 L400,300 Z'/%3E%3Cpath fill='none' stroke='hsl(%25%28var%28--ring%29%29 / 0.2)' stroke-width='2' d='M80,300 L80,380 L180,380 L180,300 Z'/%3E%3Cpath fill='none' stroke='hsl(%25%28var%28--ring%29%29 / 0.15)' stroke-width='1.5' d='M200,100 L240,60 L420,60 L420,180 L380,180 L380,120 L280,120'/%3E%3C/svg%3E"),
+    /* Location pins for properties (use primary color) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Ccircle cx='150' cy='150' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3Ccircle cx='450' cy='250' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3Ccircle cx='300' cy='420' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3Ccircle cx='100' cy='350' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3Ccircle cx='500' cy='100' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3Ccircle cx='400' cy='500' r='6' fill='hsl(%25%28var%28--primary%29%29 / 0.45)'/%3E%3C/svg%3E");
   background-size: 40px 40px, 40px 40px, 1000px 1000px, 1200px 1200px;
   background-position: center center;
 }
 
 /* Tab interface improvements */
-.grid {
-  gap: 1rem;
-}
+.grid { gap: 1rem; }
 
-/* Better scrollbars for content areas */
-.max-h-96 {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
+/* Better scrollbars for content areas (theme-aware) */
+.max-h-96 { scrollbar-width: thin; scrollbar-color: hsl(var(--muted) / 0.5) transparent; }
 
-.max-h-96::-webkit-scrollbar {
-  width: 6px;
-}
-
-.max-h-96::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.max-h-96::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
-}
-
-.max-h-96::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.7);
-}
+.max-h-96::-webkit-scrollbar { width: 6px; }
+.max-h-96::-webkit-scrollbar-track { background: transparent; }
+.max-h-96::-webkit-scrollbar-thumb { background-color: hsl(var(--muted) / 0.5); border-radius: 3px; }
+.max-h-96::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--muted) / 0.65); }
 
 /* Smooth transitions for tab content */
-.transition-colors {
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
+.transition-colors { transition: color 0.2s ease, border-color 0.2s ease; }
 
 /* Enhanced card layouts */
-.aspect-square {
-  aspect-ratio: 1;
-}
+.aspect-square { aspect-ratio: 1; }
 
 /* Use Apple system font on Analysis page */
 .font-apple {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 16px; /* slightly larger base size */
+  font-size: 16px;
   line-height: 1.45;
 }
 
-/* Markdown content styling */
-.markdown-content {
-  line-height: 1.6;
-}
-
-.markdown-content h3 {
-  border-bottom: 1px solid #374151;
-  padding-bottom: 0.5rem;
-}
-
-.markdown-content h4 {
-  border-bottom: 1px solid #4b5563;
-  padding-bottom: 0.25rem;
-}
-
-.markdown-content ul {
-  padding-left: 1rem;
-}
-
-.markdown-content li {
-  position: relative;
-}
-
-.markdown-content strong {
-  color: #f3f4f6;
-}
+/* Markdown content styling - theme-aware */
+.markdown-content { line-height: 1.6; color: hsl(var(--foreground)); }
+.markdown-content p { color: hsl(var(--foreground)); margin-bottom: 0.75rem; }
+.markdown-content h3 { border-bottom: 1px solid hsl(var(--border)); padding-bottom: 0.5rem; color: hsl(var(--foreground)); }
+.markdown-content h4 { border-bottom: 1px solid hsl(var(--border)); padding-bottom: 0.25rem; color: hsl(var(--foreground)); }
+.markdown-content ul { padding-left: 1rem; color: hsl(var(--foreground)); }
+.markdown-content li { position: relative; color: hsl(var(--foreground)); }
+.markdown-content strong { color: hsl(var(--foreground)); font-weight: 600; }
+.markdown-content * { color: hsl(var(--foreground)); }
 </style>
 
 <style scoped>

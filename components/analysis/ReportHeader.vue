@@ -1,15 +1,15 @@
 <template>
-  <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl mb-4">
-    <CardContent class="p-6">
+  <Card class="border border-border bg-card/50 backdrop-blur shadow-xl mb-4">
+    <CardContent class="p-3">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-lg text-gray-100">{{ selectedReport.name }}</h2>
-          <p class="text-xs text-gray-400">Uploaded {{ formatDate(selectedReport.created_at) }}</p>
+          <h2 class="text-lg text-foreground font-semibold leading-tight truncate">{{ displayName }}</h2>
+          <p class="text-xs text-muted-foreground">Uploaded {{ formatDate(selectedReport.created_at) }}</p>
         </div>
         <div class="flex gap-2">
           <button 
             @click="handleViewPdf" 
-            class="p-2 text-gray-400 hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-800/50"
+            class="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-card/50"
             title="View PDF"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
           <button 
             @click="handleProcessPdf" 
             :disabled="isProcessing"
-            class="p-2 text-gray-400 hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-card/50 disabled:opacity-50 disabled:cursor-not-allowed"
             :title="isProcessing ? 'Processing...' : 'Process Report'"
           >
             <svg v-if="!isProcessing" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,6 +39,7 @@
 
 <script setup>
 import { Card, CardContent } from '~/components/ui/card'
+import { computed } from 'vue'
 
 // Props
 const props = defineProps({
@@ -54,6 +55,16 @@ const emit = defineEmits(['pdf-processed', 'pdf-view-requested'])
 // Composables
 const { isProcessing, processPdf, viewPdf } = usePdfProcessor()
 const { formatDate } = useFileUpload()
+
+// Create a displayName that replaces underscores with spaces
+const displayName = computed(() => {
+  try {
+    const name = props && props.selectedReport && props.selectedReport.name ? String(props.selectedReport.name) : ''
+    return name.replace(/_/g, ' ')
+  } catch (e) {
+    return ''
+  }
+})
 
 // Methods
 const handleProcessPdf = async () => {

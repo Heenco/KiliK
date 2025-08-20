@@ -1,31 +1,31 @@
 <template>
   <!-- Always show the card, but with different content based on file count -->
-  <Card class="border border-gray-700 bg-gray-900/80 backdrop-blur shadow-xl font-apple">
+  <Card class="border border-border bg-card/50 backdrop-blur shadow-xl font-apple">
     <CardHeader class="pb-3">
-      <CardTitle class="text-gray-100 text-base">Your Reports</CardTitle>
+      <CardTitle class="text-foreground text-base">Your Reports</CardTitle>
     </CardHeader>
     <CardContent class="pt-0">
       <!-- Show files if they exist -->
-      <div v-if="filesList.length > 0" class="max-h-80 overflow-y-auto -mx-6 px-6">
+      <div v-if="filesList.length > 0" class="max-h-80 overflow-y-auto -mx-6 px-6 py-1">
         <div 
           v-for="file in filesList" 
           :key="file.id" 
-          class="p-3 border-b border-gray-700/50 last:border-b-0 hover:bg-gray-800/30 transition-colors cursor-pointer rounded-lg mb-1 last:mb-0"
-          :class="{ 'bg-gray-800/50 ring-1 ring-green-500/30': selectedReportId === file.id }"
+          class="py-2 px-3 border-b border-border last:border-b-0 hover:bg-card/50 transition-colors cursor-pointer rounded-lg mb-1 last:mb-0"
+          :class="{ 'bg-card/50 ring-1 ring-primary/30': selectedReportId === file.id }"
           @click="handleSelectReport(file.id)"
         >
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-200 truncate">{{ file.name }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ formatDate(file.created_at) }}</p>
+              <p class="text-sm text-foreground truncate">{{ file.name }}</p>
+              <p class="text-xs text-muted-foreground mt-0.5">{{ formatDate(file.created_at) }}</p>
             </div>
             <div class="flex items-center gap-1 ml-2">
               <button 
                 @click.stop="handleDeleteFile(file.name)"
-                class="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded"
+                class="p-1 text-muted-foreground hover:text-destructive transition-colors rounded"
                 title="Delete"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
               </button>
@@ -35,8 +35,8 @@
       </div>
       
       <!-- Show empty state when no files -->
-      <div v-else class="py-8 text-center text-gray-500">
-        <svg class="mx-auto h-8 w-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div v-else class="py-8 text-center text-muted-foreground">
+        <svg class="mx-auto h-8 w-8 text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
         <p class="text-sm">No reports uploaded yet</p>
