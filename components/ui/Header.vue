@@ -1,41 +1,22 @@
 <template>  <header    
-    class="fixed top-0 left-0 w-full z-20 flex items-center px-1 py-2 border-b border-border bg-background/80 backdrop-blur-md transition-all duration-300"
+    class="fixed top-0 left-0 w-full z-20 flex items-center px-1 py-1.5 border-b border-border bg-background/80 backdrop-blur-md transition-all duration-300"
     :class="{ 'translate-y-0 opacity-100': isVisible, '-translate-y-full opacity-0': !isVisible }"
   ><div class="w-full flex items-center justify-between px-4">      <div class="logo-container">        <NuxtLink to="/" class="font-outfit text-2xl md:text-3xl font-black tracking-tight text-foreground flex items-center relative cursor-pointer">
-          <span class="text-shadow logo-text">Kili<span class="text-green-400 font-black">K</span></span>
-          <span class="text-xxs absolute -top-2 -right-5 text-muted-foreground tracking-wider font-medium bg-muted px-0.5 py-0.5 rounded-sm beta-tag">BETA</span>
+          <span class="text-shadow logo-text"><span class="text-green-400 font-black">Safe</span>Buy</span>
+          <span class="text-xxs absolute -top-1 -right-5 text-muted-foreground tracking-wider font-medium bg-muted px-0.5 py-0.5 rounded-sm beta-tag">BETA</span>
         </NuxtLink>
       </div>        <div class="relative">
         <!-- Always show the dropdown menu, but content changes based on auth status -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button class="p-3 hover:bg-accent focus:outline-none text-foreground transition-all duration-300 rounded-md border border-border/50 bg-background/20">
-              <div class="hamburger-menu">
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
-                <div class="hamburger-line"></div>
+            <button class="p-2 hover:bg-accent focus:outline-none transition-all duration-200 flex items-center justify-center">
+              <div class="flex flex-col space-y-0.5">
+                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
+                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
               </div>
             </button>
-          </DropdownMenuTrigger>          <DropdownMenuContent align="end" class="w-80 mt-2 mr-4 max-h-60 overflow-y-auto bg-popover border border-border shadow-xl backdrop-blur dropdown-menu-content">
-            <!-- Theme Toggle -->
-            <div class="p-3 border-b border-border">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-muted-foreground">Theme</span>
-                <button 
-                  @click="toggleTheme"
-                  class="p-2 rounded-lg bg-accent hover:bg-accent/80 border border-border hover:border-ring transition-all duration-200"
-                  :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
-                >
-                  <svg v-if="isDarkMode" class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                  </svg>
-                  <svg v-else class="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
+          </DropdownMenuTrigger>          <DropdownMenuContent align="end" class="w-64 mt-2 bg-popover border border-border shadow-xl backdrop-blur dropdown-menu-content">
             <!-- Show user info and sign out button when signed in -->
             <template v-if="user">
               <div class="flex flex-col gap-1 p-4 pb-4 border-b border-border">
@@ -50,6 +31,25 @@
                   <NuxtLink to="/map" class="p-2 rounded hover:bg-accent text-foreground text-xs">Map</NuxtLink>
                   <NuxtLink to="/analysis" class="p-2 rounded hover:bg-accent text-foreground text-xs">Analysis</NuxtLink>
                   <NuxtLink to="/products" class="p-2 rounded hover:bg-accent text-foreground text-xs">Pricing</NuxtLink>
+                </div>
+              </div>
+              
+              <!-- Theme Toggle moved down -->
+              <div class="p-3 border-b border-border">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-muted-foreground">Theme</span>
+                  <button 
+                    @click="toggleTheme"
+                    class="p-1 hover:bg-accent/50 rounded transition-all duration-200"
+                    :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+                  >
+                    <svg v-if="isDarkMode" class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg v-else class="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
               
@@ -73,6 +73,25 @@
                   <NuxtLink to="/products" class="p-2 rounded hover:bg-accent text-foreground text-xs">Pricing</NuxtLink>
                   <NuxtLink to="/index2" class="p-2 rounded hover:bg-accent text-foreground text-xs">Vision</NuxtLink>
                   <NuxtLink to="/" class="p-2 rounded hover:bg-accent text-foreground text-xs">Search</NuxtLink>
+                </div>
+              </div>
+              
+              <!-- Theme Toggle moved down -->
+              <div class="p-3 border-b border-border">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-muted-foreground">Theme</span>
+                  <button 
+                    @click="toggleTheme"
+                    class="p-1 hover:bg-accent/50 rounded transition-all duration-200"
+                    :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+                  >
+                    <svg v-if="isDarkMode" class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg v-else class="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
               
@@ -250,44 +269,6 @@ header { z-index: 100; }
 
 .hover\:shadow-green:hover {
   box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
-}
-
-/* Hamburger menu styling */
-.hamburger-menu {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 20px;
-  height: 16px;
-}
-
-.hamburger-line {
-  width: 100%;
-  height: 3px;
-  background-color: rgb(55 65 81); /* gray-700 - darker and more visible in light theme */
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  opacity: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Dark theme - make lines much lighter and more prominent */
-.dark .hamburger-line {
-  background-color: rgb(243 244 246); /* gray-100 - much lighter and more visible in dark theme */
-  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-/* Hover effect for hamburger lines */
-button:hover .hamburger-line {
-  background-color: hsl(var(--primary));
-  opacity: 1;
-  transform: scaleX(1.1);
-}
-
-/* Focus effect for hamburger button */
-button:focus .hamburger-line {
-  background-color: hsl(var(--primary));
-  opacity: 1;
 }
 
 /* User info animation */

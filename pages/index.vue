@@ -2,8 +2,8 @@
     <div class="property-grid"></div>
     <div class="container mx-auto px-4 flex-1 flex flex-col">
       <!-- Main Content -->
-      <main class="flex flex-col justify-center items-center min-h-[60vh] py-6 flex-1"><div class="text-center mb-3">          <span class="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
-            Now available in Brisbane, Australia
+      <main class="flex flex-col items-center min-h-[60vh] py-6 flex-1 pt-112"><div class="text-center mb-3">          <span class="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
+            Now available in <span class="text-green-400">Brisbane</span>, Australia
           </span>        </div>        <h2 class="text-center text-4xl font-bold mb-2 text-foreground">
           Find Your Dream Home with <span class="text-green-400">Confidence</span>
         </h2>
@@ -33,18 +33,29 @@
         </div>
         
         <!-- Sample Address -->
-        <div class="max-w-2xl mx-auto mt-12">
-          <p class="text-sm text-muted-foreground mb-3 text-center">
-           Not sure where to start? Try this sample address:
-          </p>
+        <div class="max-w-5xl mx-auto mt-16">
+          <div class="text-center mb-8">
+            <h3 class="text-xl font-semibold text-foreground mb-3">
+              Not sure where to start?
+            </h3>
+            <p class="text-muted-foreground max-w-2xl mx-auto mb-6">
+              Experience the power of our comprehensive property analysis with this sample address.
+            </p>
+          </div>
           
           <div class="flex justify-center">
-            <button 
+            <div 
               @click="searchSampleAddress"
-              class="px-4 py-2 bg-secondary hover:bg-secondary/80 border border-border rounded-lg text-secondary-foreground text-sm transition-colors duration-200"
+              class="bg-card/50 backdrop-blur border border-border rounded-lg p-6 hover:shadow-lg hover:bg-card/70 transition-all duration-300 cursor-pointer group"
             >
-              6 Land Street, Toowong QLD
-            </button>
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="text-center sm:text-left flex-1">
+                  <p class="text-sm text-muted-foreground mb-2">Try this sample address:</p>
+                  <p class="font-medium text-foreground group-hover:text-green-600 transition-colors duration-200">6 Land Street, Toowong 4066, Queensland</p>
+                </div>
+                <ChevronRightIcon class="w-5 h-5 text-muted-foreground group-hover:text-green-600 group-hover:translate-x-1 transition-all duration-200" />
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -53,7 +64,7 @@
       <section class="w-full max-w-6xl mx-auto px-4 py-16 mt-8">
         <div class="text-center mb-12">
           <h3 class="text-2xl md:text-3xl font-bold text-foreground mb-4">
-            Latest Property Insights
+            All you need to choose the right property
           </h3>
           <p class="text-muted-foreground max-w-2xl mx-auto">
             Expert guides and market insights to help you make informed property decisions
@@ -247,7 +258,7 @@ const selectAddress = (suggestion) => {
 }
 
 const searchSampleAddress = async () => {
-  const sampleAddress = '6 Land Street, Toowong QLD, Australia';
+  const sampleAddress = '6 Land Street, Toowong 4066, Queensland, Australia';
   searchQuery.value = sampleAddress;
   
   try {

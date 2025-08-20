@@ -122,16 +122,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Add geometric hexagon background for light theme */
-    background-image: 
-      radial-gradient(circle at 25% 25%, transparent 20%, oklch(0.556 0 0 / 0.05) 21%),
-      radial-gradient(circle at 75% 75%, transparent 20%, oklch(0.556 0 0 / 0.05) 21%);
-    background-size: 30px 30px;
-    background-attachment: fixed;
-  }
-  .dark body {
-    background: linear-gradient(to bottom, oklch(0.1 0 0), oklch(0.16 0.01 240));
-    background-image: none; /* Remove dots in dark theme */
-    min-height: 100vh;
   }
 }
