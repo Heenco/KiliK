@@ -8,12 +8,14 @@
 
         <CardContent>
           <ClientOnly>
-            <!-- Use native PDF embed to avoid pdf.js compatibility issues in some browsers -->
-            <div class="pdf-embed-wrap">
-              <object :data="pdfUrl" type="application/pdf" width="100%" height="80vh">
-                <!-- Fallback to iframe if object embedding is not supported -->
-                <iframe :src="pdfUrl" class="pdf-iframe" frameborder="0" style="width:100%;height:80vh;border:0;"></iframe>
-              </object>
+            <!-- A4-sized preview: 210mm x 297mm. uses min() so it fits smaller viewports responsively -->
+            <div class="a4-wrapper">
+              <div class="a4-frame" role="document" aria-label="Inspection Report (A4)">
+                <object :data="pdfUrl" type="application/pdf">
+                  <!-- Fallback to iframe if object embedding is not supported -->
+                  <iframe :src="pdfUrl" class="pdf-iframe" frameborder="0" title="Inspection Report"></iframe>
+                </object>
+              </div>
             </div>
           </ClientOnly>
         </CardContent>
@@ -49,7 +51,16 @@ const downloadPdf = () => {
 </script>
 
 <style scoped>
-.pdf-viewer { height: 800px; }
-.pdf-embed-wrap { width: 100%; }
-.pdf-iframe { width: 100%; height: 80vh; border: 0; }
+.a4-wrapper { display:flex; justify-content:center; padding:16px; }
+.a4-frame {
+  /* A4 size in mm; min() ensures it fits the available width on small screens */
+  width: min(210mm, 100%);
+  aspect-ratio: 210 / 297;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+.a4-frame object, .a4-frame iframe { width:100%; height:100%; border:0; display:block; }
+.pdf-iframe { border:0 }
 </style>
