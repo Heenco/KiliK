@@ -17,6 +17,16 @@ export const useAnalysisTools = () => {
   const deepInfraStatus = ref('')
   const deepInfraSummary = ref('')
   
+  // Image analysis state
+  const isAnalyzingImages = ref(false)
+  const imageAnalysisStatus = ref('')
+  const imageAnalysisResult = ref('')
+
+  // PDF analysis state
+  const isAnalyzingPdf = ref(false)
+  const pdfAnalysisStatus = ref('')
+  const pdfAnalysisResult = ref('')
+  
   // Chat state
   const chatMessages = ref([])
   const isChatting = ref(false)
@@ -248,6 +258,122 @@ export const useAnalysisTools = () => {
     }
   }
 
+  // DeepInfra Image Analysis
+  const analyzeImagesWithDeepInfra = async (images, extractedText = '') => {
+    if (!images || !Array.isArray(images) || images.length === 0 || isAnalyzingImages.value) {
+      return false
+    }
+    
+    console.log('Starting DeepInfra image analysis with', images.length, 'images');
+    isAnalyzingImages.value = true
+    imageAnalysisStatus.value = `Analyzing ${Math.min(images.length, 5)} images with DeepInfra Qwen2.5-VL...`
+    imageAnalysisResult.value = ''
+    
+    try {
+      const response = await fetch('/api/analyze-images-deepinfra', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          images: images.slice(0, 5), // Limit to 5 images
+          text: extractedText 
+        }),
+      })
+
+      console.log('DeepInfra image analysis response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('DeepInfra image analysis fetch error:', response.status, errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}` || 'Failed to analyze images')
+      }
+
+      const result = await response.json()
+      console.log('DeepInfra image analysis result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      imageAnalysisResult.value = result.analysis || ''
+      imageAnalysisStatus.value = result.analysis 
+        ? `Image analysis complete (${result.imagesAnalyzed || 0} images analyzed)` 
+        : 'No analysis generated'
+      
+      return true
+    } catch (error) {
+      console.error('Error analyzing images with DeepInfra:', error)
+      imageAnalysisStatus.value = `Error: ${error.message || 'Unknown error during image analysis'}`
+      imageAnalysisResult.value = ''
+      return false
+    } finally {
+      isAnalyzingImages.value = false
+    }
+  }
+
+  // DeepInfra PDF Analysis
+  const analyzePdfWithDeepInfra = async (fileName, extractedText = '') => {
+    if (!fileName || isAnalyzingPdf.value) {
+      return false
+    }
+    
+    // Get the current user
+    const user = useSupabaseUser()
+    if (!user.value) {
+      pdfAnalysisStatus.value = 'Error: User not authenticated'
+      return false
+    }
+    
+    console.log('Starting DeepInfra PDF analysis for:', fileName);
+    isAnalyzingPdf.value = true
+    pdfAnalysisStatus.value = 'Analyzing PDF with DeepInfra Qwen2.5-VL...'
+    pdfAnalysisResult.value = ''
+    
+    try {
+      const response = await fetch('/api/analyze-pdf-deepinfra', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          fileName,
+          textContext: extractedText,
+          userId: user.value.id
+        }),
+      })
+
+      console.log('DeepInfra PDF analysis response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('DeepInfra PDF analysis fetch error:', response.status, errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}` || 'Failed to analyze PDF')
+      }
+
+      const result = await response.json()
+      console.log('DeepInfra PDF analysis result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      pdfAnalysisResult.value = result.analysis || ''
+      pdfAnalysisStatus.value = result.analysis 
+        ? `PDF analysis complete using ${result.model}` 
+        : 'No analysis generated'
+      
+      return true
+    } catch (error) {
+      console.error('Error analyzing PDF with DeepInfra:', error)
+      pdfAnalysisStatus.value = `Error: ${error.message || 'Unknown error during PDF analysis'}`
+      pdfAnalysisResult.value = ''
+      return false
+    } finally {
+      isAnalyzingPdf.value = false
+    }
+  }
+
   // Chat with DeepInfra (updated to use DeepInfra instead of Ollama)
   const sendChatMessage = async (message, reportContext = null) => {
     if (!message?.trim() || isChatting.value) return false
@@ -345,11 +471,17 @@ export const useAnalysisTools = () => {
     ollamaSummary.value = ''
     deepInfraStatus.value = ''
     deepInfraSummary.value = ''
+    imageAnalysisStatus.value = ''
+    imageAnalysisResult.value = ''
+    pdfAnalysisStatus.value = ''
+    pdfAnalysisResult.value = ''
     isSummarizing.value = false
     isAnalyzingOpenAI.value = false
     isAnalyzingGensim.value = false
     isAnalyzingOllama.value = false
     isAnalyzingDeepInfra.value = false
+    isAnalyzingImages.value = false
+    isAnalyzingPdf.value = false
     // Don't clear chat on analysis clear
   }
 
@@ -388,6 +520,16 @@ export const useAnalysisTools = () => {
     deepInfraStatus,
     deepInfraSummary,
     
+    // Image analysis state
+    isAnalyzingImages,
+    imageAnalysisStatus,
+    imageAnalysisResult,
+    
+    // PDF analysis state
+    isAnalyzingPdf,
+    pdfAnalysisStatus,
+    pdfAnalysisResult,
+    
     // Chat state
     chatMessages,
     isChatting,
@@ -399,6 +541,8 @@ export const useAnalysisTools = () => {
     analyzeWithGensim,
     analyzeWithOllama,
     analyzeWithDeepInfra,
+    analyzeImagesWithDeepInfra,
+    analyzePdfWithDeepInfra,
     clearAnalysisResults,
     
     // Chat methods

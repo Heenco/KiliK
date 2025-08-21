@@ -206,7 +206,7 @@
                     <!-- Analysis Tab -->
                     <TabsContent value="analysis" class="mt-0">
                       <!-- Analysis Results -->
-                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary || deepInfraStatus || deepInfraSummary" class="space-y-4">
+                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary || deepInfraStatus || deepInfraSummary || imageAnalysisStatus || imageAnalysisResult || pdfAnalysisStatus || pdfAnalysisResult" class="space-y-4">
                         <!-- Analysis Status Messages -->
                         <div v-if="summarizeStatus" class="p-4 rounded-lg bg-purple-900/30 border border-purple-700">
                           <div class="flex items-center gap-2 mb-2">
@@ -256,6 +256,26 @@
                           <p class="text-muted-foreground">{{ deepInfraStatus }}</p>
                         </div>
                         
+                        <div v-if="imageAnalysisStatus" class="p-4 rounded-lg bg-card/50 border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="font-medium text-foreground">Image Analysis</span>
+                          </div>
+                          <p class="text-muted-foreground">{{ imageAnalysisStatus }}</p>
+                        </div>
+                        
+                        <div v-if="pdfAnalysisStatus" class="p-4 rounded-lg bg-card/50 border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="font-medium text-foreground">PDF Analysis</span>
+                          </div>
+                          <p class="text-muted-foreground">{{ pdfAnalysisStatus }}</p>
+                        </div>
+                        
                         <!-- Gensim Summary Text -->
                         <div v-if="gensimSummary" class="bg-card/50 border border-border rounded-lg p-4">
                           <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
@@ -285,6 +305,39 @@
                             DeepInfra Analysis
                           </h5>
                           <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(deepInfraSummary)"></div>
+                        </div>
+                        
+                        <!-- Image Analysis Result -->
+                        <div v-if="imageAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Visual Analysis
+                          </h5>
+                          <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(imageAnalysisResult)"></div>
+                        </div>
+                        
+                        <!-- PDF Analysis Result -->
+                        <div v-if="pdfAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            PDF Document Analysis
+                          </h5>
+                          <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(pdfAnalysisResult)"></div>
+                        </div>
+                        
+                        <!-- PDF Analysis Result -->
+                        <div v-if="pdfAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            PDF Document Analysis
+                          </h5>
+                          <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(pdfAnalysisResult)"></div>
                         </div>
                         
                         <!-- Issues List -->
@@ -334,7 +387,7 @@
                         <p class="text-sm text-muted-foreground mb-6">Choose an analysis method to begin processing your inspection report</p>
                         
                         <!-- Analysis Action Buttons -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
                           <button 
                             @click="handleSummarizeText" 
                             :disabled="isSummarizing || !extractedText"
@@ -367,6 +420,42 @@
                               <div>
                                 <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">DeepInfra Analysis</div>
                                 <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Qwen2.5-VL-32B</div>
+                              </div>
+                            </div>
+                          </button>
+
+                          <button 
+                            @click="handleAnalyzeImages"
+                            :disabled="isAnalyzingImages || !extractedImages || extractedImages.length === 0"
+                            class="group border border-border bg-background/80 p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 bg-emerald-500/20 group-hover:bg-emerald-500/30 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                              </div>
+                              <div>
+                                <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">Analyze Images</div>
+                                <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Visual inspection (5 images)</div>
+                              </div>
+                            </div>
+                          </button>
+
+                          <button 
+                            @click="handleAnalyzePdf"
+                            :disabled="isAnalyzingPdf || !selectedReport"
+                            class="group border border-border bg-background/80 p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 bg-orange-500/20 group-hover:bg-orange-500/30 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                              </div>
+                              <div>
+                                <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">Analyze PDF</div>
+                                <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Document analysis</div>
                               </div>
                             </div>
                           </button>
@@ -621,11 +710,24 @@ const {
   isAnalyzingDeepInfra,
   deepInfraStatus,
   deepInfraSummary,
+  
+  // Image analysis
+  isAnalyzingImages,
+  imageAnalysisStatus,
+  imageAnalysisResult,
+  
+  // PDF analysis
+  isAnalyzingPdf,
+  pdfAnalysisStatus,
+  pdfAnalysisResult,
+  
   summarizeText,
   analyzeWithOpenAI,
   analyzeWithGensim,
   analyzeWithOllama,
   analyzeWithDeepInfra,
+  analyzeImagesWithDeepInfra,
+  analyzePdfWithDeepInfra,
   clearAnalysisResults,
   
   // Chat functionality
@@ -772,6 +874,22 @@ const handleAnalyzeWithOllama = async () => {
 const handleAnalyzeWithDeepInfra = async () => {
   console.log('DeepInfra clicked, extractedText length:', extractedText.value?.length);
   const success = await analyzeWithDeepInfra(extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzeImages = async () => {
+  console.log('Image analysis clicked, images count:', extractedImages.value?.length);
+  const success = await analyzeImagesWithDeepInfra(extractedImages.value, extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
+const handleAnalyzePdf = async () => {
+  console.log('PDF analysis clicked, selected report:', selectedReport.value?.name);
+  const success = await analyzePdfWithDeepInfra(selectedReport.value?.name, extractedText.value);
   if (success) {
     setActiveTab('analysis');
   }
