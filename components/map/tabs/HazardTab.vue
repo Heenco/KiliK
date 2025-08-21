@@ -1,7 +1,7 @@
 <template>
   <TabsContent value="hazard">
     <!-- Info message when no address is selected -->
-    <div v-if="!hasSpecificAddress" class="mb-3 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-500">
+    <div v-if="!hasSpecificAddress" class="mb-3 p-2 bg-accent/50 border border-border rounded text-xs text-muted-foreground">
       <div class="flex items-center">
         Search for an address to see specific property risks.
       </div>
@@ -22,13 +22,13 @@
           
           <!-- Flood Risk Badge -->
           <div class="ml-2">
-            <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">
+            <div v-if="!hasSpecificAddress" class="px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs">
               --
             </div>
-            <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-gray-600/50 text-gray-300 rounded-full text-xs">
+            <div v-else-if="isLoadingHazards" class="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs">
               Loading...
             </div>
-            <div v-else-if="hazardError" class="px-3 py-1 bg-red-400/20 text-red-400 rounded-full text-xs">
+            <div v-else-if="hazardError" class="px-3 py-1 bg-destructive/20 text-destructive rounded-full text-xs">
               Error
             </div>
             <div v-else-if="hazardData?.flood_risk">
@@ -307,7 +307,7 @@
     </div>
     
     <!-- Description text -->
-    <div class="mt-4 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+    <div class="mt-4 p-2 bg-accent/50 border border-border rounded text-xs text-muted-foreground">
       View flood zones, bushfire risks, noise corridors, erosion areas, acid sulfate soils, and infrastructure pipelines to assess potential environmental hazards and utility considerations for informed property decisions.
     </div>
   </TabsContent>
@@ -348,7 +348,7 @@ const emit = defineEmits([
 .layer-label {
   font-size: 0.8rem; /* 13px */
   font-weight: 500;
-  color: #374151;
+  color: hsl(var(--foreground));
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -363,34 +363,53 @@ const emit = defineEmits([
   line-height: 1.2;
 }
 
-/* Badge colors */
+/* Badge colors - updated to use theme tokens */
 .badge-green {
-  background-color: #d4f4dd;
-  color: #16a34a;
+  background-color: hsl(var(--success, 142 76% 36%) / 0.2);
+  color: hsl(var(--success, 142 76% 36%));
 }
 
 .badge-red {
-  background-color: #fecaca;
-  color: #dc2626;
+  background-color: hsl(var(--destructive) / 0.2);
+  color: hsl(var(--destructive));
 }
 
 .badge-yellow {
-  background-color: #fef3c7;
-  color: #d97706;
+  background-color: hsl(var(--warning, 48 96% 53%) / 0.2);
+  color: hsl(var(--warning, 48 96% 53%));
 }
 
 .badge-lime {
-  background-color: #ecfccb;
-  color: #65a30d;
+  background-color: hsl(var(--success, 142 76% 36%) / 0.1);
+  color: hsl(var(--success, 142 76% 36%));
 }
 
 .badge-gray {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
 }
 
 .badge-error {
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: hsl(var(--destructive) / 0.2);
+  color: hsl(var(--destructive));
+}
+
+/* Override default classes to use theme tokens */
+:deep([class*="bg-gray-100"]) {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+:deep([class*="bg-gray-600"]) {
+  background-color: hsl(var(--primary) / 0.1) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+:deep([class*="text-gray-"]) {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+:deep([class*="border-gray-"]) {
+  border-color: hsl(var(--border)) !important;
 }
 </style>

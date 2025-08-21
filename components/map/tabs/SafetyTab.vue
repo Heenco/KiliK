@@ -116,7 +116,7 @@ const emit = defineEmits([
 .layer-label {
   font-size: 0.715rem; /* 11px */
   font-weight: 500;
-  color: #555555;
+  color: hsl(var(--muted-foreground));
 }
 
 /* Pill-shaped badge component */
@@ -130,12 +130,12 @@ const emit = defineEmits([
 
 /* Badge colors */
 .badge-green {
-  background-color: #d4f4dd;
-  color: #16a34a;
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
 }
 
 .badge-gray {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: hsl(var(--muted) / 0.3);
+  color: hsl(var(--muted-foreground));
 }
 </style>

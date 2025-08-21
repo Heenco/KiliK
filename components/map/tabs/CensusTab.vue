@@ -11,22 +11,22 @@
       </div>
 
       <div class="py-1 mt-2">
-        <p class="text-xs text-gray-600">SEIFA (Socio-Economic Indexes for Areas) shows relative socio-economic advantage and disadvantage. Higher scores (green) indicate areas of advantage, while lower scores (red) indicate areas of disadvantage.</p>
+        <p class="text-xs text-muted-foreground">SEIFA (Socio-Economic Indexes for Areas) shows relative socio-economic advantage and disadvantage. Higher scores (green) indicate areas of advantage, while lower scores (red) indicate areas of disadvantage.</p>
       </div>
       
       <!-- SEIFA Data Card - Only shown when selectedAddress exists and data is loaded -->
-      <Card v-if="seifaData && selectedAddress" class="mt-1 bg-white shadow-sm">
+      <Card v-if="seifaData && selectedAddress" class="mt-1 shadow-sm">
 
         <CardContent>
           <div class="text-xs space-y-1">
-            <div class="pb-1 border-b border-gray-100">
-              <div class="font-medium text-gray-700 bold">Statistical Area:</div>
+            <div class="pb-1 border-b border-border">
+              <div class="font-medium text-foreground bold">Statistical Area:</div>
               <div>{{ seifaData.sal_name_2021 }}</div>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <div class="font-medium text-gray-700 mb-1">State Ranking</div>
+                <div class="font-medium text-foreground mb-1">State Ranking</div>
                 <div class="flex justify-between items-center mb-1">
                   <TooltipProvider>
                     <Tooltip>
@@ -63,7 +63,7 @@
               </div>
               
               <div>
-                <div class="font-medium text-gray-700 mb-1">Australia Ranking</div>
+                <div class="font-medium text-foreground mb-1">Australia Ranking</div>
                 <div class="flex justify-between items-center mb-1">
                   <TooltipProvider>
                     <Tooltip>
@@ -100,7 +100,7 @@
               </div>
             </div>
             
-            <div class="text-gray-500 italic text-[0.65rem] mt-1 pt-1 border-t border-gray-100">
+            <div class="text-muted-foreground italic text-[0.65rem] mt-1 pt-1 border-t border-border">
               Source: Australian Bureau of Statistics, SEIFA 2021
             </div>
           </div>
@@ -108,10 +108,10 @@
       </Card>
       
       <!-- Loading state for SEIFA data -->
-      <div v-else-if="isLoading && selectedAddress" class="mt-4 py-3 px-4 bg-white rounded-lg shadow-sm">
+      <div v-else-if="isLoading && selectedAddress" class="mt-4 py-3 px-4 bg-card rounded-lg shadow-sm border border-border">
         <div class="flex items-center space-x-2">
-          <div class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-          <span class="text-xs text-gray-600">Loading SEIFA data...</span>
+          <div class="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+          <span class="text-xs text-muted-foreground">Loading SEIFA data...</span>
         </div>
       </div>
     </div>
@@ -171,13 +171,13 @@ const loadSeifaData = async (coordinates) => {
 
 // Helper function to determine color based on decile value
 const getDecileColor = (decile) => {
-  if (!decile) return 'text-gray-500'
+  if (!decile) return 'text-muted-foreground'
   
-  // Colors based on decile value
-  if (decile <= 3) return 'text-blue-700' // Low - blue
-  if (decile <= 5) return 'text-gray-700' // Medium - gray
-  if (decile <= 7) return 'text-teal-700' // Medium-high - teal
-  return 'text-green-700' // High - green
+  // Colors based on decile value using tokens
+  if (decile <= 3) return 'text-destructive' // Low - using destructive token
+  if (decile <= 5) return 'text-foreground' // Medium - using default foreground color
+  if (decile <= 7) return 'text-accent-foreground' // Medium-high - using accent-foreground
+  return 'text-primary' // High - using primary color
 }
 
 // Watch for changes in the selected address
@@ -194,6 +194,6 @@ watch(() => props.selectedAddress, (newAddress) => {
 .layer-label {
   font-size: 0.715rem; /* 11px */
   font-weight: 500;
-  color: #555555;
+  color: hsl(var(--muted-foreground));
 }
 </style>

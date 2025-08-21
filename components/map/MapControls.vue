@@ -10,7 +10,7 @@
     <!-- Expanded view (full panel) -->
     <div 
       v-if="isExpanded" 
-      class="bg-white rounded-lg shadow-lg p-4 h-full transition-opacity overflow-y-auto"
+      class="bg-card rounded-lg shadow-lg p-4 h-full transition-opacity overflow-y-auto border border-border"
       :class="{'opacity-100': isExpanded, 'opacity-0': !isExpanded}"
       style="max-height: 80vh;"
     >
@@ -19,10 +19,10 @@
         <div v-if="selectedAddress" class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <!-- Main address title -->
-            <h3 class="text-xs font-semibold text-gray-800 truncate">{{ selectedAddress.title }}</h3>
+            <h3 class="text-xs font-semibold text-foreground truncate">{{ selectedAddress.title }}</h3>
 
             <!-- Second line with suburb and postcode -->
-            <p class="text-xs text-gray-500 mt-0.5">
+            <p class="text-xs text-muted-foreground mt-0.5">
               <span v-if="selectedAddress.suburb || selectedAddress.postcode">
                 {{ [selectedAddress.suburb, selectedAddress.postcode].filter(Boolean).join(', ') }}
               </span>
@@ -34,66 +34,66 @@
             <!-- Sticky/Pin toggle button -->
             <button 
               @click="toggleSticky"
-              class="p-1 rounded hover:bg-gray-100"
-              :class="{ 'bg-blue-100': isSticky }"
+              class="p-1 rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+              :class="{ 'bg-primary/10': isSticky }"
               :title="isSticky ? 'Unpin panel (auto-collapse enabled)' : 'Pin panel (disable auto-collapse)'"
             >
               <Pin 
                 class="h-4 w-4" 
-                :class="isSticky ? 'text-blue-600' : 'text-gray-500'"
+                :class="isSticky ? 'text-primary' : 'text-muted-foreground'"
               />
             </button>
             <a 
               :href="getStreetViewUrl()"
               target="_blank"
               rel="noopener noreferrer"
-              class="p-1 rounded hover:bg-gray-100"
+              class="p-1 rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
               title="View in Google Street View"
             >
-              <CameraIcon class="h-4 w-4 text-gray-500" />
+              <CameraIcon class="h-4 w-4 text-muted-foreground" />
             </a>
-            <button class="p-1 rounded hover:bg-gray-100">
-              <MapPinIcon class="h-4 w-4 text-gray-500" />
+            <button class="p-1 rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+              <MapPinIcon class="h-4 w-4 text-muted-foreground" />
             </button>
             <button 
               @click="clearSelectedAddress" 
-              class="p-1 rounded hover:bg-gray-100"
+              class="p-1 rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Close"
             >
-              <XIcon class="h-3 w-3 text-gray-500" />
+              <XIcon class="h-3 w-3 text-muted-foreground" />
             </button>
           </div>
         </div>
         <div v-else class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <h3 class="text-xs font-medium text-gray-400">No address selected</h3>
-            <p class="text-xs text-gray-300 mt-0.5">Search for a property to view details</p>
+            <h3 class="text-xs font-medium text-muted-foreground">No address selected</h3>
+            <p class="text-xs text-muted-foreground/70 mt-0.5">Search for a property to view details</p>
           </div>
           <div class="flex items-center space-x-2">
             <!-- Sticky/Pin toggle button -->
             <button 
               @click="toggleSticky"
-              class="p-1 rounded hover:bg-gray-100"
-              :class="{ 'bg-blue-100': isSticky }"
+              class="p-1 rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+              :class="{ 'bg-primary/10': isSticky }"
               :title="isSticky ? 'Unpin panel (auto-collapse enabled)' : 'Pin panel (disable auto-collapse)'"
             >
               <Pin 
                 class="h-4 w-4" 
-                :class="isSticky ? 'text-blue-600' : 'text-gray-500'"
+                :class="isSticky ? 'text-primary' : 'text-muted-foreground'"
               />
             </button>
           </div>
         </div>
-        <hr class="my-3 border-gray-200" />
+        <hr class="my-3 border-border" />
       </div>
 
       <!-- Updated Tabs component -->
       <Tabs :defaultValue="selectedTab" class="w-full" @update:value="handleTabChange">
-        <TabsList class="w-full bg-gray-100 rounded-lg p-1 mb-4">
-          <TabsTrigger value="access" class="tab-label">Access</TabsTrigger>
-          <TabsTrigger value="hazard" class="tab-label">Hazard</TabsTrigger>
-          <TabsTrigger value="safety" class="tab-label">Safety</TabsTrigger>
-          <TabsTrigger value="census" class="tab-label">Census</TabsTrigger>
+        <TabsList class="w-full mb-4">
+          <TabsTrigger value="access">Access</TabsTrigger>
+          <TabsTrigger value="hazard">Hazard</TabsTrigger>
+          <TabsTrigger value="safety">Safety</TabsTrigger>
+          <TabsTrigger value="census">Census</TabsTrigger>
         </TabsList>
         
         <AccessTab
@@ -188,36 +188,36 @@
     <!-- Collapsed view (vertical tabs) -->
     <div 
       v-else 
-      class="flex flex-col bg-white rounded-lg shadow-lg py-4 px-2 h-auto transition-opacity"
+      class="flex flex-col bg-card rounded-lg shadow-lg py-4 px-2 h-auto transition-opacity border border-border"
       :class="{'opacity-100': !isExpanded, 'opacity-0': isExpanded}"
     >
       <button 
         title="Access"
         @click="expandAndSelectTab('access')" 
-        class="p-2 my-1 rounded-full hover:bg-gray-100 flex items-center justify-center"
+        class="p-2 my-1 rounded-full hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring flex items-center justify-center"
       >
-        <MapPinIcon class="h-5 w-5 text-gray-700" />
+        <MapPinIcon class="h-5 w-5 text-foreground" />
       </button>
       <button 
         title="Hazard"
         @click="expandAndSelectTab('hazard')" 
-        class="p-2 my-1 rounded-full hover:bg-gray-100 flex items-center justify-center"
+        class="p-2 my-1 rounded-full hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring flex items-center justify-center"
       >
-        <AlertTriangleIcon class="h-5 w-5 text-gray-700" />
+        <AlertTriangleIcon class="h-5 w-5 text-foreground" />
       </button>
       <button 
         title="Safety"
         @click="expandAndSelectTab('safety')" 
-        class="p-2 my-1 rounded-full hover:bg-gray-100 flex items-center justify-center"
+        class="p-2 my-1 rounded-full hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring flex items-center justify-center"
       >
-        <ShieldIcon class="h-5 w-5 text-gray-700" />
+        <ShieldIcon class="h-5 w-5 text-foreground" />
       </button>
       <button 
         title="Census"
         @click="expandAndSelectTab('census')" 
-        class="p-2 my-1 rounded-full hover:bg-gray-100 flex items-center justify-center"
+        class="p-2 my-1 rounded-full hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring flex items-center justify-center"
       >
-        <UsersIcon class="h-5 w-5 text-gray-700" />
+        <UsersIcon class="h-5 w-5 text-foreground" />
       </button>
     </div>
   </div>
@@ -404,47 +404,19 @@ defineExpose({
               0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.tab-label {
-  font-size: 0.775rem; /* 14px */
-  font-weight: 500;
-  color: #666666;
-  transition: color 0.2s ease, font-weight 0.2s ease;
-}
-
-/* Add these styles for the selected tab state */
-:deep(.tab-label[data-state="active"]) {
-  color: #000000 !important; /* Black text for selected tab */
-  font-weight: 600; /* Make it slightly bolder */
-}
-
-/* Optional: Add a subtle bottom indicator for the active tab */
-:deep(.tab-label[data-state="active"]) {
-  position: relative;
-}
-
-:deep(.tab-label[data-state="active"])::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 25%;
-  width: 50%;
-  height: 2px;
-
-  border-radius: 1px;
-}
-
 /* Keep existing styles */
 :deep(.category-label) {
   font-size: 0.9375rem; /* 15px */
   font-weight: 500;
-  color: #333333;
+  color: hsl(var(--foreground));
 }
 
 :deep(.description-text) {
   font-size: 0.8125rem; /* 13px */
   font-weight: 400;
-  color: #666666;
+  color: hsl(var(--muted-foreground));
 }
+
 .w-full {
   width: 100%;
   height: 85%;

@@ -127,6 +127,7 @@
           <NuxtLink to="/blog" class="text-muted-foreground hover:text-foreground transition text-xs">Blog</NuxtLink>
           <NuxtLink to="/products" class="text-muted-foreground hover:text-foreground transition text-xs">Pricing</NuxtLink>
           <NuxtLink to="/index2" class="text-muted-foreground hover:text-foreground transition text-xs">Vision</NuxtLink>
+          <NuxtLink to="/pdf-view" class="text-muted-foreground hover:text-foreground transition text-xs">Inspection Report</NuxtLink>
         </nav>
       </div>
       <footer class="w-full py-4 mt-0 border-t border-border text-center text-muted-foreground text-xs">

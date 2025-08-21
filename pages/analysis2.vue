@@ -303,20 +303,33 @@ const renderPdfBlob = async (blob) => {
     
     // Use CDN for PDF.js to avoid Vite import resolution issues
     if (!window.pdfjsLib) {
-      // Load PDF.js from CDN if not already loaded
-      const script = document.createElement('script')
-      script.src = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js'
-      script.async = true
-      
-      // Wait for script to load
-      await new Promise((resolve, reject) => {
-        script.onload = resolve
-        script.onerror = reject
-        document.head.appendChild(script)
-      })
-      
-      // Set the worker source using CDN
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js'
+      // Dynamically import the local, legacy pdf.js bundle so we don't mix versions.
+      // The app uses pdfjs-dist@5.x in package.json; import the legacy bundle which pairs
+      // with the legacy worker file copied to /public.
+      try {
+        const mod = await import('pdfjs-dist/legacy/build/pdf')
+        window.pdfjsLib = (mod && (mod.default || mod))
+        // Point to the worker copied into /public. Ensure public/pdf.worker.min.mjs exists.
+        if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+        }
+      } catch (e) {
+        console.warn('Failed to dynamically import local pdfjs-dist; falling back to CDN', e)
+        // Fallback to CDN only as a last resort
+        const script = document.createElement('script')
+        script.src = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js'
+        script.async = true
+        await new Promise((resolve, reject) => {
+          script.onload = resolve
+          script.onerror = reject
+          document.head.appendChild(script)
+        })
+        try {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js'
+        } catch (err) {
+          console.warn('Could not set CDN workerSrc', err)
+        }
+      }
     }
     
     // Use the globally loaded PDF.js library

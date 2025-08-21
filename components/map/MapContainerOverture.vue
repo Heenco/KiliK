@@ -844,14 +844,14 @@ onMounted(() => {
         minzoom: 16, // Only show when zoomed in enough to see individual lots
         maxzoom: 22,
         paint: {
-          'line-color': '#FF6B35', // Orange color for better visibility
+          'line-color': '#FFFFFF', // Light white color for better visibility
           'line-width': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            16, 1,    // Thicker lines at zoom 16
-            18, 2,    // Medium-thick lines at zoom 18
-            20, 3     // Very thick lines at zoom 20+
+            16, 0.5,  // Thin lines at zoom 16
+            18, 1,    // Medium-thin lines at zoom 18
+            20, 1.5   // Slightly thicker lines at zoom 20+
           ],
           'line-opacity': [
             'interpolate',
@@ -881,14 +881,14 @@ onMounted(() => {
             minzoom: 16,
             maxzoom: 22,
             paint: {
-              'line-color': '#FF6B35', // Orange color for better visibility
+              'line-color': '#FFFFFF', // Light white color for better visibility
               'line-width': [
                 'interpolate',
                 ['linear'],
                 ['zoom'],
-                16, 1,    // Thicker lines at zoom 16
-                18, 2,    // Medium-thick lines at zoom 18
-                20, 3     // Very thick lines at zoom 20+
+                16, 0.5,  // Thin lines at zoom 16
+                18, 1,    // Medium-thin lines at zoom 18
+                20, 1.5   // Slightly thicker lines at zoom 20+
               ],
               'line-opacity': [
                 'interpolate',

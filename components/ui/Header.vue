@@ -9,11 +9,11 @@
         <!-- Always show the dropdown menu, but content changes based on auth status -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button class="p-2 hover:bg-accent focus:outline-none transition-all duration-200 flex items-center justify-center">
+            <button class="p-2 hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all duration-200 flex items-center justify-center rounded-md">
               <div class="flex flex-col space-y-0.5">
-                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
-                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
-                <div class="w-1 h-1 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
+                <div class="w-1 h-1 bg-foreground/70 rounded-full"></div>
+                <div class="w-1 h-1 bg-foreground/70 rounded-full"></div>
+                <div class="w-1 h-1 bg-foreground/70 rounded-full"></div>
               </div>
             </button>
           </DropdownMenuTrigger>          <DropdownMenuContent align="end" class="w-64 mt-2 bg-popover border border-border shadow-xl backdrop-blur dropdown-menu-content">

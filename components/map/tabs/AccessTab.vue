@@ -23,7 +23,7 @@
         <div class="flex-1">
           <Label for="travel-mode" class="layer-label block mb-1">Travel mode</Label>
           <Select id="travel-mode" :value="travelMode" @update:modelValue="$emit('update:travelMode', $event)" class="w-full">
-            <SelectTrigger class="w-full bg-white h-9 px-3 rounded-md text-xs">
+            <SelectTrigger class="w-full h-9 px-3 rounded-md text-xs">
               <SelectValue>{{ displayTravelMode }}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -36,7 +36,7 @@
         <div class="flex-1">
           <Label for="travel-time" class="layer-label block mb-1">Travel time</Label>
           <Select id="travel-time" :value="travelTime" @update:modelValue="$emit('update:travelTime', $event)" class="w-full">
-            <SelectTrigger class="w-full bg-white h-9 px-3 rounded-md text-xs">
+            <SelectTrigger class="w-full h-9 px-3 rounded-md text-xs">
               <SelectValue>{{ travelTime }} minutes</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -68,7 +68,7 @@
             :model-value="showPlacesLayer"
             @update:modelValue="$emit('update:showPlacesLayer', $event)"
           />
-          <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #808080;"></div>
+          <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #808080;"></div>
           <Label for="places-layer" class="layer-label">All Places</Label>
         </div>
 
@@ -86,7 +86,7 @@
                   :model-value="showTransportationLayer"
                   @update:modelValue="$emit('update:showTransportationLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #607D8B;"></div>
+                                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #607D8B;"></div>
                 <Label for="transportation-layer" class="layer-label">Public Transportation</Label>
               </div>
 
@@ -96,7 +96,7 @@
                   :model-value="showVehiclesLayer"
                   @update:modelValue="$emit('update:showVehiclesLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #424242;"></div>
+                                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #424242;"></div>
                 <Label for="vehicles-layer" class="layer-label">Vehicle Services</Label>
               </div>
 
@@ -118,7 +118,7 @@
                   :model-value="showHealthcareLayer"
                   @update:modelValue="$emit('update:showHealthcareLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF4444;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #FF4444;"></div>
                 <Label for="healthcare-layer" class="layer-label">Health & Personal Care</Label>
               </div>
 
@@ -128,7 +128,7 @@
                   :model-value="showGroceriesLayer"
                   @update:modelValue="$emit('update:showGroceriesLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #4CAF50;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #4CAF50;"></div>
                 <Label for="groceries-layer" class="layer-label">Food & Groceries</Label>
               </div>
 
@@ -138,7 +138,7 @@
                   :model-value="showBankingLayer"
                   @update:modelValue="$emit('update:showBankingLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #2196F3;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #2196F3;"></div>
                 <Label for="banking-layer" class="layer-label">Banking & Financial</Label>
               </div>
 
@@ -160,7 +160,7 @@
                   :model-value="showRetailLayer"
                   @update:modelValue="$emit('update:showRetailLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #9C27B0;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #9C27B0;"></div>
                 <Label for="retail-layer" class="layer-label">Retail Shops</Label>
               </div>
 
@@ -170,7 +170,7 @@
                   :model-value="showPetcareLayer"
                   @update:modelValue="$emit('update:showPetcareLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF9800;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #FF9800;"></div>
                 <Label for="petcare-layer" class="layer-label">Pet Care & Services</Label>
               </div>
 
@@ -192,7 +192,7 @@
                   :model-value="showDiningLayer"
                   @update:modelValue="$emit('update:showDiningLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #E91E63;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #E91E63;"></div>
                 <Label for="dining-layer" class="layer-label">Dining & Cafes</Label>
               </div>
 
@@ -202,7 +202,7 @@
                   :model-value="showEntertainmentLayer"
                   @update:modelValue="$emit('update:showEntertainmentLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #673AB7;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #673AB7;"></div>
                 <Label for="entertainment-layer" class="layer-label">Entertainment Venues</Label>
               </div>
 
@@ -224,7 +224,7 @@
                   :model-value="showRecreationLayer"
                   @update:modelValue="$emit('update:showRecreationLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #4CAF50;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #4CAF50;"></div>
                 <Label for="recreation-layer" class="layer-label">Recreation & Sports</Label>
               </div>
 
@@ -234,7 +234,7 @@
                   :model-value="showTrailsLayer"
                   @update:modelValue="$emit('update:showTrailsLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #8BC34A;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #8BC34A;"></div>
                 <Label for="trails-layer" class="layer-label">Walking & Cycling Trails</Label>
               </div>
 
@@ -256,7 +256,7 @@
                   :model-value="showSchoolsLayer"
                   @update:modelValue="$emit('update:showSchoolsLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #FF9800;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #FF9800;"></div>
                 <Label for="schools-layer" class="layer-label">Schools & Education</Label>
               </div>
 
@@ -266,7 +266,7 @@
                   :model-value="showCommunityLayer"
                   @update:modelValue="$emit('update:showCommunityLayer', $event)"
                 />
-                <div class="w-3 h-3 rounded-full mr-2 border border-gray-300" style="background-color: #795548;"></div>
+                <div class="w-3 h-3 rounded-full mr-2 border border-border" style="background-color: #795548;"></div>
                 <Label for="community-layer" class="layer-label">Community Resources</Label>
               </div>
 
@@ -367,7 +367,7 @@ const displayTravelMode = computed(() => {
 .layer-label {
   font-size: 0.8rem; /* 13px */
   font-weight: 500;
-  color: #374151;
+  color: hsl(var(--muted-foreground));
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -405,8 +405,8 @@ const displayTravelMode = computed(() => {
 }
 
 .badge-green {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: rgb(22, 163, 74);
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
 }
 
 @keyframes accordion-down {
