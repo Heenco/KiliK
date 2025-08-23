@@ -100,13 +100,29 @@
                         </svg>
                         <h3 class="text-base font-medium text-foreground mb-2">Report Not Processed</h3>
                         <p class="text-sm text-muted-foreground mb-6">Click "Process Report" to extract text and images from this PDF</p>
-                        <button 
-                          @click="handleProcessPdf(selectedReport.name)" 
-                          :disabled="isProcessing"
-                          class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold shadow-sm hover:bg-primary/90 transition disabled:opacity-50"
-                        >
-                          {{ isProcessing ? 'Processing...' : 'Process Report' }}
-                        </button>
+                        <div class="flex gap-3 justify-center">
+                          <button 
+                            @click="handleProcessPdf(selectedReport.name)" 
+                            :disabled="isProcessing"
+                            class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold shadow-sm hover:bg-primary/90 transition disabled:opacity-50"
+                          >
+                            {{ isProcessing ? 'Processing...' : 'Process Report' }}
+                          </button>
+                          <button 
+                            @click="handlePdfToMarkdown"
+                            :disabled="isConvertingToMarkdown"
+                            class="inline-flex items-center px-4 py-2 border border-border bg-background/80 rounded-lg text-sm text-foreground hover:border-primary/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <svg v-if="isConvertingToMarkdown" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            {{ isConvertingToMarkdown ? 'Converting...' : 'PDF to MD' }}
+                          </button>
+                        </div>
                       </div>
 
                       <div v-else-if="isProcessing" class="text-center py-12">
@@ -166,7 +182,24 @@
 
                     <!-- Text Tab -->
                     <TabsContent value="text" class="mt-0">
-                      <div v-if="extractedText" class="space-y-4">
+                      <div v-if="markdownContent" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                          <h3 class="text-lg font-medium text-foreground">Markdown Content</h3>
+                          <button 
+                            @click="markdownContent = ''"
+                            class="text-sm text-muted-foreground hover:text-foreground"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        
+                        <!-- Rendered Markdown -->
+                        <div class="prose prose-invert max-w-none bg-card/50 rounded-lg p-6 border border-border">
+                          <div class="markdown-content" v-html="renderMarkdown(markdownContent)"></div>
+                        </div>
+                      </div>
+                      
+                      <div v-else-if="extractedText" class="space-y-4">
                         <!-- Text Actions -->
                         <div class="flex justify-between items-center">
                           <h4 class="font-semibold text-foreground text-sm tracking-wide">Extracted Text Content</h4>
@@ -199,7 +232,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         <h3 class="text-base font-medium text-foreground mb-2">No Text Extracted</h3>
-                        <p class="text-sm text-muted-foreground">Process the report first to extract text content</p>
+                        <p class="text-sm text-muted-foreground">Process the report first to extract text content, or use "PDF to MD" to convert the PDF to markdown format</p>
                       </div>
                     </TabsContent>
 
@@ -269,7 +302,7 @@
                         <div v-if="pdfAnalysisStatus" class="p-4 rounded-lg bg-card/50 border border-border">
                           <div class="flex items-center gap-2 mb-2">
                             <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             <span class="font-medium text-foreground">PDF Analysis</span>
                           </div>
@@ -322,7 +355,7 @@
                         <div v-if="pdfAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
                           <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             PDF Document Analysis
                           </h5>
@@ -333,7 +366,7 @@
                         <div v-if="pdfAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
                           <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             PDF Document Analysis
                           </h5>
@@ -381,7 +414,7 @@
 
                       <div v-else class="text-center py-12">
                         <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2v-14a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         <h3 class="text-base font-medium text-foreground mb-2">Start Analysis</h3>
                         <p class="text-sm text-muted-foreground mb-6">Choose an analysis method to begin processing your inspection report</p>
@@ -450,7 +483,7 @@
                             <div class="flex items-center gap-3">
                               <div class="w-10 h-10 bg-orange-500/20 group-hover:bg-orange-500/30 rounded-xl flex items-center justify-center transition-colors">
                                 <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                               </div>
                               <div>
@@ -459,6 +492,78 @@
                               </div>
                             </div>
                           </button>
+
+                          <!-- Vector Database Choice Toggle -->
+                          <div class="mb-4 p-3 bg-card/30 border border-border rounded-xl">
+                            <div class="text-xs font-medium text-foreground mb-2">Vector Database:</div>
+                            <div class="flex gap-2">
+                              <button
+                                @click="vectorDbChoice = 'faiss'"
+                                :class="[
+                                  'flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                                  vectorDbChoice === 'faiss' 
+                                    ? 'bg-sky-500 text-white' 
+                                    : 'bg-background border border-border text-muted-foreground hover:text-foreground'
+                                ]"
+                              >
+                                Local FAISS
+                              </button>
+                              <button
+                                @click="vectorDbChoice = 'supabase'"
+                                :class="[
+                                  'flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                                  vectorDbChoice === 'supabase' 
+                                    ? 'bg-emerald-500 text-white' 
+                                    : 'bg-background border border-border text-muted-foreground hover:text-foreground'
+                                ]"
+                              >
+                                Supabase Vector
+                              </button>
+                            </div>
+                          </div>
+
+                          <!-- New: Ingest for RAG -->
+                          <button
+                            @click="handleIngestForRag"
+                            :disabled="isIngesting || !extractedText"
+                            class="group border border-border bg-background/80 p-4 text-left rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 bg-sky-500/10 group-hover:bg-sky-500/20 rounded-xl flex items-center justify-center transition-colors">
+                                <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v4a1 1 0 001 1h3m10 0h3a1 1 0 001-1V7M8 21h8M12 3v18"/></svg>
+                              </div>
+                              <div>
+                                <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">Ingest for RAG</div>
+                                <div class="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                                  {{ vectorDbChoice === 'supabase' ? 'Create Supabase vectors with DeepInfra embeddings' : 'Create local FAISS vectors' }}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+
+                          <!-- New: Query RAG -->
+                          <div class="space-y-3">
+                            <div class="flex gap-2">
+                              <input
+                                v-model="queryInput"
+                                type="text"
+                                placeholder="Ask a question about the report..."
+                                @keyup.enter="handleQueryRag"
+                                :disabled="isQuerying"
+                                class="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                              >
+                              <button
+                                @click="handleQueryRag"
+                                :disabled="isQuerying || !queryInput.trim()"
+                                class="px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white rounded-lg text-sm transition-colors"
+                              >
+                                {{ isQuerying ? 'Querying...' : 'Query RAG' }}
+                              </button>
+                            </div>
+                            <div class="text-xs text-muted-foreground">
+                              {{ vectorDbChoice === 'supabase' ? 'Search Supabase vectors with DeepInfra embeddings & Qwen2.5 LLM' : 'Search FAISS vectors and get AI summary via DeepInfra' }}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </TabsContent>
@@ -892,6 +997,156 @@ const handleAnalyzePdf = async () => {
   const success = await analyzePdfWithDeepInfra(selectedReport.value?.name, extractedText.value);
   if (success) {
     setActiveTab('analysis');
+  }
+};
+
+const isIngesting = ref(false);
+const isQuerying = ref(false);
+const queryInput = ref('');
+const vectorDbChoice = ref('faiss'); // 'faiss' or 'supabase'
+
+// PDF to Markdown conversion
+const isConvertingToMarkdown = ref(false);
+const markdownContent = ref('');
+
+const handleIngestForRag = async () => {
+  if (!extractedText) return;
+  isIngesting.value = true;
+  try {
+    // Unwrap possible Vue refs before sending to the server to avoid circular JSON
+    const textValue = typeof extractedText === 'string' ? extractedText : (extractedText && extractedText.value !== undefined ? extractedText.value : '');
+    const reportNameValue = (selectedReport && (selectedReport.name || (selectedReport.value && selectedReport.value.name))) || 'report';
+    
+    let payload, endpoint, successMessage;
+    
+    if (vectorDbChoice.value === 'supabase') {
+      // Supabase ingestion - requires real user UID
+      const user = useSupabaseUser();
+      if (!user.value) {
+        throw new Error('User not authenticated');
+      }
+      const userId = user.value.id; // This is the real UID from auth.users
+      payload = { text: textValue, reportName: reportNameValue, userId };
+      endpoint = '/api/ingest-supabase';
+      successMessage = (data) => `Supabase: Ingested ${data.chunks_added}/${data.total_chunks} chunks`;
+    } else {
+      // FAISS ingestion (original)
+      payload = { text: textValue, reportName: reportNameValue };
+      endpoint = '/api/ingest-pdf';
+      successMessage = (data) => `FAISS: Ingested ${data.added} chunks, total ${data.total}`;
+    }
+    
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Ingest failed');
+    
+    // Success notification
+    alert(successMessage(data));
+   } catch (err) {
+     console.error(err);
+     alert('Ingest failed: ' + (err.message || err));
+   } finally {
+     isIngesting.value = false;
+   }
+};
+
+const handleQueryRag = async () => {
+  if (!queryInput.value.trim() || isQuerying.value) return;
+  
+  isQuerying.value = true;
+  try {
+    const reportNameValue = (selectedReport && (selectedReport.name || (selectedReport.value && selectedReport.value.name))) || 'report';
+    
+    let payload, endpoint;
+    
+    if (vectorDbChoice.value === 'supabase') {
+      // Supabase query - requires real user UID
+      const user = useSupabaseUser();
+      if (!user.value) {
+        throw new Error('User not authenticated');
+      }
+      const userId = user.value.id; // This is the real UID from auth.users
+      payload = { 
+        query: queryInput.value.trim(), 
+        reportName: reportNameValue,
+        userId,
+        maxChunks: 5 
+      };
+      endpoint = '/api/query-supabase';
+    } else {
+      // FAISS query (original)
+      payload = { 
+        query: queryInput.value.trim(), 
+        reportName: reportNameValue,
+        maxChunks: 5 
+      };
+      endpoint = '/api/query-chunks';
+    }
+    
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Query failed');
+    
+    // Display the summary with backend info
+    const backendInfo = vectorDbChoice.value === 'supabase' ? 'Supabase' : 'FAISS';
+    alert(`${backendInfo} Summary:\n\n${data.summary}\n\n(Used ${data.chunks_used} chunks)`);
+    queryInput.value = ''; // Clear input after successful query
+    
+  } catch (err) {
+    console.error(err);
+    alert('Query failed: ' + (err.message || err));
+  } finally {
+    isQuerying.value = false;
+  }
+};
+
+// PDF to Markdown conversion handler
+const handlePdfToMarkdown = async () => {
+  if (!selectedReport.value) {
+    alert('Please select a report first')
+    return
+  }
+
+  const user = useSupabaseUser();
+  if (!user.value?.id) {
+    alert('Please log in to convert PDF to Markdown')
+    return
+  }
+
+  isConvertingToMarkdown.value = true
+  
+  try {
+    const response = await $fetch('/api/pdf-to-markdown', {
+      method: 'POST',
+      body: {
+        fileName: selectedReport.value.file_name || selectedReport.value.name,
+        userId: user.value.id
+      }
+    })
+
+    if (response.success) {
+      markdownContent.value = response.markdown
+      // Switch to text tab to show the result
+      setActiveTab('text')
+      alert(`Successfully converted PDF to Markdown!`)
+    } else {
+      alert('Failed to convert PDF to Markdown')
+    }
+  } catch (error) {
+    console.error('PDF to Markdown error:', error)
+    alert('Error converting PDF to Markdown: ' + (error.data?.error || error.message))
+  } finally {
+    isConvertingToMarkdown.value = false
   }
 };
 
