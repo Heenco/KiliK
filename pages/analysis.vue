@@ -122,6 +122,20 @@
                             </svg>
                             {{ isConvertingToMarkdown ? 'Converting...' : 'PDF to MD' }}
                           </button>
+                          <button 
+                            @click="handlePdfToImages"
+                            :disabled="isConvertingToImages"
+                            class="inline-flex items-center px-4 py-2 border border-border bg-background/80 rounded-lg text-sm text-foreground hover:border-primary/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <svg v-if="isConvertingToImages" class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <svg v-else class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ isConvertingToImages ? 'Converting...' : 'PDF to Images' }}
+                          </button>
                         </div>
                       </div>
 
@@ -152,31 +166,66 @@
 
                     <!-- Images Tab -->
                     <TabsContent value="images" class="mt-0">
-                      <div v-if="extractedImages && extractedImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="(image, index) in extractedImages" :key="index" class="relative border border-border rounded-xl overflow-hidden bg-card/50 hover:border-ring transition-all duration-200 hover:shadow-lg aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index)">
-                          <img 
-                            :src="image" 
-                            class="w-full h-full object-cover pointer-events-none" 
-                            :alt="`Image ${index + 1} from PDF`" 
-                          />
-                          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                              </svg>
+                      <div v-if="(extractedImages && extractedImages.length > 0) || (pdfPageImages && pdfPageImages.length > 0)" class="space-y-6">
+                        
+                        <!-- Extracted Images Section -->
+                        <div v-if="extractedImages && extractedImages.length > 0">
+                          <h4 class="font-semibold text-foreground mb-4 text-sm tracking-wide">Extracted Images ({{ extractedImages.length }})</h4>
+                          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div v-for="(image, index) in extractedImages" :key="`extracted-${index}`" class="relative border border-border rounded-xl overflow-hidden bg-card/50 hover:border-ring transition-all duration-200 hover:shadow-lg aspect-square group cursor-pointer" @click="handleOpenImageModal(image, index, 'extracted')">
+                              <img 
+                                :src="image" 
+                                class="w-full h-full object-cover pointer-events-none" 
+                                :alt="`Extracted image ${index + 1}`" 
+                              />
+                              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                  </svg>
+                                </div>
+                              </div>
+                              <div class="absolute bottom-2 right-2 bg-green-600/90 text-white text-xs px-2 py-1 rounded-md font-medium">
+                                E{{ index + 1 }}
+                              </div>
                             </div>
                           </div>
-                          <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md font-medium">
-                            {{ index + 1 }}
+                        </div>
+
+                        <!-- PDF Page Images Section -->
+                        <div v-if="pdfPageImages && pdfPageImages.length > 0">
+                          <h4 class="font-semibold text-foreground mb-4 text-sm tracking-wide">PDF Pages ({{ pdfPageImages.length }} of {{ pdfTotalPages || 'unknown' }})</h4>
+                          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div v-for="(pageImage, index) in pdfPageImages" :key="`page-${pageImage.page}`" class="relative border border-border rounded-xl overflow-hidden bg-card/50 hover:border-ring transition-all duration-200 hover:shadow-lg group cursor-pointer" @click="handleOpenImageModal(pageImage.dataUrl, index, 'pages')">
+                              <img 
+                                :src="pageImage.dataUrl" 
+                                class="w-full h-full object-cover pointer-events-none" 
+                                :alt="`PDF page ${pageImage.page}`" 
+                              />
+                              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                  </svg>
+                                </div>
+                              </div>
+                              <div class="absolute bottom-2 right-2 bg-blue-600/90 text-white text-xs px-2 py-1 rounded-md font-medium">
+                                P{{ pageImage.page }}
+                              </div>
+                              <div class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md font-medium">
+                                {{ Math.round(pageImage.size / 1024) }}KB
+                              </div>
+                            </div>
                           </div>
                         </div>
+                        
                       </div>
                       <div v-else class="text-center py-12">
                         <svg class="mx-auto h-16 w-16 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <h3 class="text-base font-medium text-foreground mb-2">No Images Found</h3>
-                        <p class="text-sm text-muted-foreground">{{ extractedText ? 'This PDF contains no extractable images' : 'Process the report first to extract images' }}</p>
+                        <h3 class="text-base font-medium text-foreground mb-2">No Images Available</h3>
+                        <p class="text-sm text-muted-foreground">Process the report to extract images, or convert PDF pages to images</p>
                       </div>
                     </TabsContent>
 
@@ -432,7 +481,7 @@
                               <option value="">Select an analysis method...</option>
                               <option value="python" :disabled="!extractedText">Python Analysis</option>
                               <option value="deepinfra-text" :disabled="!extractedText">DeepInfra - text analysis</option>
-                              <option value="deepinfra-image" :disabled="!extractedImages || extractedImages.length === 0">DeepInfra - image analysis</option>
+                              <option value="deepinfra-image" :disabled="(!extractedImages || extractedImages.length === 0) && (!pdfPageImages || pdfPageImages.length === 0)">DeepInfra - image analysis</option>
                               <option value="deepinfra-pdf" :disabled="!selectedReport">DeepInfra - pdf analysis</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -672,7 +721,7 @@
           
           <!-- Previous Button -->
           <button 
-            v-if="extractedImages.length > 1"
+            v-if="(currentImageType === 'extracted' && extractedImages.length > 1) || (currentImageType === 'pages' && pdfPageImages.length > 1)"
             @click.stop="handleNavigateImage('prev')" 
             class="absolute left-4 z-10 bg-background/80 hover:bg-background border border-border text-foreground rounded-full p-3 transition-colors"
           >
@@ -683,12 +732,12 @@
           
           <!-- Image -->
           <div class="flex items-center justify-center w-full h-full" @click.stop>
-            <img :src="selectedImage" class="max-w-full max-h-full object-contain" :alt="`Image ${selectedImageIndex + 1} of ${extractedImages.length}`" />
+            <img :src="selectedImage" class="max-w-full max-h-full object-contain" :alt="`Image ${selectedImageIndex + 1} of ${currentImageType === 'extracted' ? extractedImages.length : pdfPageImages.length}`" />
           </div>
           
           <!-- Next Button -->
           <button 
-            v-if="extractedImages.length > 1"
+            v-if="(currentImageType === 'extracted' && extractedImages.length > 1) || (currentImageType === 'pages' && pdfPageImages.length > 1)"
             @click.stop="handleNavigateImage('next')" 
             class="absolute right-4 z-10 bg-background/80 hover:bg-background border border-border text-foreground rounded-full p-3 transition-colors"
           >
@@ -698,8 +747,9 @@
           </button>
           
           <!-- Image Counter -->
-          <div v-if="extractedImages.length > 1" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background/80 border border-border text-foreground px-4 py-2 rounded-full text-sm">
-            {{ selectedImageIndex + 1 }} / {{ extractedImages.length }}
+          <div v-if="(currentImageType === 'extracted' && extractedImages.length > 1) || (currentImageType === 'pages' && pdfPageImages.length > 1)" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background/80 border border-border text-foreground px-4 py-2 rounded-full text-sm">
+            {{ selectedImageIndex + 1 }} / {{ currentImageType === 'extracted' ? extractedImages.length : pdfPageImages.length }}
+            <span class="ml-2 text-xs opacity-75">{{ currentImageType === 'extracted' ? 'Extracted' : 'PDF Pages' }}</span>
           </div>
         </div>
       </div>
@@ -939,8 +989,28 @@ const handleAnalyzeWithDeepInfra = async () => {
 };
 
 const handleAnalyzeImages = async () => {
-  console.log('Image analysis clicked, images count:', extractedImages.value?.length);
-  const success = await analyzeImagesWithDeepInfra(extractedImages.value, extractedText.value);
+  // Combine extracted images and PDF page images
+  const allImages = [];
+  
+  if (extractedImages.value && extractedImages.value.length > 0) {
+    allImages.push(...extractedImages.value);
+  }
+  
+  if (pdfPageImages.value && pdfPageImages.value.length > 0) {
+    // Extract dataUrl from PDF page images
+    allImages.push(...pdfPageImages.value.map(img => img.dataUrl));
+  }
+  
+  console.log('Image analysis clicked, total images count:', allImages.length);
+  console.log('- Extracted images:', extractedImages.value?.length || 0);
+  console.log('- PDF page images:', pdfPageImages.value?.length || 0);
+  
+  if (allImages.length === 0) {
+    alert('No images available for analysis');
+    return;
+  }
+  
+  const success = await analyzeImagesWithDeepInfra(allImages, extractedText.value);
   if (success) {
     setActiveTab('analysis');
   }
@@ -985,6 +1055,11 @@ const vectorDbChoice = ref('faiss'); // 'faiss' or 'supabase'
 // PDF to Markdown conversion
 const isConvertingToMarkdown = ref(false);
 const markdownContent = ref('');
+
+// PDF to Images conversion
+const isConvertingToImages = ref(false);
+const pdfPageImages = ref([]);
+const pdfTotalPages = ref(null);
 
 // Analysis method dropdown
 const selectedAnalysisMethod = ref('');
@@ -1130,6 +1205,47 @@ const handlePdfToMarkdown = async () => {
   }
 };
 
+// PDF to Images conversion handler
+const handlePdfToImages = async () => {
+  if (!selectedReport.value) {
+    alert('Please select a report first')
+    return
+  }
+
+  const user = useSupabaseUser();
+  if (!user.value?.id) {
+    alert('Please log in to convert PDF to Images')
+    return
+  }
+
+  isConvertingToImages.value = true
+  
+  try {
+    const response = await $fetch('/api/pdf-to-images', {
+      method: 'POST',
+      body: {
+        fileName: selectedReport.value.file_name || selectedReport.value.name,
+        userId: user.value.id
+      }
+    })
+
+    if (response.success) {
+      pdfPageImages.value = response.images
+      pdfTotalPages.value = response.totalPages
+      // Switch to images tab to show the result
+      setActiveTab('images')
+      alert(`Successfully converted ${response.convertedPages} pages to images!`)
+    } else {
+      alert('Failed to convert PDF to Images')
+    }
+  } catch (error) {
+    console.error('PDF to Images error:', error)
+    alert('Error converting PDF to Images: ' + (error.data?.error || error.message))
+  } finally {
+    isConvertingToImages.value = false
+  }
+};
+
 // Chat methods
 const handleSendChatMessage = async () => {
   if (!chatInput.value.trim() || isChatting.value) return;
@@ -1162,12 +1278,19 @@ const handleChatKeyPress = (event) => {
 };
 
 // Image gallery methods
-const handleOpenImageModal = (imageUrl, index) => {
-  openImageModal(imageUrl, index, extractedImages.value);
+const currentImageType = ref('extracted'); // 'extracted' or 'pages'
+
+const handleOpenImageModal = (imageUrl, index, type = 'extracted') => {
+  currentImageType.value = type;
+  const imageArray = type === 'extracted' ? extractedImages.value : pdfPageImages.value.map(p => p.dataUrl);
+  openImageModal(imageUrl, index, imageArray);
 };
 
 const handleNavigateImage = (direction) => {
-  navigateImage(direction, extractedImages.value);
+  const imageArray = currentImageType.value === 'extracted' 
+    ? extractedImages.value 
+    : pdfPageImages.value.map(p => p.dataUrl);
+  navigateImage(direction, imageArray);
 };
 
 // Markdown rendering function
