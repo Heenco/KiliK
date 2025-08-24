@@ -50,8 +50,8 @@ import json
 pdf_data = sys.stdin.buffer.read()
 doc = fitz.open(stream=pdf_data, filetype="pdf")
 
-# Limit to first 30 pages
-max_pages = min(30, len(doc))
+# Limit to first 100 pages
+max_pages = min(100, len(doc))
 images = []
 
 for page_num in range(max_pages):

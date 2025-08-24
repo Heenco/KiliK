@@ -288,7 +288,7 @@
                     <!-- Analysis Tab -->
                     <TabsContent value="analysis" class="mt-0">
                       <!-- Analysis Results -->
-                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary || deepInfraStatus || deepInfraSummary || imageAnalysisStatus || imageAnalysisResult || pdfAnalysisStatus || pdfAnalysisResult" class="space-y-4">
+                      <div v-if="summarizeStatus || openAIStatus || gensimStatus || summarizedIssues.length > 0 || gensimSummary || ollamaSummary || deepInfraStatus || deepInfraSummary || imageAnalysisStatus || imageAnalysisResult || layoutAnalysisStatus || layoutAnalysisResult || pdfAnalysisStatus || pdfAnalysisResult" class="space-y-4">
                         <!-- Analysis Status Messages -->
                         <div v-if="summarizeStatus" class="p-4 rounded-lg bg-purple-900/30 border border-purple-700">
                           <div class="flex items-center gap-2 mb-2">
@@ -348,6 +348,16 @@
                           <p class="text-muted-foreground">{{ imageAnalysisStatus }}</p>
                         </div>
                         
+                        <div v-if="layoutAnalysisStatus" class="p-4 rounded-lg bg-card/50 border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            <span class="font-medium text-foreground">Layout Detection</span>
+                          </div>
+                          <p class="text-muted-foreground">{{ layoutAnalysisStatus }}</p>
+                        </div>
+                        
                         <div v-if="pdfAnalysisStatus" class="p-4 rounded-lg bg-card/50 border border-border">
                           <div class="flex items-center gap-2 mb-2">
                             <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,6 +408,51 @@
                             Visual Analysis
                           </h5>
                           <div class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(imageAnalysisResult)"></div>
+                        </div>
+                        
+                        <!-- Layout Analysis Result -->
+                        <div v-if="layoutAnalysisResult" class="bg-card/50 border border-border rounded-lg p-4">
+                          <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            Layout Detection Results
+                          </h5>
+                          
+                          <!-- Try to parse as JSON first for bbox visualization -->
+                          <div v-if="parsedLayoutData" class="space-y-6">
+                            <!-- Visual Layout Display with Bounding Boxes -->
+                            <div v-for="(imageData, index) in parsedLayoutData" :key="index" class="space-y-4">
+                              <h6 class="font-medium text-foreground">Image {{ index + 1 }} Layout</h6>
+                              
+                              <!-- Canvas container for image with overlays -->
+                              <div class="relative inline-block bg-gray-100 rounded-lg">
+                                <canvas 
+                                  :data-canvas="`layoutCanvas${index}`"
+                                  class="max-w-full h-auto border border-border rounded-lg"
+                                  @click="handleLayoutCanvasClick"
+                                ></canvas>
+                              </div>
+                              
+                              <!-- Layout Elements List -->
+                              <div v-if="imageData.layout_elements" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div 
+                                  v-for="(element, elemIndex) in imageData.layout_elements" 
+                                  :key="elemIndex"
+                                  class="p-2 bg-background/80 border border-border rounded text-xs"
+                                >
+                                  <div class="font-medium text-cyan-400">{{ element.type }}</div>
+                                  <div class="text-muted-foreground truncate">{{ element.text || 'No text' }}</div>
+                                  <div class="text-xs text-muted-foreground">
+                                    BBox: [{{ element.bbox?.join(', ') }}]
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Fallback to markdown if not JSON -->
+                          <div v-else class="text-foreground text-sm leading-relaxed markdown-content" v-html="renderMarkdown(layoutAnalysisResult)"></div>
                         </div>
                         
                         <!-- PDF Analysis Result -->
@@ -475,13 +530,14 @@
                             <select 
                               v-model="selectedAnalysisMethod"
                               @change="handleAnalysisMethodChange"
-                              :disabled="isSummarizing || isAnalyzingDeepInfra || isAnalyzingImages || isAnalyzingPdf"
+                              :disabled="isSummarizing || isAnalyzingDeepInfra || isAnalyzingImages || isAnalyzingLayout || isAnalyzingPdf"
                               class="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50 appearance-none"
                             >
                               <option value="">Select an analysis method...</option>
                               <option value="python" :disabled="!extractedText">Python Analysis</option>
                               <option value="deepinfra-text" :disabled="!extractedText">DeepInfra - text analysis</option>
                               <option value="deepinfra-image" :disabled="(!extractedImages || extractedImages.length === 0) && (!pdfPageImages || pdfPageImages.length === 0)">DeepInfra - image analysis</option>
+                              <option value="deepinfra-layout" :disabled="(!extractedImages || extractedImages.length === 0) && (!pdfPageImages || pdfPageImages.length === 0)">DeepInfra - layout detection</option>
                               <option value="deepinfra-pdf" :disabled="!selectedReport">DeepInfra - pdf analysis</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
@@ -758,7 +814,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
@@ -825,6 +881,11 @@ const {
   imageAnalysisStatus,
   imageAnalysisResult,
   
+  // Layout analysis
+  isAnalyzingLayout,
+  layoutAnalysisStatus,
+  layoutAnalysisResult,
+  
   // PDF analysis
   isAnalyzingPdf,
   pdfAnalysisStatus,
@@ -836,6 +897,7 @@ const {
   analyzeWithOllama,
   analyzeWithDeepInfra,
   analyzeImagesWithDeepInfra,
+  analyzeLayoutWithDeepInfra,
   analyzePdfWithDeepInfra,
   clearAnalysisResults,
   
@@ -1016,6 +1078,34 @@ const handleAnalyzeImages = async () => {
   }
 };
 
+const handleAnalyzeLayout = async () => {
+  // Combine extracted images and PDF page images
+  const allImages = [];
+  
+  if (extractedImages.value && extractedImages.value.length > 0) {
+    allImages.push(...extractedImages.value);
+  }
+  
+  if (pdfPageImages.value && pdfPageImages.value.length > 0) {
+    // Extract dataUrl from PDF page images
+    allImages.push(...pdfPageImages.value.map(img => img.dataUrl));
+  }
+  
+  console.log('Layout analysis clicked, total images count:', allImages.length);
+  console.log('- Extracted images:', extractedImages.value?.length || 0);
+  console.log('- PDF page images:', pdfPageImages.value?.length || 0);
+  
+  if (allImages.length === 0) {
+    alert('No images available for layout analysis');
+    return;
+  }
+  
+  const success = await analyzeLayoutWithDeepInfra(allImages, extractedText.value);
+  if (success) {
+    setActiveTab('analysis');
+  }
+};
+
 const handleAnalyzePdf = async () => {
   console.log('PDF analysis clicked, selected report:', selectedReport.value?.name);
   const success = await analyzePdfWithDeepInfra(selectedReport.value?.name, extractedText.value);
@@ -1037,6 +1127,9 @@ const handleAnalysisMethodChange = async () => {
       break;
     case 'deepinfra-image':
       await handleAnalyzeImages();
+      break;
+    case 'deepinfra-layout':
+      await handleAnalyzeLayout();
       break;
     case 'deepinfra-pdf':
       await handleAnalyzePdf();
@@ -1246,7 +1339,109 @@ const handlePdfToImages = async () => {
   }
 };
 
-// Chat methods
+// Layout analysis methods
+const parsedLayoutData = computed(() => {
+  if (!layoutAnalysisResult.value) return null;
+  
+  try {
+    // Try to parse as JSON
+    const parsed = JSON.parse(layoutAnalysisResult.value);
+    if (parsed && Array.isArray(parsed)) {
+      return parsed;
+    } else if (parsed && parsed.layout_elements) {
+      return [parsed]; // Single image result
+    }
+  } catch (e) {
+    // Not JSON, return null to fall back to markdown
+    return null;
+  }
+  return null;
+});
+
+const drawLayoutOnCanvas = async (imageUrl, layoutData, canvasRef) => {
+  if (!canvasRef || !layoutData) return;
+  
+  const canvas = canvasRef;
+  const ctx = canvas.getContext('2d');
+  
+  // Create image element
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  
+  return new Promise((resolve) => {
+    img.onload = () => {
+      // Set canvas size to image size
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw the image
+      ctx.drawImage(img, 0, 0);
+      
+      // Draw bounding boxes
+      if (layoutData.layout_elements) {
+        layoutData.layout_elements.forEach((element, index) => {
+          if (element.bbox && Array.isArray(element.bbox) && element.bbox.length === 4) {
+            const [x1, y1, x2, y2] = element.bbox;
+            
+            // Set style for bounding box
+            ctx.strokeStyle = '#ef4444'; // Red color
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            
+            // Draw rectangle
+            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            
+            // Draw label background
+            const label = `${element.type} ${index + 1}`;
+            ctx.font = '12px Arial';
+            const textMetrics = ctx.measureText(label);
+            const textHeight = 16;
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(x1, y1 - textHeight, textMetrics.width + 8, textHeight);
+            
+            // Draw label text
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(label, x1 + 4, y1 - 4);
+          }
+        });
+      }
+      
+      resolve();
+    };
+    
+    img.src = imageUrl;
+  });
+};
+
+const handleLayoutCanvasClick = (event) => {
+  // Handle click events on layout canvas if needed
+  console.log('Layout canvas clicked', event);
+};
+
+// Watch for layout analysis results and draw on canvas
+watch(layoutAnalysisResult, async () => {
+  if (parsedLayoutData.value) {
+    await nextTick(); // Wait for DOM updates
+    
+    // Get all images that were analyzed
+    const allImages = [];
+    if (extractedImages.value && extractedImages.value.length > 0) {
+      allImages.push(...extractedImages.value);
+    }
+    if (pdfPageImages.value && pdfPageImages.value.length > 0) {
+      allImages.push(...pdfPageImages.value.map(img => img.dataUrl));
+    }
+    
+    // Draw layout for each image
+    parsedLayoutData.value.forEach(async (layoutData, index) => {
+      const canvasRef = this.$refs[`layoutCanvas${index}`]?.[0];
+      if (canvasRef && allImages[index]) {
+        await drawLayoutOnCanvas(allImages[index], layoutData, canvasRef);
+      }
+    });
+  }
+});
 const handleSendChatMessage = async () => {
   if (!chatInput.value.trim() || isChatting.value) return;
   
@@ -1343,6 +1538,31 @@ onMounted(() => {
   if (route.path === '/upload-pdf') {
     const router = useRouter();
     router.replace('/analysis');
+  }
+});
+
+// Watch for layout analysis results and draw on canvas
+watch(layoutAnalysisResult, async () => {
+  if (parsedLayoutData.value) {
+    await nextTick(); // Wait for DOM updates
+    
+    // Get all images that were analyzed
+    const allImages = [];
+    if (extractedImages.value && extractedImages.value.length > 0) {
+      allImages.push(...extractedImages.value);
+    }
+    if (pdfPageImages.value && pdfPageImages.value.length > 0) {
+      allImages.push(...pdfPageImages.value.map(img => img.dataUrl));
+    }
+    
+    // Draw layout for each image
+    parsedLayoutData.value.forEach(async (layoutData, index) => {
+      const canvasRefs = document.querySelectorAll(`[data-canvas="layoutCanvas${index}"]`);
+      const canvasRef = canvasRefs[0];
+      if (canvasRef && allImages[index]) {
+        await drawLayoutOnCanvas(allImages[index], layoutData, canvasRef);
+      }
+    });
   }
 });
 

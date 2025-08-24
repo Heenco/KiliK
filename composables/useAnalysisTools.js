@@ -22,6 +22,11 @@ export const useAnalysisTools = () => {
   const imageAnalysisStatus = ref('')
   const imageAnalysisResult = ref('')
 
+  // Layout analysis state
+  const isAnalyzingLayout = ref(false)
+  const layoutAnalysisStatus = ref('')
+  const layoutAnalysisResult = ref('')
+
   // PDF analysis state
   const isAnalyzingPdf = ref(false)
   const pdfAnalysisStatus = ref('')
@@ -312,6 +317,60 @@ export const useAnalysisTools = () => {
     }
   }
 
+  // DeepInfra Layout Analysis
+  const analyzeLayoutWithDeepInfra = async (images, extractedText = '') => {
+    if (!images || !Array.isArray(images) || images.length === 0 || isAnalyzingLayout.value) {
+      return false
+    }
+    
+    console.log('Starting DeepInfra layout analysis with', images.length, 'images');
+    isAnalyzingLayout.value = true
+    layoutAnalysisStatus.value = `Analyzing layout of ${Math.min(images.length, 5)} images with DeepInfra Qwen2.5-VL...`
+    layoutAnalysisResult.value = ''
+    
+    try {
+      const response = await fetch('/api/analyze-layout-deepinfra', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          images: images.slice(0, 5), // Limit to 5 images
+          text: extractedText 
+        }),
+      })
+
+      console.log('DeepInfra layout analysis response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('DeepInfra layout analysis fetch error:', response.status, errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}` || 'Failed to analyze layout')
+      }
+
+      const result = await response.json()
+      console.log('DeepInfra layout analysis result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      layoutAnalysisResult.value = result.analysis || ''
+      layoutAnalysisStatus.value = result.analysis 
+        ? `Layout analysis complete (${result.imagesAnalyzed || 0} images analyzed)` 
+        : 'No layout analysis generated'
+      
+      return true
+    } catch (error) {
+      console.error('Error analyzing layout with DeepInfra:', error)
+      layoutAnalysisStatus.value = `Error: ${error.message || 'Unknown error during layout analysis'}`
+      layoutAnalysisResult.value = ''
+      return false
+    } finally {
+      isAnalyzingLayout.value = false
+    }
+  }
+
   // DeepInfra PDF Analysis
   const analyzePdfWithDeepInfra = async (fileName, extractedText = '') => {
     if (!fileName || isAnalyzingPdf.value) {
@@ -473,6 +532,8 @@ export const useAnalysisTools = () => {
     deepInfraSummary.value = ''
     imageAnalysisStatus.value = ''
     imageAnalysisResult.value = ''
+    layoutAnalysisStatus.value = ''
+    layoutAnalysisResult.value = ''
     pdfAnalysisStatus.value = ''
     pdfAnalysisResult.value = ''
     isSummarizing.value = false
@@ -525,6 +586,11 @@ export const useAnalysisTools = () => {
     imageAnalysisStatus,
     imageAnalysisResult,
     
+    // Layout analysis state
+    isAnalyzingLayout,
+    layoutAnalysisStatus,
+    layoutAnalysisResult,
+    
     // PDF analysis state
     isAnalyzingPdf,
     pdfAnalysisStatus,
@@ -542,6 +608,7 @@ export const useAnalysisTools = () => {
     analyzeWithOllama,
     analyzeWithDeepInfra,
     analyzeImagesWithDeepInfra,
+    analyzeLayoutWithDeepInfra,
     analyzePdfWithDeepInfra,
     clearAnalysisResults,
     

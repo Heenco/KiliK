@@ -3,10 +3,12 @@ import { ref, watch } from 'vue'
 // Shared reactive state (singleton)
 const selectedFile = ref(null)
 const isUploading = ref(false)
+const uploadProgress = ref(0)
 const uploadMessage = ref('')
 const uploadSuccess = ref(false)
 const uploadedFiles = ref([])
 const isDragOver = ref(false)
+const uploadQueue = ref([])
 
 let _setupDone = false
 
@@ -32,6 +34,7 @@ export const useFileUpload = () => {
     if (!selectedFile.value || !user.value) return false
     
     isUploading.value = true
+    uploadProgress.value = 0
     uploadMessage.value = ''
     
     try {
@@ -40,13 +43,47 @@ export const useFileUpload = () => {
       const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, '_')
       const filePath = `${user.value.id}/${sanitizedName}`
       
-      // Upload file to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('inspection-reports')
-        .upload(filePath, selectedFile.value, {
-          cacheControl: '3600',
-          upsert: false
-        })
+      // Track upload progress with a more reliable method
+      const uploadWithProgress = async () => {
+        try {
+          // Reset progress indicators
+          uploadProgress.value = 0;
+          
+          // Start a progress simulation for user feedback
+          const startTime = Date.now();
+          const updateProgressInterval = setInterval(() => {
+            // Calculate simulated progress based on time elapsed
+            // Max out at 90% until we get confirmation of success
+            const elapsed = Date.now() - startTime;
+            const simulatedProgress = Math.min(90, Math.round((elapsed / 5000) * 100));
+            uploadProgress.value = simulatedProgress;
+          }, 100);
+          
+          // Perform the actual upload using the standard Supabase method
+          const { data, error } = await supabase.storage
+            .from('inspection-reports')
+            .upload(filePath, selectedFile.value, {
+              cacheControl: '3600',
+              upsert: false
+            });
+            
+          // Clear the progress interval
+          clearInterval(updateProgressInterval);
+          
+          // Set progress to 100% on success
+          if (!error) {
+            uploadProgress.value = 100;
+          }
+          
+          return { data, error };
+        } catch (err) {
+          console.error('Upload error:', err);
+          return { data: null, error: err };
+        }
+      };
+      
+      // Perform the upload with progress
+      const { data, error } = await uploadWithProgress();
       
       if (error) throw error
       
@@ -94,7 +131,19 @@ export const useFileUpload = () => {
     } catch (error) {
       console.error('Upload error:', error)
       uploadSuccess.value = false
-      uploadMessage.value = error.message || 'An error occurred during upload'
+      
+      // Provide a more helpful error message based on the error type
+      let errorMessage = error.message || 'An unknown error occurred';
+      
+      if (error.message && error.message.includes('Network')) {
+        errorMessage = 'Network connection error. Please check your internet connection and try again.';
+      } else if (error.message && error.message.includes('already exists')) {
+        errorMessage = 'A file with the same name already exists.';
+      } else if (error.statusCode === 413 || (error.message && error.message.includes('too large'))) {
+        errorMessage = 'The file is too large. Maximum file size is 10MB.';
+      }
+      
+      uploadMessage.value = errorMessage;
       selectedFile.value = null
       return false
     } finally {
@@ -111,33 +160,80 @@ export const useFileUpload = () => {
 
     try {
       console.log('Fetching files for user:', user.value.id) // Debug log
-      const { data, error } = await supabase.storage
-        .from('inspection-reports')
-        .list(user.value.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
-
-      if (error) throw error
-
-      console.log('Raw storage data:', data) // Debug log
-
-      // Create new array to ensure reactivity
-      const newFiles = data.map(file => ({
-        id: file.name, // Use filename as consistent ID
-        name: file.name,
-        created_at: file.created_at || new Date().toISOString(),
-        size: file.size || 0
-      }))
       
-      console.log('Files fetched:', newFiles.length, newFiles.map(f => ({ id: f.id, name: f.name }))) // Debug log
-      uploadedFiles.value = newFiles
+      // Get all files recursively from user's folder (simpler approach)
+      const getAllFiles = async (prefix = '') => {
+        const { data, error } = await supabase.storage
+          .from('inspection-reports')
+          .list(`${user.value.id}${prefix}`, { 
+            limit: 1000, 
+            sortBy: { column: 'created_at', order: 'desc' } 
+          })
+
+        if (error) throw error
+
+        const allFiles = []
+        
+        for (const item of data) {
+          const fullPath = prefix ? `${prefix.slice(1)}/${item.name}` : item.name // Remove leading slash
+          
+          if (item.id === null && item.name !== '.emptyFolderPlaceholder') {
+            // This is a folder, recurse into it
+            const subFiles = await getAllFiles(`/${fullPath}`)
+            allFiles.push(...subFiles)
+          } else if (item.id !== null && !item.name.startsWith('.emptyFolderPlaceholder')) {
+            // This is a file (include .keep files for folder structure)
+            allFiles.push({
+              id: fullPath, // Use full path as consistent ID
+              name: fullPath,
+              created_at: item.created_at || new Date().toISOString(),
+              size: item.size || 0
+            })
+          }
+        }
+        
+        return allFiles
+      }
+
+      const allFiles = await getAllFiles()
+      
+      console.log('Files fetched:', allFiles.length, allFiles.map(f => ({ id: f.id, name: f.name }))) // Debug log
+      uploadedFiles.value = allFiles
     } catch (error) {
       console.error('Error fetching files from storage:', error)
+      // Fallback to simple listing if recursive fails
+      try {
+        const { data, error } = await supabase.storage
+          .from('inspection-reports')
+          .list(user.value.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+
+        if (error) throw error
+
+        const simpleFiles = data
+          .filter(file => file.id !== null && file.name !== '.emptyFolderPlaceholder')
+          .map(file => ({
+            id: file.name,
+            name: file.name,
+            created_at: file.created_at || new Date().toISOString(),
+            size: file.size || 0
+          }))
+        
+        console.log('Fallback: Files fetched:', simpleFiles.length)
+        uploadedFiles.value = simpleFiles
+      } catch (fallbackError) {
+        console.error('Fallback fetch also failed:', fallbackError)
+      }
     }
   }
 
   // Delete file
   const deletePdf = async (fileName) => {
     try {
-      const filePath = `${user.value.id}/${fileName}`
+      // Handle both regular files and files in folders
+      const filePath = fileName.includes('/') 
+        ? `${user.value.id}/${fileName}` 
+        : `${user.value.id}/${fileName}`
+      
       const { error: storageError } = await supabase.storage
         .from('inspection-reports')
         .remove([filePath])
@@ -158,7 +254,11 @@ export const useFileUpload = () => {
   // Generate download URL
   const getDownloadUrl = async (fileName) => {
     try {
-      const filePath = `${user.value.id}/${fileName}`
+      // Handle both regular files and files in folders
+      const filePath = fileName.includes('/') 
+        ? `${user.value.id}/${fileName}` 
+        : `${user.value.id}/${fileName}`
+        
       const { data: urlData, error: urlError } = await supabase.storage
         .from('inspection-reports')
         .createSignedUrl(filePath, 60 * 60) // 1 hour expiry
@@ -277,6 +377,7 @@ export const useFileUpload = () => {
     // State
     selectedFile,
     isUploading,
+    uploadProgress,
     uploadMessage,
     uploadSuccess,
     uploadedFiles,
