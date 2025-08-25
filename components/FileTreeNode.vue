@@ -76,6 +76,12 @@
               <DropdownMenuItem v-if="node.type === 'file'" @click.stop.prevent="handleFileSelect">
                 Open file
               </DropdownMenuItem>
+              <DropdownMenuItem v-if="node.type === 'file'" @click.stop.prevent="handleProcessAndIngest">
+                <div class="flex items-center">
+                  <span>Process and Ingest</span>
+                  <span v-if="isProcessed" class="ml-2 text-green-500">✓</span>
+                </div>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem @click.stop.prevent="handleDelete" variant="destructive">
                 Delete {{ node.type === 'folder' ? 'folder' : 'file' }}
@@ -110,6 +116,7 @@
         @upload-to-folder="handleUploadToFolder"
         @file-moved="$emit('file-moved')"
         @toggle-expanded="$emit('toggle-expanded', $event)"
+  @process-and-ingest="$emit('process-and-ingest', $event)"
       />
     </template>
   </div>
@@ -123,6 +130,7 @@ import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigg
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
+import { onMounted, watch } from 'vue'
 
 // Define props
 const props = defineProps({
@@ -141,12 +149,13 @@ const props = defineProps({
 })
 
 // Define emits
-const emit = defineEmits(['file-select', 'file-delete', 'folder-delete', 'upload-to-folder', 'file-moved', 'toggle-expanded'])
+const emit = defineEmits(['file-select', 'file-delete', 'folder-delete', 'upload-to-folder', 'file-moved', 'toggle-expanded', 'process-and-ingest'])
 
 // Component state
 const fileInput = ref(null)
 const isDragOver = ref(false)
 const isDragging = ref(false)
+const isProcessed = ref(false)
 
 // Supabase
 const user = useSupabaseUser()
@@ -175,6 +184,41 @@ const handleDelete = () => {
     }
   } else if (props.node.type === 'folder') {
     emit('folder-delete', props.node)
+  }
+}
+
+// Process and ingest file
+const handleProcessAndIngest = () => {
+  console.log('FileTreeNode: Process and Ingest clicked for node:', props.node)
+  if (props.node.type === 'file') {
+    // Emit the full node so parents have context (folder path, file object etc.)
+    emit('process-and-ingest', props.node)
+  } else {
+    console.warn('Process and Ingest clicked on non-file node:', props.node)
+  }
+}
+
+// Check if file has already been processed and ingested
+const checkProcessingStatus = async () => {
+  if (props.node.type === 'file' && user.value) {
+    try {
+      // Check if this file exists in the documents table
+      const { data, error } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('user_id', user.value.id)
+        .eq('document_name', props.node.name)
+        .limit(1)
+      
+      if (!error && data && data.length > 0) {
+        isProcessed.value = true
+      } else {
+        isProcessed.value = false
+      }
+    } catch (error) {
+      console.error('Error checking processing status:', error)
+      isProcessed.value = false
+    }
   }
 }
 
@@ -337,4 +381,24 @@ const moveFileToFolder = async (draggedFile, targetFolder) => {
     alert('Error moving file: ' + error.message)
   }
 }
+
+// Check processing status when component mounts and when user changes
+onMounted(() => {
+  if (user.value) {
+    checkProcessingStatus()
+  }
+})
+
+watch(user, (newUser) => {
+  if (newUser) {
+    checkProcessingStatus()
+  }
+})
+
+// Watch for node changes to update processing status
+watch(() => props.node, (newNode) => {
+  if (newNode && newNode.type === 'file') {
+    checkProcessingStatus()
+  }
+}, { deep: true })
 </script>

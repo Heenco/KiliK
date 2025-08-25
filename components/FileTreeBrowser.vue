@@ -75,6 +75,7 @@
         @upload-to-folder="handleUploadToFolder"
         @file-moved="handleFileMoved"
         @toggle-expanded="handleToggleExpanded"
+        @process-and-ingest="handleProcessAndIngest"
       />
     </div>
   </div>
@@ -94,7 +95,7 @@ const props = defineProps({
 })
 
 // Define emits
-const emit = defineEmits(['file-select', 'file-delete'])
+const emit = defineEmits(['file-select', 'file-delete', 'process-and-ingest'])
 
 // File upload composable
 const { uploadedFiles, fetchUserFiles, deletePdf, isUploading, uploadProgress } = useFileUpload()
@@ -478,6 +479,13 @@ const handleToggleExpanded = (path) => {
       expandedFolders: [...expandedFolders.value]
     })
   })
+}
+
+// Handle process and ingest request
+const handleProcessAndIngest = (node) => {
+  console.log('FileTreeBrowser: process-and-ingest received from child:', node)
+  // Relay the original node object to the parent so the parent has full context
+  emit('process-and-ingest', node)
 }
 
 // Handle files dropped on root (outside of folders)

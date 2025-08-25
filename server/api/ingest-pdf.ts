@@ -1,88 +1,78 @@
-import { spawn } from 'child_process';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const text = body.text;
-  const reportName = body.reportName || 'report';
+  const { fileName, userId } = body;
 
-  if (!text) {
+  if (!fileName || !userId) {
     setResponseStatus(event, 400);
-    return { error: 'no text provided' };
+    return { error: 'Missing fileName or userId in request' };
   }
 
-  // locate python script
-  const scriptPath = resolve(process.cwd(), 'server', 'ingest_pdf.py');
-  // Hard-coded Python environment (recommended). Update if your venv is elsewhere.
-  const python = process.env.PYTHON_PATH || 'C:/Luma/Crime/venv/Scripts/python.exe';
-
-  // Quick pre-check: ensure python exists and required packages can be imported.
+  // Get supabase client using environment variables
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_KEY || '';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  
   try {
-    const checkResult = await new Promise((res) => {
-      const chk = spawn(python, ['-c', 'import sentence_transformers,faiss,numpy; print("OK")'], { stdio: ['ignore', 'pipe', 'pipe'] });
-      let out = '';
-      let err = '';
-      chk.stdout.on('data', (d) => { out += d.toString(); });
-      chk.stderr.on('data', (d) => { err += d.toString(); });
-      chk.on('close', (code) => {
-        res({ code, out, err });
-      });
+    // First, use the existing process-pdf endpoint to extract text
+    console.log('Step 1: Processing PDF to extract text...');
+    const processResult = await $fetch('/api/process-pdf', {
+      method: 'POST',
+      body: { fileName, userId }
     });
-
-    if (checkResult.code !== 0 || !checkResult.out.includes('OK')) {
-      setResponseStatus(event, 500);
-      console.error('Python dependency check failed for ingest:', checkResult);
-      return {
-        error: 'python_dependencies_missing',
-        message: 'Python executable not found or required packages are not installed in that environment.',
-        suggestion: `${python} -m pip install sentence-transformers numpy faiss-cpu`,
-        stdout: checkResult.out,
-        stderr: checkResult.err
+    
+    if (!processResult.success || !processResult.text) {
+      setResponseStatus(event, 400);
+      return { 
+        error: 'PDF text extraction failed', 
+        detail: processResult.error || 'No text extracted from PDF'
       };
     }
-  } catch (e) {
-    setResponseStatus(event, 500);
-    console.error('Failed to run python dependency check', e);
-    return { error: 'python_check_failed', detail: String(e) };
-  }
+    
+    const text = processResult.text;
+    console.log(`Step 2: Extracted ${text.length} characters from PDF`);
+    
+    if (text.trim().length === 0) {
+      setResponseStatus(event, 400);
+      return { error: 'No text content found in PDF' };
+    }
+    
+    console.log('Step 3: Ready to ingest into Supabase vector database...');
 
-  return await new Promise((resolvePromise) => {
-    const proc = spawn(python, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
-
-    let stdout = '';
-    let stderr = '';
-
-    proc.stdout.on('data', (d) => { stdout += d.toString(); });
-    proc.stderr.on('data', (d) => { stderr += d.toString(); });
-
-    proc.on('close', (code) => {
-      if (code !== 0) {
-        // set HTTP status and return error
-        setResponseStatus(event, 500);
-        console.error('ingest script failed:', stderr || stdout);
-        resolvePromise({ error: 'ingest process failed', detail: stderr || stdout });
-      } else {
-        try {
-          const parsed = JSON.parse(stdout);
-          // Ensure expected fields exist
-          if (parsed && (parsed.added !== undefined) && (parsed.total !== undefined)) {
-            resolvePromise(parsed);
-          } else {
-            setResponseStatus(event, 500);
-            console.error('ingest script returned unexpected JSON:', parsed, 'stderr:', stderr);
-            resolvePromise({ error: 'invalid ingest output', detail: parsed || stdout, stderr: stderr });
-          }
-        } catch (e) {
-          setResponseStatus(event, 500);
-          console.error('failed to parse ingest script output as JSON', e, stdout, stderr);
-          resolvePromise({ error: 'invalid json from ingest script', detail: stdout || stderr });
+    console.log('Step 4: Running Supabase vector ingestion...');
+    
+    // Use the same Supabase ingestion approach as analysis.vue
+    try {
+      const ingestResponse = await $fetch('/api/ingest-supabase', {
+        method: 'POST',
+        body: {
+          text,
+          reportName: fileName,
+          userId
         }
-      }
-    });
+      });
 
-    // write input json
-    proc.stdin.write(JSON.stringify({ text, reportName }));
-    proc.stdin.end();
-  });
+      console.log('Step 5: Ingestion completed successfully');
+      return {
+        success: true,
+        chunks_added: ingestResponse.chunks_added,
+        total_chunks: ingestResponse.total_chunks,
+        document_name: ingestResponse.document_name,
+        message: `Successfully processed PDF and ingested ${ingestResponse.chunks_added} chunks into Supabase vector database`
+      };
+      
+    } catch (ingestError: any) {
+      console.error('Supabase ingestion failed:', ingestError);
+      setResponseStatus(event, 500);
+      return { 
+        error: 'Failed to ingest into Supabase vector database',
+        detail: ingestError.message || ingestError
+      };
+    }
+  } catch (e: any) {
+    setResponseStatus(event, 500);
+    console.error('Error in ingest-pdf handler:', e);
+    return { error: `Error ingesting PDF: ${e.message}` };
+  }
 });

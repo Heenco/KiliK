@@ -23,6 +23,7 @@ const callRenderService = async (fileName: string, userId: string, supabase: any
   
   // Download the PDF file from Supabase storage
   const filePath = `${userId}/${fileName}`
+  console.log('process-pdf: attempting to download from storage path:', filePath)
   const { data, error } = await supabase.storage
     .from('inspection-reports')
     .download(filePath)
@@ -122,7 +123,14 @@ async function processLocalPdf(fileName: string, userId: string, supabase: any, 
   
   // Generate a unique filename for the downloaded PDF
   const timestamp = Date.now()
-  const tempFilePath = path.join(tempDir, `${timestamp}-${fileName}`)
+  // Sanitize fileName: use only the basename to avoid nested folders in temp path
+  const safeFileName = path.basename(fileName)
+  const tempFilePath = path.join(tempDir, `${timestamp}-${safeFileName}`)
+
+  // Ensure temp dir exists
+  if (!fs.existsSync(path.dirname(tempFilePath))) {
+    fs.mkdirSync(path.dirname(tempFilePath), { recursive: true })
+  }
   
   // Download file from Supabase storage
   const filePath = `${userId}/${fileName}`
@@ -139,8 +147,13 @@ async function processLocalPdf(fileName: string, userId: string, supabase: any, 
   
   // Convert Blob to Buffer and save to temp file
   const buffer = Buffer.from(await data.arrayBuffer())
-  fs.writeFileSync(tempFilePath, buffer)
-  console.log(`Downloaded PDF saved to: ${tempFilePath}`)
+  try {
+    fs.writeFileSync(tempFilePath, buffer)
+    console.log(`Downloaded PDF saved to: ${tempFilePath}`)
+  } catch (writeErr) {
+    console.error('Failed to write temp PDF file:', writeErr)
+    throw createError({ statusCode: 500, statusMessage: `Failed to write temp file: ${String(writeErr)}` })
+  }
   
   // Process the PDF using Python script
   const serverDir = path.join(process.cwd(), 'server')

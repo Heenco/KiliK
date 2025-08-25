@@ -62,14 +62,97 @@ def main():
             safe_print_err(traceback.format_exc())
             sys.exit(2)
 
-        texts = [c['text'] for c in chunks]
-        safe_print_err(f'Computing embeddings for {len(texts)} chunks...')
+        # Filter and validate chunks before embedding
+        valid_chunks = []
+        valid_texts = []
+        
+        for i, chunk in enumerate(chunks):
+            text = chunk['text']
+            
+            # Skip if not a string
+            if not isinstance(text, str):
+                safe_print_err(f'Skipping chunk {i}: not a string (type: {type(text)})')
+                continue
+                
+            # Skip if empty or too short
+            if not text.strip() or len(text.strip()) < 10:
+                safe_print_err(f'Skipping chunk {i}: too short or empty (len={len(text.strip())})')
+                continue
+            
+            # Check for binary/PDF content patterns
+            if any(pattern in text for pattern in ['%PDF-', 'obj\n<<', 'endobj', '/Type ', '/Length ']):
+                safe_print_err(f'Skipping chunk {i}: contains PDF structure')
+                continue
+                
+            # Check for excessive binary content (null bytes, control chars)
+            binary_chars = sum(1 for c in text if ord(c) < 32 and c not in '\n\r\t ')
+            if binary_chars > len(text) * 0.1:  # More than 10% binary chars
+                safe_print_err(f'Skipping chunk {i}: too many binary characters ({binary_chars}/{len(text)})')
+                continue
+            
+            # Check for reasonable text ratio
+            printable_chars = sum(1 for c in text if c.isprintable() or c in '\n\r\t')
+            if printable_chars < len(text) * 0.8:  # Less than 80% printable
+                safe_print_err(f'Skipping chunk {i}: insufficient printable characters ({printable_chars}/{len(text)})')
+                continue
+                
+            # Check for meaningful alphanumeric content
+            alnum_chars = sum(1 for c in text if c.isalnum())
+            if alnum_chars < 20:  # At least 20 alphanumeric characters
+                safe_print_err(f'Skipping chunk {i}: insufficient alphanumeric content ({alnum_chars})')
+                continue
+            
+            # Additional validation: ensure text can be encoded/decoded properly
+            try:
+                text.encode('utf-8').decode('utf-8')
+            except UnicodeError:
+                safe_print_err(f'Skipping chunk {i}: unicode encoding issues')
+                continue
+            
+            # If we made it here, the chunk is valid
+            valid_chunks.append(chunk)
+            valid_texts.append(text.strip())
+        
+        if len(valid_texts) == 0:
+            safe_print_err('No valid chunks found after filtering')
+            print(json.dumps({"error": "no valid chunks after filtering"}))
+            sys.exit(1)
+        
+        safe_print_err(f'Computing embeddings for {len(valid_texts)} valid chunks (filtered from {len(chunks)} total)...')
+        
+        # Final safety check: ensure all texts are strings and clean them
+        cleaned_texts = []
+        for i, text in enumerate(valid_texts):
+            if not isinstance(text, str):
+                safe_print_err(f'Warning: text {i} is not a string, converting')
+                text = str(text)
+            
+            # Clean the text to ensure it's safe for tokenization
+            text = text.strip()
+            if not text:
+                safe_print_err(f'Warning: text {i} became empty after cleaning, skipping')
+                continue
+                
+            cleaned_texts.append(text)
+        
+        if len(cleaned_texts) == 0:
+            safe_print_err('No texts remaining after final cleaning')
+            print(json.dumps({"error": "no texts after final cleaning"}))
+            sys.exit(1)
+        
+        # Update valid_chunks to match cleaned_texts
+        valid_chunks = valid_chunks[:len(cleaned_texts)]
+        
         try:
-            embeddings = model.encode(texts, show_progress_bar=False, convert_to_numpy=True)
+            embeddings = model.encode(cleaned_texts, show_progress_bar=False, convert_to_numpy=True)
             embeddings = np.array(embeddings, dtype='float32')
         except Exception as e:
             safe_print_err('Embedding computation failed:', str(e))
             safe_print_err(traceback.format_exc())
+            # Debug: print first few problematic texts
+            safe_print_err('First few texts that failed:')
+            for i, text in enumerate(cleaned_texts[:5]):
+                safe_print_err(f'  [{i}]: {repr(text[:100])}...')
             sys.exit(3)
 
         if embeddings.ndim != 2:
@@ -109,7 +192,7 @@ def main():
             safe_print_err(traceback.format_exc())
             sys.exit(5)
 
-        # Update metadata file
+        # Update metadata file with only valid chunks
         meta = []
         if os.path.exists(meta_path):
             try:
@@ -119,7 +202,7 @@ def main():
                 safe_print_err('Failed to load existing meta file, starting fresh')
                 meta = []
 
-        for i, c in enumerate(chunks):
+        for i, c in enumerate(valid_chunks):
             meta.append({"id": existing_count + i, "text": c['text'], "start": c['start'], "end": c['end']})
 
         try:
@@ -131,7 +214,7 @@ def main():
             sys.exit(6)
 
         # Print final JSON result to stdout ONLY
-        result = {"added": len(chunks), "total": index.ntotal, "index_path": index_path, "meta_path": meta_path}
+        result = {"added": len(valid_chunks), "total": index.ntotal, "index_path": index_path, "meta_path": meta_path}
         sys.stdout.write(json.dumps(result))
         sys.stdout.flush()
         return 0

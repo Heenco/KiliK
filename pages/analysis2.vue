@@ -27,6 +27,7 @@
             :open="open" 
             @file-select="openReport"
             @file-delete="handleFileDelete"
+            @process-and-ingest="handleProcessAndIngest"
           />
         </div>
       </div>
@@ -135,9 +136,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { useAnalysisState } from '@/composables/useAnalysisState'
+import { usePdfProcessor } from '@/composables/usePdfProcessor'
 // pdfjs will be imported dynamically on the client to avoid SSR DOM APIs error
 
 const open = ref(true)
@@ -178,6 +180,118 @@ const removeFile = async (fileName) => {
 // Handle file delete from tree browser
 const handleFileDelete = async (fileName) => {
   await fetchUserFiles()
+}
+
+// Handle process and ingest event from file tree
+const handleProcessAndIngest = async (payload) => {
+  console.log('analysis2: handleProcessAndIngest payload:', payload)
+  // payload may be the node object emitted from FileTreeBrowser or a simple file object
+  const fileNode = payload?.type === 'file' ? payload : (payload?.file ? payload.file : payload)
+  if (!fileNode || !fileNode.name) return
+
+  // Initialize PDF processor on client
+  if (typeof window === 'undefined') {
+    console.warn('Process+Ingest attempted during SSR - aborting')
+    return
+  }
+
+  const pdfProcessor = usePdfProcessor()
+  console.log('analysis2: pdfProcessor initialized', {
+    isProcessing: pdfProcessor.isProcessing.value,
+    status: pdfProcessor.processingStatus.value
+  })
+
+  // Use full storage path when checking/processing (includes folders)
+  const storagePath = fileNode.path || fileNode.name
+
+  // Check if already processed
+  let isAlreadyProcessed = false
+  try {
+    console.log('analysis2: checking processed state for storagePath:', storagePath)
+    isAlreadyProcessed = await pdfProcessor.checkFileProcessed(storagePath)
+    console.log('analysis2: checkFileProcessed result for', storagePath, isAlreadyProcessed)
+  } catch (err) {
+    console.error('analysis2: checkFileProcessed threw error', err)
+  }
+  if (isAlreadyProcessed) {
+    alert(`The file "${fileNode.name}" has already been processed and ingested.`)
+    return
+  }
+  
+  // Confirm with user
+  if (!confirm(`Process and ingest "${fileNode.name}" into the database for searching and querying?`)) {
+    return
+  }
+  
+  // Create processing dialog
+  const processingDialog = document.createElement('div')
+  processingDialog.style.position = 'fixed'
+  processingDialog.style.top = '50%'
+  processingDialog.style.left = '50%'
+  processingDialog.style.transform = 'translate(-50%, -50%)'
+  processingDialog.style.backgroundColor = 'white'
+  processingDialog.style.padding = '20px'
+  processingDialog.style.borderRadius = '8px'
+  processingDialog.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+  processingDialog.style.zIndex = '1000'
+  processingDialog.style.minWidth = '300px'
+  processingDialog.style.maxWidth = '400px'
+  
+  // Create dialog content
+  processingDialog.innerHTML = `
+    <div style="text-align: center;">
+      <h3 style="margin-top: 0; margin-bottom: 16px;">Processing PDF</h3>
+      <p id="processing-status">Starting process...</p>
+      <div style="width: 100%; height: 6px; background-color: #eee; border-radius: 3px; margin: 16px 0;">
+        <div id="processing-progress" style="width: 0%; height: 100%; background-color: #4f46e5; border-radius: 3px; transition: width 0.3s ease;"></div>
+      </div>
+    </div>
+  `
+  
+  // Add to document
+  document.body.appendChild(processingDialog)
+  
+  // Setup progress tracking
+  const updateProgress = () => {
+    const progressBar = document.getElementById('processing-progress')
+    const statusText = document.getElementById('processing-status')
+    if (progressBar) {
+      progressBar.style.width = `${pdfProcessor.processingProgress.value}%`
+    }
+    if (statusText) {
+      statusText.textContent = pdfProcessor.processingStatus.value
+    }
+  }
+  
+  // Watch for progress updates
+  const unwatch = watch(
+    () => [pdfProcessor.processingProgress.value, pdfProcessor.processingStatus.value],
+    updateProgress,
+    { immediate: true }
+  )
+  
+  try {
+  // Process and ingest the PDF (use full storage path)
+  console.log('analysis2: starting processAndIngestPdf for', storagePath)
+  const success = await pdfProcessor.processAndIngestPdf(storagePath)
+    
+    if (success) {
+      // Update UI to show success
+      updateProgress()
+      
+      // Show success for 2 seconds before removing dialog
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    } else {
+      // Show error for 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000))
+    }
+  } catch (error) {
+    console.error('Error in handleProcessAndIngest:', error)
+  } finally {
+    // Clean up
+    unwatch()
+    document.body.removeChild(processingDialog)
+  }
 }
 
 // PDF viewing with community PDF.js implementation
